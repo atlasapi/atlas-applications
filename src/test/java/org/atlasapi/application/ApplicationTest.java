@@ -9,6 +9,6 @@ public class ApplicationTest {
 
     @Test
     public void shouldCreateApplication() {
-        assertNotNull(new Application());
+        assertNotNull(new Application("test-slug"));
     }
 }
