@@ -8,6 +8,7 @@
     <description>atlas applications</description>
     
     <build>
+        <finalName>atlas-applications</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
