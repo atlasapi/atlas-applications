@@ -8,6 +8,7 @@ public class Application {
 	private String title;
 
 	private ApplicationConfiguration configuration = new ApplicationConfiguration();
+	private ApplicationCredentials credentials = new ApplicationCredentials();
 
 	public Application(String slug) {
 		this.slug = slug;
@@ -31,6 +32,14 @@ public class Application {
 
 	public ApplicationConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	public void setCredentials(ApplicationCredentials credentials) {
+		this.credentials = credentials;
+	}
+
+	public ApplicationCredentials getCredentials() {
+		return credentials;
 	}
 
 	@Override

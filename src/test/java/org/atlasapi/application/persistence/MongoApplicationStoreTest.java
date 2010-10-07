@@ -2,8 +2,12 @@ package org.atlasapi.application.persistence;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationConfiguration;
+import org.atlasapi.application.model.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
@@ -65,4 +69,35 @@ public class MongoApplicationStoreTest {
 		assertEquals(2, retrieved.getConfiguration().getExcludedPublishers().size());
 	}
 	
+	@Test
+	public void testCredentialAPIKeyPersistence() {
+		Application app1 = new Application("test1");
+		
+		ApplicationCredentials credentials = new ApplicationCredentials();
+		credentials.setApiKey("I'm an API Key");
+		
+		app1.setCredentials(credentials);
+		
+		appStore.persist(app1);
+		
+		Application retrieved = appStore.applicationFor("test1");
+		
+		assertEquals(app1.getCredentials().getApiKey(), retrieved.getCredentials().getApiKey());
+	}
+	
+	@Test
+	public void testCredentialIPAddressPersistence() throws UnknownHostException {
+		Application app1 = new Application("test1");
+		
+		ApplicationCredentials credentials = new ApplicationCredentials();
+		credentials.setIpAddress(InetAddress.getLocalHost());
+		
+		app1.setCredentials(credentials);
+		
+		appStore.persist(app1);
+		
+		Application retrieved = appStore.applicationFor("test1");
+		
+		assertEquals(app1.getCredentials().getIpAddress(), retrieved.getCredentials().getIpAddress());
+	}
 }

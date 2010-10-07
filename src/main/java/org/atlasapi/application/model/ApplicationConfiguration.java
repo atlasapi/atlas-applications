@@ -1,6 +1,5 @@
 package org.atlasapi.application.model;
 
-import java.util.Collection;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Publisher;
