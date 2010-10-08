@@ -8,6 +8,7 @@ import com.metabroadcast.common.model.SimpleModel;
 public class ApplicationModelBuilder implements ModelBuilder<Application>{
 
 	private ApplicationCredentialsModelBuilder credentialsModelBuilder = new ApplicationCredentialsModelBuilder();
+	private ApplicationConfigurationModelBuilder configurationModelBuilder = new ApplicationConfigurationModelBuilder();
 	
 	@Override
 	public SimpleModel build(Application application) {
@@ -16,6 +17,7 @@ public class ApplicationModelBuilder implements ModelBuilder<Application>{
 		model.put("slug", application.getSlug());
 		model.put("title", application.getTitle());
 		model.put("credentials", credentialsModelBuilder.build(application.getCredentials()));
+		model.put("configuration", configurationModelBuilder.build(application.getConfiguration()));
 		
 		return model;
 	}
