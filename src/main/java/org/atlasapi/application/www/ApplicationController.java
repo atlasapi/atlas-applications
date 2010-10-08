@@ -1,14 +1,18 @@
 package org.atlasapi.application.www;
 
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.model.Application;
+import org.atlasapi.application.model.ApplicationConfiguration;
+import org.atlasapi.application.model.ApplicationCredentials;
 import org.atlasapi.application.persistence.ApplicationPersistor;
 import org.atlasapi.application.persistence.ApplicationReader;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -43,13 +47,44 @@ public class ApplicationController {
     	String slug = request.getParameter("slug");
     	String title= request.getParameter("title");
     	
-    	Application newApp = new Application(slug);
-    	newApp.setTitle(title);
+    	Application newApp = createNewApplication(slug, title);
     	
     	persistor.persist(newApp);
-    	model.put("application", modelBuilder.build(newApp));
+    	
+    	model.put("applications", modelListBuilder.build(reader.applications()));
     	response.setStatus(HttpServletResponse.SC_OK);
     	
-    	return "";
+    	return "applications/index";
+    }
+    
+    @RequestMapping(value="/admin/applications/{appSlug}", method=RequestMethod.GET)
+    public String application(Map<String, Object> model, @PathVariable("appSlug") String slug, HttpServletResponse response) {
+    	Application application = reader.applicationFor(slug);
+    	
+    	if (application == null) {
+    		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    	}
+    	
+    	model.put("application", modelBuilder.build(application));
+    	
+    	return "applications/application";
+    }
+
+    
+    private Application createNewApplication(String slug, String title) {
+    	Application application = new Application(slug);
+    	application.setTitle(title);
+    	
+    	ApplicationCredentials credentials = new ApplicationCredentials();
+    	String apiKey = UUID.randomUUID().toString().replaceAll("-", "");
+    	credentials.setApiKey(apiKey);
+    	
+    	application.setCredentials(credentials);
+    	
+    	ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
+    	
+    	application.setConfiguration(config);
+    	
+    	return application;
     }
 }
