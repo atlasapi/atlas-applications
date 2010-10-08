@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
-import org.atlasapi.application.model.ApplicationCredentials;
+import org.atlasapi.application.ApplicationCredentials;
 
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBObject;
@@ -14,8 +14,8 @@ public class ApplicationCredentialsTranslator {
 
 	private static final Pattern ipAddressPattern = Pattern.compile("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b");
 	
-	private static final String IP_ADDRESS_KEY = "ip_address";
-	private static final String API_KEY_KEY = "api_key";
+	public static final String IP_ADDRESS_KEY = "ip_address";
+	public static final String API_KEY_KEY = "api_key";
 
 	public DBObject toDBObject(ApplicationCredentials credentials) {
 		DBObject dbo = new BasicDBObject();

@@ -2,7 +2,7 @@ package org.atlasapi.application;
 
 import static org.junit.Assert.*;
 
-import org.atlasapi.application.model.Application;
+import org.atlasapi.application.Application;
 import org.junit.Test;
 
 

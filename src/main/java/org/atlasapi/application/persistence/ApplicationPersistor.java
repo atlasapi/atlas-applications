@@ -1,6 +1,6 @@
 package org.atlasapi.application.persistence;
 
-import org.atlasapi.application.model.Application;
+import org.atlasapi.application.Application;
 
 public interface ApplicationPersistor {
 

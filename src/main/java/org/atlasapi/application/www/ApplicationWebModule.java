@@ -10,14 +10,10 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 @Configuration
 public class ApplicationWebModule {
 	
-	@Autowired DatabasedMongo mongo;
+	@Autowired MongoApplicationStore applicationStore;
     
 	@Bean public ApplicationController applicationController() {
-        return new ApplicationController(applicationStore(), applicationStore());
+        return new ApplicationController(applicationStore, applicationStore);
     }
-	
-	@Bean public MongoApplicationStore applicationStore(){
-		return new MongoApplicationStore(mongo);
-	}
 
 }

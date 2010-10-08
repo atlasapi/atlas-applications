@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.ApplicationConfiguration;
-import org.atlasapi.application.model.ApplicationCredentials;
+import org.atlasapi.application.Application;
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
@@ -99,5 +99,22 @@ public class MongoApplicationStoreTest {
 		Application retrieved = appStore.applicationFor("test1");
 		
 		assertEquals(app1.getCredentials().getIpAddress(), retrieved.getCredentials().getIpAddress());
+	}
+	
+	@Test
+	public void testGetApplicationByAPIKey() {
+		Application app1 = new Application("test1");
+		
+		ApplicationCredentials credentials = new ApplicationCredentials();
+		String key = "apikey";
+		credentials.setApiKey(key);
+		
+		app1.setCredentials(credentials);
+		
+		appStore.persist(app1);
+		
+		Application retrieved = appStore.applicationForKey(key);
+		
+		assertEquals(app1, retrieved);
 	}
 }

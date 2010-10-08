@@ -2,7 +2,7 @@ package org.atlasapi.application.persistence;
 
 import java.util.Set;
 
-import org.atlasapi.application.model.ApplicationConfiguration;
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;

@@ -6,9 +6,9 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.ApplicationConfiguration;
-import org.atlasapi.application.model.ApplicationCredentials;
+import org.atlasapi.application.Application;
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.application.persistence.ApplicationPersistor;
 import org.atlasapi.application.persistence.ApplicationReader;
 import org.springframework.stereotype.Controller;

@@ -2,7 +2,7 @@ package org.atlasapi.application.persistence;
 
 import java.util.Set;
 
-import org.atlasapi.application.model.Application;
+import org.atlasapi.application.Application;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
@@ -22,6 +22,14 @@ public class MongoApplicationStore implements ApplicationPersistor, ApplicationR
 	
 	public MongoApplicationStore(DatabasedMongo mongo) {
 		this.applications = mongo.collection(APPLICATION_COLLECTION);
+	}
+	
+	@Override
+	public Application applicationForKey(String key) {
+		String credentialsKey = ApplicationTranslator.APPLICATION_CREDENTIALS_KEY;
+		String apiKeyKey = ApplicationCredentialsTranslator.API_KEY_KEY;
+		
+		return translator.fromDBObject(applications.findOne(new BasicDBObject(credentialsKey+"."+apiKeyKey, key)));
 	}
 
 	@Override
