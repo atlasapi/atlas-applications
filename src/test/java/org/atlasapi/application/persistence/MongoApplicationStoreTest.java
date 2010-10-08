@@ -11,6 +11,7 @@ import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -88,7 +89,7 @@ public class MongoApplicationStoreTest {
 		Application app1 = new Application("test1");
 		
 		ApplicationCredentials credentials = new ApplicationCredentials();
-		credentials.setIpAddress(InetAddress.getLocalHost());
+		credentials.setIpAddresses(ImmutableList.of(InetAddress.getLocalHost()));
 		
 		app1.setCredentials(credentials);
 		
@@ -96,7 +97,7 @@ public class MongoApplicationStoreTest {
 		
 		Application retrieved = appStore.applicationFor("test1");
 		
-		assertEquals(app1.getCredentials().getIpAddress(), retrieved.getCredentials().getIpAddress());
+		assertEquals(app1.getCredentials().getIpAddresses(), retrieved.getCredentials().getIpAddresses());
 	}
 	
 	@Test
