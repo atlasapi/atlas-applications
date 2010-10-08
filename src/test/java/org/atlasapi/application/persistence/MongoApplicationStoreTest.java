@@ -57,7 +57,6 @@ public class MongoApplicationStoreTest {
 		
 		ApplicationConfiguration config = new ApplicationConfiguration();
 		config.setIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
-		config.setExcludedPublishers(ImmutableSet.of(Publisher.C4,Publisher.BLIP));
 		
 		app1.setConfiguration(config);
 		
@@ -66,7 +65,6 @@ public class MongoApplicationStoreTest {
 		Application retrieved = appStore.applicationFor("test1");
 
 		assertEquals(2, retrieved.getConfiguration().getIncludedPublishers().size());
-		assertEquals(2, retrieved.getConfiguration().getExcludedPublishers().size());
 	}
 	
 	@Test

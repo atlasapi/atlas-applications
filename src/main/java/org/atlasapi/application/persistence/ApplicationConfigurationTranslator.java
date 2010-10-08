@@ -15,14 +15,12 @@ import com.mongodb.DBObject;
 
 public class ApplicationConfigurationTranslator {
 
-	private static final String EXCLUDED_PUBLISHERS_KEY = "excludedPublishers";
 	private static final String INCLUDED_PUBLISHERS_KEY = "includedPublishers";
 
 	public DBObject toDBObject(ApplicationConfiguration configuration) {
 		BasicDBObject dbo = new BasicDBObject();
 		
 		TranslatorUtils.fromSet(dbo, publisherKeySetOf(configuration.getIncludedPublishers()), INCLUDED_PUBLISHERS_KEY);
-		TranslatorUtils.fromSet(dbo, publisherKeySetOf(configuration.getExcludedPublishers()), EXCLUDED_PUBLISHERS_KEY);
 		
 		return dbo;
 	}
@@ -42,7 +40,6 @@ public class ApplicationConfigurationTranslator {
 		ApplicationConfiguration configuration = new ApplicationConfiguration();
 		
 		configuration.setIncludedPublishers(publisherSetOf(TranslatorUtils.toSet(dbo, INCLUDED_PUBLISHERS_KEY)));
-		configuration.setExcludedPublishers(publisherSetOf(TranslatorUtils.toSet(dbo, EXCLUDED_PUBLISHERS_KEY)));
 		
 		return configuration;
 	}

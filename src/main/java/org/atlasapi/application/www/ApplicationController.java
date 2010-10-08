@@ -81,7 +81,7 @@ public class ApplicationController {
     	
     	application.setCredentials(credentials);
     	
-    	ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
+    	ApplicationConfiguration config = ApplicationConfiguration.defaultConfiguration();
     	
     	application.setConfiguration(config);
     	
