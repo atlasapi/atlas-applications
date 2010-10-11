@@ -19,17 +19,22 @@ public class ApplicationTranslator {
 	public DBObject toDBObject(Application application) {
 		DBObject dbo = new BasicDBObject();
 		
-		dbo.put(APPLICATION_SLUG_KEY, application.getSlug());
-		dbo.put(APPLICATION_TITLE_KEY, application.getTitle());
-		dbo.put(APPLICATION_CONFIG_KEY, configurationTranslator.toDBObject(application.getConfiguration()));
-		dbo.put(APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
+		if (application != null) {
+    		dbo.put(APPLICATION_SLUG_KEY, application.getSlug());
+    		dbo.put(APPLICATION_TITLE_KEY, application.getTitle());
+    		dbo.put(APPLICATION_CONFIG_KEY, configurationTranslator.toDBObject(application.getConfiguration()));
+    		dbo.put(APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
+		}
 		
 		return dbo;
 	}
 	
 	public Application fromDBObject(DBObject dbo) {
+	    if (dbo == null) {
+	        return null;
+	    }
+	    
 		String applicationSlug = (String) dbo.get(APPLICATION_SLUG_KEY);
-		
 		if(applicationSlug == null){
 			return null;
 		}

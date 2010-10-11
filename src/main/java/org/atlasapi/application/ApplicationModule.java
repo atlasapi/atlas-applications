@@ -17,11 +17,11 @@ public class ApplicationModule {
 	
 	@Autowired DatabasedMongo mongo;
     
-	@Bean ApplicationConfigurationFetcher configFetcher(){
+	public @Bean ApplicationConfigurationFetcher configFetcher(){
 		return new ApiKeyConfigurationFetcher(applicationStore());
 	}
 	
-	@Bean public MongoApplicationStore applicationStore(){
+	public @Bean MongoApplicationStore applicationStore(){
 		return new MongoApplicationStore(mongo);
 	}
 	
