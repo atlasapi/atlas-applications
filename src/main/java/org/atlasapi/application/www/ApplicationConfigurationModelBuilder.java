@@ -10,18 +10,20 @@ import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;
 
 public class ApplicationConfigurationModelBuilder implements ModelBuilder<ApplicationConfiguration> {
-
+	
 	@Override
-	public SimpleModel build(ApplicationConfiguration target) {
+	public SimpleModel build(final ApplicationConfiguration target) {
 		SimpleModel model = new SimpleModel();
 		
-		model.put("publishers", ImmutableList.copyOf(Iterables.transform(target.getIncludedPublishers(), new Function<Publisher, SimpleModel>(){
+		model.put("publishers", ImmutableList.copyOf(Iterables.transform(ImmutableList.copyOf(Publisher.values()), new Function<Publisher, SimpleModel>(){
 			@Override
 			public SimpleModel apply(Publisher publisher) {
 				SimpleModel publisherModel = new SimpleModel();
 				
 				publisherModel.put("key", publisher.key());
+				publisherModel.put("title", publisher.title());
 				publisherModel.put("name", publisher.name());
+				publisherModel.put("enabled", target.getIncludedPublishers().contains(publisher));
 				
 				return publisherModel;
 			}

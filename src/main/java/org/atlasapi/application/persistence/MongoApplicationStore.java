@@ -8,6 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -52,4 +53,8 @@ public class MongoApplicationStore implements ApplicationPersistor, ApplicationR
 		applications.insert(translator.toDBObject(application));
 	}
 	
+	@Override
+	public void update(Application application) {
+		applications.update(new BasicDBObject(MongoConstants.ID, application.getSlug()), translator.toDBObject(application));
+	}
 }

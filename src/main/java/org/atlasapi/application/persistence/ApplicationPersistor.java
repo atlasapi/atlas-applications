@@ -5,5 +5,6 @@ import org.atlasapi.application.Application;
 public interface ApplicationPersistor {
 
 	void persist(Application application);
+	void update(Application application);
 	
 }
