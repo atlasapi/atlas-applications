@@ -1,7 +1,5 @@
 package org.atlasapi.application.www;
 
-import java.net.InetAddress;
-
 import org.atlasapi.application.ApplicationCredentials;
 
 import com.google.common.base.Function;
@@ -9,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;
+import com.metabroadcast.common.net.IpRange;
 
 public class ApplicationCredentialsModelBuilder implements ModelBuilder<ApplicationCredentials> {
 
@@ -17,11 +16,11 @@ public class ApplicationCredentialsModelBuilder implements ModelBuilder<Applicat
 		SimpleModel model = new SimpleModel();
 		
 		model.put("apiKey", target.getApiKey());
-		model.put("ipAddresses", ImmutableList.copyOf(Iterables.transform(target.getIpAddresses(), new Function<InetAddress, SimpleModel>(){
+		model.putStrings("ipRanges", ImmutableList.copyOf(Iterables.transform(target.getIpAddressRanges(), new Function<IpRange, String>(){
 
 			@Override
-			public SimpleModel apply(InetAddress address) {
-				return new SimpleModel().put("ipAddress", address.getHostAddress());
+			public String apply(IpRange range) {
+				return range.toFriendlyString();
 			}
 			
 		})));
