@@ -53,7 +53,7 @@ public class IpAddressConfigurationFetcher implements ApplicationConfigurationFe
 
 	private String getAddressFrom(HttpServletRequest request) {
 		String forwardedFor = request.getHeader(X_FORWARDED_FOR);
-		log.debug(X_FORWARDED_FOR + " : " + forwardedFor);
+		log.warn(X_FORWARDED_FOR + " : " + forwardedFor);
 		if (!Strings.isNullOrEmpty(forwardedFor)) {
 			List<String> forwardList = ImmutableList.copyOf(Splitter.on(",").trimResults().omitEmptyStrings().split(forwardedFor));
 			if (!forwardList.isEmpty()){
