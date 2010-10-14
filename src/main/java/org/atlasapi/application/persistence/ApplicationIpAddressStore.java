@@ -45,7 +45,7 @@ public class ApplicationIpAddressStore {
 				return inetApplicationMap;
 			}
 		});
-		this.computer.start(Maps.<InetAddress,Application>newHashMap());
+		this.computer.start();
 	}
 	
 	public Maybe<Application> applicationFor(InetAddress address) {
