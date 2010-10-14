@@ -14,6 +14,7 @@ import org.atlasapi.application.persistence.ApplicationIpAddressStore;
 import org.atlasapi.application.persistence.ApplicationReader;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 
@@ -52,7 +53,8 @@ public class IpAddressConfigurationFetcher implements ApplicationConfigurationFe
 
 	private String getAddressFrom(HttpServletRequest request) {
 		String forwardedFor = request.getHeader(X_FORWARDED_FOR);
-		if (forwardedFor != null) {
+		log.debug(X_FORWARDED_FOR + " : " + forwardedFor);
+		if (!Strings.isNullOrEmpty(forwardedFor)) {
 			List<String> forwardList = ImmutableList.copyOf(Splitter.on(",").trimResults().omitEmptyStrings().split(forwardedFor));
 			if (!forwardList.isEmpty()){
 				return forwardList.get(forwardList.size()-1);
