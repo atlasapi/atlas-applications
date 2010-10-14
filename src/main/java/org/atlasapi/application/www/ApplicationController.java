@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
+import com.metabroadcast.common.net.IpRange;
 
 @Controller
 public class ApplicationController {
@@ -73,6 +75,7 @@ public class ApplicationController {
     	
     	if (application == null) {
     		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		return null;
     	}
     	
     	model.put("application", modelBuilder.build(application));
@@ -149,5 +152,64 @@ public class ApplicationController {
 			return null;
 		}
 		return Publisher.fromKey(keyParam).valueOrNull();
+	}
+	
+	@RequestMapping(value="/admin/applications/{appSlug}/ipranges", method=RequestMethod.POST)
+	public String addIpAddress(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug){
+		Application app = reader.applicationFor(slug);
+		if (app == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
+		
+		String addressString = request.getParameter("ipaddress");
+		IpRange range;
+		if (addressString == null || (range = IpRange.fromString(addressString)) == null) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+
+		Set<IpRange> currentIps = app.getCredentials().getIpAddressRanges();
+		app.getCredentials().setIpAddresses(Iterables.concat(currentIps, ImmutableList.of(range)));
+		persistor.update(app);
+		
+		response.setStatus(HttpServletResponse.SC_OK);
+		return "";
+	}
+	
+	@RequestMapping(value="/admin/applications/{appSlug}/ipranges/delete", method=RequestMethod.POST)
+	public String deleteIpAddress(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+		Application app = reader.applicationFor(slug);
+		if (app == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
+		
+		String rangeString = request.getParameter("range");
+		if (rangeString == null) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		
+		IpRange range = IpRange.fromString(rangeString);
+		if (range == null) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		
+		Set<IpRange> currentRanges = app.getCredentials().getIpAddressRanges();
+		
+		if (!currentRanges.contains(range)) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
+		
+		Set<IpRange> newIps = Sets.newHashSet(currentRanges);
+		newIps.remove(range);
+		
+		app.getCredentials().setIpAddresses(newIps);
+		persistor.update(app);
+		
+		response.setStatus(HttpServletResponse.SC_OK);
+		return "";
 	}
 }

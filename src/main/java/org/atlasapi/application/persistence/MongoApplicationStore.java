@@ -1,5 +1,6 @@
 package org.atlasapi.application.persistence;
 
+import java.net.InetAddress;
 import java.util.Set;
 
 import org.atlasapi.application.Application;
@@ -36,6 +37,14 @@ public class MongoApplicationStore implements ApplicationPersistor, ApplicationR
 	@Override
 	public Application applicationFor(String slug) {
 		return translator.fromDBObject(applications.findOne(new BasicDBObject(ApplicationTranslator.APPLICATION_SLUG_KEY, slug)));
+	}
+	
+
+	@Override
+	public Application applicationForIpAddress(InetAddress address) {
+		String credentialsKey = ApplicationTranslator.APPLICATION_CREDENTIALS_KEY;
+		String ipKey = ApplicationCredentialsTranslator.IP_ADDRESS_KEY;
+		return translator.fromDBObject(applications.findOne(new BasicDBObject(credentialsKey+"."+ipKey, address.getHostAddress())));
 	}
 	
 	@Override

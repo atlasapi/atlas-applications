@@ -12,9 +12,11 @@ public class ApiKeyConfigurationFetcher implements ApplicationConfigurationFetch
 
     private static final String API_KEY_QUERY_PARAMETER = "apiKey";
     private final ApplicationReader reader;
+    private final ApplicationConfigurationFetcher delegate;
 
     public ApiKeyConfigurationFetcher(ApplicationReader reader) {
         this.reader = reader;
+        this.delegate  = new IpAddressConfigurationFetcher(reader);
     }
 
     @Override
@@ -26,6 +28,8 @@ public class ApiKeyConfigurationFetcher implements ApplicationConfigurationFetch
                 if (app != null) {
                     return Maybe.fromPossibleNullValue(app.getConfiguration());
                 }
+            } else {
+            	return delegate.configurationFor(request);
             }
         }
 

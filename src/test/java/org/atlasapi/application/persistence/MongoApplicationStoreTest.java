@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
@@ -89,7 +90,7 @@ public class MongoApplicationStoreTest {
 		Application app1 = new Application("test1");
 		
 		ApplicationCredentials credentials = new ApplicationCredentials();
-		credentials.setIpAddresses(ImmutableList.of(InetAddress.getLocalHost()));
+		credentials.setIpAddresses(ImmutableList.of(new IpRange(InetAddress.getLocalHost())));
 		
 		app1.setCredentials(credentials);
 		
@@ -97,7 +98,7 @@ public class MongoApplicationStoreTest {
 		
 		Application retrieved = appStore.applicationFor("test1");
 		
-		assertEquals(app1.getCredentials().getIpAddresses(), retrieved.getCredentials().getIpAddresses());
+		assertEquals(app1.getCredentials().getIpAddressRanges(), retrieved.getCredentials().getIpAddressRanges());
 	}
 	
 	@Test
