@@ -10,27 +10,24 @@ import java.net.UnknownHostException;
 
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationCredentials;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.net.IpRange;
-import com.metabroadcast.common.persistence.MongoTestHelper;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 public class CachingMongoApplicationStoreTest {
 
-	DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 	ApplicationTranslator translator = new ApplicationTranslator();
 	
 	CachingMongoApplicationStore store;
 	private Application application1;
 	private Application application2;
+	private ApplicationStore mongoStore;
+	private Mockery context;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -50,24 +47,30 @@ public class CachingMongoApplicationStoreTest {
 		
 		application2.setCredentials(credentials2);
 		
-		DBCollection appColl = mongo.collection("applications");
-		appColl.insert(ImmutableList.copyOf(Iterables.transform(ImmutableList.of(application1,application2), new Function<Application, DBObject>(){
-			@Override
-			public DBObject apply(Application from) {
-				return translator.toDBObject(from);
-			}
-		})));
+		context = new Mockery();
 		
-		store = new CachingMongoApplicationStore(new MongoApplicationStore(mongo));
+		mongoStore = context.mock(ApplicationStore.class);
 	}
 	
 	@Test
 	public void testApplications() {
+		context.checking(new Expectations(){{
+			oneOf(mongoStore).applications();
+			will(returnValue(ImmutableSet.of(application1, application2)));
+		}});
+		
+		store = new CachingMongoApplicationStore(mongoStore);
 		assertThat(ImmutableSet.copyOf(store.applications()), equalTo(ImmutableSet.of(application1, application2)));
 	}
 
 	@Test
 	public void testApplicationFor() {
+		context.checking(new Expectations(){{
+			oneOf(mongoStore).applications();
+			will(returnValue(ImmutableSet.of(application1, application2)));
+		}});
+		
+		store = new CachingMongoApplicationStore(mongoStore);
 		assertThat(store.applicationFor("testSlug1"), is(equalTo(application1)));
 		assertThat(store.applicationFor("testSlug2"), is(equalTo(application2)));
 		assertThat(store.applicationFor("snail"), nullValue());
@@ -75,6 +78,12 @@ public class CachingMongoApplicationStoreTest {
 
 	@Test
 	public void testApplicationForKey() {
+		context.checking(new Expectations(){{
+			oneOf(mongoStore).applications();
+			will(returnValue(ImmutableSet.of(application1, application2)));
+		}});
+		
+		store = new CachingMongoApplicationStore(mongoStore);
 		assertThat(store.applicationForKey("testApiKey1"), is(equalTo(application1)));
 		assertThat(store.applicationForKey("testApiKey2"), is(equalTo(application2)));
 		assertThat(store.applicationForKey("lock"), nullValue());
@@ -82,6 +91,12 @@ public class CachingMongoApplicationStoreTest {
 
 	@Test
 	public void testApplicationForAddress() throws UnknownHostException {
+		context.checking(new Expectations(){{
+			oneOf(mongoStore).applications();
+			will(returnValue(ImmutableSet.of(application1, application2)));
+		}});
+		
+		store = new CachingMongoApplicationStore(mongoStore);
 		assertThat(store.applicationForAddress(InetAddress.getByName("192.168.0.1")), is(equalTo(application1)));
 		assertThat(store.applicationForAddress(InetAddress.getByName("10.0.0.5")), is(equalTo(application2)));
 		assertThat(store.applicationForAddress(InetAddress.getByName("192.168.1.1")), nullValue());
@@ -89,13 +104,22 @@ public class CachingMongoApplicationStoreTest {
 
 	@Test
 	public void testPersist() throws UnknownHostException {
-		Application application3 = new Application("testSlug3");
+		
+		final Application application3 = new Application("testSlug3");
 		
 		ApplicationCredentials credentials3 = new ApplicationCredentials();
 		credentials3.setApiKey("testApiKey3");
 		credentials3.setIpAddresses(ImmutableList.of(IpRange.fromString("12.0.0.0/24")));
 		
 		application3.setCredentials(credentials3);
+
+		context.checking(new Expectations(){{
+			oneOf(mongoStore).applications();
+			will(returnValue(ImmutableSet.of(application1, application2)));
+			oneOf(mongoStore).persist(application3);
+		}});
+		
+		store = new CachingMongoApplicationStore(mongoStore);
 		
 		store.persist(application3);
 		
@@ -114,6 +138,14 @@ public class CachingMongoApplicationStoreTest {
 		credentials2.setApiKey("newTestApiKey2");
 		credentials2.setIpAddresses(ImmutableList.of(IpRange.fromString("10.0.0.0/24"), IpRange.fromString("11.0.0.0/24")));
 		
+		context.checking(new Expectations(){{
+			oneOf(mongoStore).applications();
+			will(returnValue(ImmutableSet.of(application1, application2)));
+			oneOf(mongoStore).update(application2);
+		}});
+		
+		store = new CachingMongoApplicationStore(mongoStore);
+
 		application2.setCredentials(credentials2);
 		
 		store.update(application2);
