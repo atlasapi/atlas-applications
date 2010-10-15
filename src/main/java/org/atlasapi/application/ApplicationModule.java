@@ -1,5 +1,7 @@
 package org.atlasapi.application;
 
+import org.atlasapi.application.persistence.ApplicationStore;
+import org.atlasapi.application.persistence.CachingMongoApplicationStore;
 import org.atlasapi.application.persistence.MongoApplicationStore;
 import org.atlasapi.application.query.ApiKeyConfigurationFetcher;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
@@ -21,8 +23,8 @@ public class ApplicationModule {
 		return new ApiKeyConfigurationFetcher(applicationStore());
 	}
 	
-	public @Bean MongoApplicationStore applicationStore(){
-		return new MongoApplicationStore(mongo);
+	public @Bean ApplicationStore applicationStore(){
+		return new CachingMongoApplicationStore(new MongoApplicationStore(mongo));
 	}
 	
 }

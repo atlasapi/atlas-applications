@@ -7,10 +7,9 @@ import org.atlasapi.application.Application;
 
 public interface ApplicationReader {
 
-	Application applicationForKey(String key);
-	Application applicationFor(String slug);
 	Set<Application> applications();
-	@Deprecated
-	Application applicationForIpAddress(InetAddress address);
+	Application applicationFor(String slug);
+	Application applicationForKey(String key);
+	Application applicationForAddress(InetAddress address);
 	
 }

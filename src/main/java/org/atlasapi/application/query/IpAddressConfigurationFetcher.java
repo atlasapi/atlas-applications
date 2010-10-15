@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.persistence.ApplicationIpAddressStore;
 import org.atlasapi.application.persistence.ApplicationReader;
 
 import com.google.common.base.Splitter;
@@ -23,10 +22,10 @@ public class IpAddressConfigurationFetcher implements ApplicationConfigurationFe
 	private static final String X_FORWARDED_FOR = "X-Forwarded-For";
 	private static final Log log = LogFactory.getLog(IpAddressConfigurationFetcher.class);
 
-	private final ApplicationIpAddressStore reader;
+	private final ApplicationReader reader;
 
 	public IpAddressConfigurationFetcher(ApplicationReader reader) {
-		this.reader = new ApplicationIpAddressStore(reader);
+		this.reader = reader;
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class IpAddressConfigurationFetcher implements ApplicationConfigurationFe
 		try {
 			InetAddress ipAddr = InetAddress.getByName(remoteAddr);
 			
-			Application app = reader.applicationFor(ipAddr).valueOrNull();
+			Application app = reader.applicationForAddress(ipAddr);
 			
 			if (app != null) {
 				return Maybe.fromPossibleNullValue(app.getConfiguration());

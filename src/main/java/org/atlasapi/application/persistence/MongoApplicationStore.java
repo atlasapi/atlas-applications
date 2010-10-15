@@ -14,7 +14,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
-public class MongoApplicationStore implements ApplicationPersistor, ApplicationReader {
+public class MongoApplicationStore implements ApplicationStore {
 	
 	public static final String APPLICATION_COLLECTION = "applications";
 	
@@ -41,7 +41,7 @@ public class MongoApplicationStore implements ApplicationPersistor, ApplicationR
 	
 
 	@Override
-	public Application applicationForIpAddress(InetAddress address) {
+	public Application applicationForAddress(InetAddress address) {
 		String credentialsKey = ApplicationTranslator.APPLICATION_CREDENTIALS_KEY;
 		String ipKey = ApplicationCredentialsTranslator.IP_ADDRESS_KEY;
 		return translator.fromDBObject(applications.findOne(new BasicDBObject(credentialsKey+"."+ipKey, address.getHostAddress())));
