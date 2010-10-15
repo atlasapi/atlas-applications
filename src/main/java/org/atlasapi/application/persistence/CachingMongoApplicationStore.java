@@ -1,24 +1,18 @@
 package org.atlasapi.application.persistence;
 
 import java.net.InetAddress;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationCredentials;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.net.IpRange;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.MongoConstants;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 
 public class CachingMongoApplicationStore implements ApplicationStore {
 
@@ -37,7 +31,7 @@ public class CachingMongoApplicationStore implements ApplicationStore {
 	private void initCache(Iterable<Application> applications) {
 		slugMap = new MapMaker().makeMap();
 		keyMap = new MapMaker().makeMap();
-		addressMap = new MapMaker().makeMap();;
+		addressMap = new MapMaker().makeMap();
 		for (Application application : applications) {
 			updateCache(application);
 		}
@@ -85,8 +79,38 @@ public class CachingMongoApplicationStore implements ApplicationStore {
 	}
 	
 	@Override
-	public void update(Application application) {
+	public void update(final Application application) {
+		checkForRangesClashes(application);
 		store.update(application);
+		
+		Map<InetAddress, Application> tempAddressMap = new MapMaker().makeMap();
+		tempAddressMap.putAll(Maps.filterValues(addressMap, new Predicate<Application>(){
+			@Override
+			public boolean apply(Application input) {
+				return !input.equals(application);
+			}
+		}));
+		addressMap = tempAddressMap;
 		updateCache(application);
+	}
+	
+	private void checkForRangesClashes(Application application) {
+		ApplicationCredentials credentials = application.getCredentials();
+		if (credentials != null) {
+			for (IpRange range : credentials.getIpAddressRanges()) {
+				for (Application app : applications()) {
+					if(!application.equals(app)) {
+						ApplicationCredentials cre = app.getCredentials();
+						if (cre != null) {
+							for (IpRange ran : cre.getIpAddressRanges()) {
+								if (Sets.intersection(ImmutableSet.copyOf(range.asList()), ImmutableSet.copyOf(ran.asList())).size() > 0) {
+									throw new IllegalArgumentException("IP Range Clash: designated IP Range is already assigned to application " + app);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

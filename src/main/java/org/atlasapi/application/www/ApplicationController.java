@@ -54,7 +54,7 @@ public class ApplicationController {
     	String slug = request.getParameter("slug");
     	String title= request.getParameter("title");
     	
-    	if (slug == null || slug.matches("[a-z0-9][a-z0-9\\-]{1,255}") ||title == null) {
+    	if (slug == null || !slug.matches("[a-z0-9][a-z0-9\\-]{1,255}") ||title == null) {
     		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     		response.setContentLength(0);
     		return null;
@@ -182,13 +182,20 @@ public class ApplicationController {
     		response.setContentLength(0);
 			return null;
 		}
-
-		Set<IpRange> currentIps = app.getCredentials().getIpAddressRanges();
-		app.getCredentials().setIpAddresses(Iterables.concat(currentIps, ImmutableList.of(range)));
-		persistor.update(app);
 		
-		response.setStatus(HttpServletResponse.SC_OK);
-		return "";
+		Set<IpRange> currentIps = app.getCredentials().getIpAddressRanges();
+		try {
+			app.getCredentials().setIpAddresses(Iterables.concat(currentIps, ImmutableList.of(range)));
+			persistor.update(app);
+			
+			response.setStatus(HttpServletResponse.SC_OK);
+			return "";
+		} catch (IllegalArgumentException iae) {
+			app.getCredentials().setIpAddresses(currentIps);
+			response.setStatus(HttpServletResponse.SC_CONFLICT);
+			response.setContentLength(0);
+			return null;
+		}
 	}
 	
 	@RequestMapping(value="/admin/applications/{appSlug}/ipranges/delete", method=RequestMethod.POST)

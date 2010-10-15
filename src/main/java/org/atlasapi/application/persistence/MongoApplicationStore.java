@@ -65,7 +65,7 @@ public class MongoApplicationStore implements ApplicationStore {
 	public void persist(Application application) {
 		applications.insert(translator.toDBObject(application));
 		CommandResult result = mongo.database().getLastError();
-		if (result.get("err") != null & result.getInt("code") == 11000) {
+		if (result.get("err") != null && result.getInt("code") == 11000) {
 			throw new IllegalArgumentException("Duplicate application slug");
 		}
 	}
