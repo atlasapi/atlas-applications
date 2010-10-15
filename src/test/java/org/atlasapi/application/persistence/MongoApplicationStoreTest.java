@@ -36,7 +36,7 @@ public class MongoApplicationStoreTest {
 		assertEquals(app1.getTitle(), retrieved.getTitle());
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void testPersitenceOfApplicationsWithSameSlugs() {
 		Application app1 = new Application("test1");
 		app1.setTitle("Application A");
