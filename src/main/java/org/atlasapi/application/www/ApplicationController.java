@@ -54,19 +54,26 @@ public class ApplicationController {
     	String slug = request.getParameter("slug");
     	String title= request.getParameter("title");
     	
-    	if (slug == null || title == null) {
+    	if (slug == null || slug.matches("[a-z0-9][a-z0-9\\-]{1,255}") ||title == null) {
     		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		response.setContentLength(0);
     		return null;
     	}
     	
     	Application newApp = createNewApplication(slug, title);
     	
-    	persistor.persist(newApp);
+    	try {
+    		persistor.persist(newApp);
     	
-    	model.put("applications", modelListBuilder.build(reader.applications()));
-    	response.setStatus(HttpServletResponse.SC_OK);
+    		model.put("applications", modelListBuilder.build(reader.applications()));
+    		response.setStatus(HttpServletResponse.SC_OK);
     	
-    	return "applications/index";
+    		return "applications/index";
+    	} catch (IllegalArgumentException iae) {
+    		response.setStatus(HttpServletResponse.SC_CONFLICT);
+    		response.setContentLength(0);
+    		return null;
+    	}
     }
     
     @RequestMapping(value="/admin/applications/{appSlug}", method=RequestMethod.GET)
@@ -75,6 +82,7 @@ public class ApplicationController {
     	
     	if (application == null) {
     		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
     		return null;
     	}
     	
@@ -105,12 +113,14 @@ public class ApplicationController {
 		Application app = reader.applicationFor(slug);
 		if (app == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
 			return null;
 		}
 
 		Publisher publisher = getPublisherFrom(request.getParameter("pubkey"));
 		if (publisher == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		response.setContentLength(0);
 			return null;
 		}
 		
@@ -128,12 +138,14 @@ public class ApplicationController {
 		Application app = reader.applicationFor(slug);
 		if (app == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
 			return null;
 		}
 		
 		Publisher publisher = getPublisherFrom(pubKey);
 		if (publisher == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		response.setContentLength(0);
 			return null;
 		}
 		
@@ -159,6 +171,7 @@ public class ApplicationController {
 		Application app = reader.applicationFor(slug);
 		if (app == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
 			return null;
 		}
 		
@@ -166,6 +179,7 @@ public class ApplicationController {
 		IpRange range;
 		if (addressString == null || (range = IpRange.fromString(addressString)) == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		response.setContentLength(0);
 			return null;
 		}
 
@@ -182,18 +196,21 @@ public class ApplicationController {
 		Application app = reader.applicationFor(slug);
 		if (app == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
 			return null;
 		}
 		
 		String rangeString = request.getParameter("range");
 		if (rangeString == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		response.setContentLength(0);
 			return null;
 		}
 		
 		IpRange range = IpRange.fromString(rangeString);
 		if (range == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    		response.setContentLength(0);
 			return null;
 		}
 		
@@ -201,6 +218,7 @@ public class ApplicationController {
 		
 		if (!currentRanges.contains(range)) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
 		}
 		
 		Set<IpRange> newIps = Sets.newHashSet(currentRanges);

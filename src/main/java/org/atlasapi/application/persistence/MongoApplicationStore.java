@@ -11,6 +11,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.mongodb.BasicDBObject;
+import com.mongodb.CommandResult;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
@@ -21,9 +22,12 @@ public class MongoApplicationStore implements ApplicationStore {
 	private final ApplicationTranslator translator = new ApplicationTranslator();
 	
 	private final DBCollection applications;
+
+	private DatabasedMongo mongo;
 	
 	public MongoApplicationStore(DatabasedMongo mongo) {
 		this.applications = mongo.collection(APPLICATION_COLLECTION);
+		this.mongo = mongo;
 	}
 	
 	@Override
@@ -60,6 +64,10 @@ public class MongoApplicationStore implements ApplicationStore {
 	@Override
 	public void persist(Application application) {
 		applications.insert(translator.toDBObject(application));
+		CommandResult result = mongo.database().getLastError();
+		if (result.get("err") != null & result.getInt("code") == 11000) {
+			throw new IllegalArgumentException("Duplicate application slug");
+		}
 	}
 	
 	@Override
