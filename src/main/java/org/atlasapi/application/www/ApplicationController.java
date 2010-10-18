@@ -101,7 +101,7 @@ public class ApplicationController {
     	
     	application.setCredentials(credentials);
     	
-    	ApplicationConfiguration config = ApplicationConfiguration.defaultConfiguration();
+    	ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
     	
     	application.setConfiguration(config);
     	
@@ -125,7 +125,7 @@ public class ApplicationController {
 		}
 		
 		Set<Publisher> currentPublishers = app.getConfiguration().getIncludedPublishers();
-		app.getConfiguration().setIncludedPublishers(Iterables.concat(currentPublishers, ImmutableSet.of(publisher)));
+		app.setConfiguration(app.getConfiguration().copyWithIncludedPublishers(Iterables.concat(currentPublishers, ImmutableSet.of(publisher))));
 		persistor.update(app);
 		
 		model.put("application", modelBuilder.build(app));
@@ -151,7 +151,7 @@ public class ApplicationController {
 		
 		Set<Publisher> newPublishers = Sets.newHashSet(app.getConfiguration().getIncludedPublishers());
 		newPublishers.remove(publisher);
-		app.getConfiguration().setIncludedPublishers(newPublishers);
+		app.setConfiguration(app.getConfiguration().copyWithIncludedPublishers(newPublishers));
 		persistor.update(app);
 		
 		model.put("application", modelBuilder.build(app));

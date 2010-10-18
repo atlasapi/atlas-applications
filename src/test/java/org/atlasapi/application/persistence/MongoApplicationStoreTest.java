@@ -57,8 +57,7 @@ public class MongoApplicationStoreTest {
 		Application app1 = new Application("test1");
 		app1.setTitle("Application A");
 		
-		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
+		ApplicationConfiguration config = new ApplicationConfiguration().copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
 		
 		app1.setConfiguration(config);
 		

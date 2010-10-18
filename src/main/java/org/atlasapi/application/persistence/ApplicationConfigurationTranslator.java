@@ -37,9 +37,7 @@ public class ApplicationConfigurationTranslator {
 	}
 
 	public ApplicationConfiguration fromDBObject(DBObject dbo) {
-		ApplicationConfiguration configuration = new ApplicationConfiguration();
-		
-		configuration.setIncludedPublishers(publisherSetOf(TranslatorUtils.toSet(dbo, INCLUDED_PUBLISHERS_KEY)));
+		ApplicationConfiguration configuration = new ApplicationConfiguration().copyWithIncludedPublishers(publisherSetOf(TranslatorUtils.toSet(dbo, INCLUDED_PUBLISHERS_KEY)));
 		
 		return configuration;
 	}
