@@ -9,19 +9,22 @@ import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.persistence.MongoTestHelper;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 public class MongoApplicationStoreTest {
 
-	DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
-
-	MongoApplicationStore appStore = new MongoApplicationStore(mongo);
+	private MongoApplicationStore appStore;
+	
+	@Before
+	public void start() {
+		appStore = new MongoApplicationStore(MongoTestHelper.anEmptyTestDatabase());
+	}
 
 	@Test
 	public void testApplicationPersists() {
@@ -57,7 +60,7 @@ public class MongoApplicationStoreTest {
 		Application app1 = new Application("test1");
 		app1.setTitle("Application A");
 		
-		ApplicationConfiguration config = new ApplicationConfiguration().copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
 		
 		app1.setConfiguration(config);
 		

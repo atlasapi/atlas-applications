@@ -1,5 +1,6 @@
 package org.atlasapi.application.www;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -87,7 +88,6 @@ public class ApplicationController {
     	}
     	
     	model.put("application", modelBuilder.build(application));
-    	
     	return "applications/application";
     }
     
@@ -129,7 +129,24 @@ public class ApplicationController {
 		persistor.update(app);
 		
 		model.put("application", modelBuilder.build(app));
+		return "applications/application";
+	}
+	
+	@RequestMapping(value="/admin/applications/{appSlug}/precedence", method=RequestMethod.POST)
+	public String setPrecidence(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+		Application app = reader.applicationFor(slug);
+		if (app == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    		response.setContentLength(0);
+			return null;
+		}
+
+		List<Publisher> publishers = getPublishersFrom(request.getParameter("precedence"));
 		
+		app.setConfiguration(app.getConfiguration().copyWithPrecedence(publishers));
+		persistor.update(app);
+		
+		model.put("application", modelBuilder.build(app));
 		return "applications/application";
 	}
 	
@@ -164,6 +181,13 @@ public class ApplicationController {
 			return null;
 		}
 		return Publisher.fromKey(keyParam).valueOrNull();
+	}
+	
+	private List<Publisher> getPublishersFrom(String keyParam) {
+		if (keyParam == null){
+			return null;
+		}
+		return Publisher.fromCsv(keyParam);
 	}
 	
 	@RequestMapping(value="/admin/applications/{appSlug}/ipranges", method=RequestMethod.POST)

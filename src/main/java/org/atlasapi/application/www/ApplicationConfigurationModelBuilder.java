@@ -15,21 +15,29 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
 	public SimpleModel build(final ApplicationConfiguration target) {
 		SimpleModel model = new SimpleModel();
 		
-		model.put("publishers", ImmutableList.copyOf(Iterables.transform(ImmutableList.copyOf(Publisher.values()), new Function<Publisher, SimpleModel>(){
+		model.put("publishers", ImmutableList.copyOf(Iterables.transform(target.publishersInOrder(), new Function<Publisher, SimpleModel>(){
 			@Override
 			public SimpleModel apply(Publisher publisher) {
-				SimpleModel publisherModel = new SimpleModel();
-				
-				publisherModel.put("key", publisher.key());
-				publisherModel.put("title", publisher.title());
-				publisherModel.put("name", publisher.name());
-				publisherModel.put("enabled", target.getIncludedPublishers().contains(publisher));
-				
-				return publisherModel;
+				SimpleModel publisherModel = toBasicPublisherModel().apply(publisher);
+				return publisherModel.put("enabled", target.getIncludedPublishers().contains(publisher));
 			}
 		})));
-		
+		if (target.precedenceEnabled()) {
+			model.put("precedence", true);
+		}
 		return model;
 	}
 
+	private Function<Publisher, SimpleModel> toBasicPublisherModel() {
+		return new Function<Publisher, SimpleModel>(){
+			@Override
+			public SimpleModel apply(Publisher publisher) {
+				SimpleModel publisherModel = new SimpleModel();
+				publisherModel.put("key", publisher.key());
+				publisherModel.put("title", publisher.title());
+				publisherModel.put("name", publisher.name());
+				return publisherModel;
+			}
+		};
+	}
 }
