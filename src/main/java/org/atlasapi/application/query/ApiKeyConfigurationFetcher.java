@@ -10,7 +10,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ApiKeyConfigurationFetcher implements ApplicationConfigurationFetcher {
 
-    private static final String API_KEY_QUERY_PARAMETER = "apiKey";
+    public static final String API_KEY_QUERY_PARAMETER = "apiKey";
     private final ApplicationReader reader;
     private final ApplicationConfigurationFetcher delegate;
 
