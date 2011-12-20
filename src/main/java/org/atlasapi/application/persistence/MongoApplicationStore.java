@@ -1,16 +1,19 @@
 package org.atlasapi.application.persistence;
 
-import java.net.InetAddress;
+import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
+import static com.metabroadcast.common.persistence.mongo.MongoConstants.NO_UPSERT;
+import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
+
 import java.util.Set;
 
 import org.atlasapi.application.Application;
+import org.atlasapi.application.users.User;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.MongoConstants;
-import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -24,6 +27,13 @@ public class MongoApplicationStore implements ApplicationStore {
 	private final DBCollection applications;
 
 	private DatabasedMongo mongo;
+
+    private final Function<DBObject, Application> translatorFunction = new Function<DBObject, Application>(){
+        @Override
+        public Application apply(DBObject dbo) {
+            return translator.fromDBObject(dbo);
+        }
+    };
 	
 	public MongoApplicationStore(DatabasedMongo mongo) {
 		this.applications = mongo.collection(APPLICATION_COLLECTION);
@@ -31,34 +41,14 @@ public class MongoApplicationStore implements ApplicationStore {
 	}
 	
 	@Override
-	public Application applicationForKey(String key) {
-		String credentialsKey = ApplicationTranslator.APPLICATION_CREDENTIALS_KEY;
-		String apiKeyKey = ApplicationCredentialsTranslator.API_KEY_KEY;
-		
-		return translator.fromDBObject(applications.findOne(new BasicDBObject(credentialsKey+"."+apiKeyKey, key)));
+	public Optional<Application> applicationForKey(String key) {
+		String apiKeyField = String.format("%s.%s", ApplicationTranslator.APPLICATION_CREDENTIALS_KEY, ApplicationCredentialsTranslator.API_KEY_KEY);
+		return Optional.fromNullable(translator.fromDBObject(applications.findOne(where().fieldEquals(apiKeyField, key).build())));
 	}
 
 	@Override
-	public Application applicationFor(String slug) {
-		return translator.fromDBObject(applications.findOne(new BasicDBObject(ApplicationTranslator.APPLICATION_SLUG_KEY, slug)));
-	}
-	
-
-	@Override
-	public Application applicationForAddress(InetAddress address) {
-		String credentialsKey = ApplicationTranslator.APPLICATION_CREDENTIALS_KEY;
-		String ipKey = ApplicationCredentialsTranslator.IP_ADDRESS_KEY;
-		return translator.fromDBObject(applications.findOne(new BasicDBObject(credentialsKey+"."+ipKey, address.getHostAddress())));
-	}
-	
-	@Override
-	public Set<Application> applications() {
-		return ImmutableSet.copyOf(Iterables.transform(applications.find(), new Function<DBObject, Application>(){
-			@Override
-			public Application apply(DBObject dbo) {
-				return translator.fromDBObject(dbo);
-			}
-		}));
+	public Optional<Application> applicationFor(String slug) {
+		return Optional.fromNullable(translator.fromDBObject(applications.findOne(where().idEquals(slug).build())));
 	}
 
 	@Override
@@ -72,6 +62,15 @@ public class MongoApplicationStore implements ApplicationStore {
 	
 	@Override
 	public void update(Application application) {
-		applications.update(new BasicDBObject(MongoConstants.ID, application.getSlug()), translator.toDBObject(application));
+		applications.update(where().idEquals(application.getSlug()).build(), translator.toDBObject(application), NO_UPSERT, SINGLE);
 	}
+
+    @Override
+    public Set<Application> applicationsFor(Optional<User> user) {
+        if (!user.isPresent()) {
+            return ImmutableSet.of();
+        }
+        return ImmutableSet.copyOf(Iterables.transform(applications.find(where().idIn(user.get().getApplications()).build()), translatorFunction));
+    }
+	
 }

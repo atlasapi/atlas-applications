@@ -16,6 +16,8 @@ public class ApplicationModelBuilder implements ModelBuilder<Application>{
 		
 		model.put("slug", application.getSlug());
 		model.put("title", application.getTitle());
+		model.put("description", application.getDescription());
+		model.put("created", application.getCreated() != null ? application.getCreated().toString() : null);
 		model.put("credentials", credentialsModelBuilder.build(application.getCredentials()));
 		model.put("configuration", configurationModelBuilder.build(application.getConfiguration()));
 		

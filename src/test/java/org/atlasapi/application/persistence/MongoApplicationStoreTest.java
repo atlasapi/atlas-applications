@@ -9,9 +9,9 @@ import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
-import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.net.IpRange;
@@ -19,104 +19,84 @@ import com.metabroadcast.common.persistence.MongoTestHelper;
 
 public class MongoApplicationStoreTest {
 
-	private MongoApplicationStore appStore;
+    private final ApplicationCredentials creds = new ApplicationCredentials("apiKey");
+	private final MongoApplicationStore appStore = new MongoApplicationStore(MongoTestHelper.anEmptyTestDatabase());
 	
-	@Before
-	public void start() {
-		appStore = new MongoApplicationStore(MongoTestHelper.anEmptyTestDatabase());
-	}
-
 	@Test
 	public void testApplicationPersists() {
-		Application app1 = new Application("test1");
-		app1.setTitle("Test 1");
+		Application app1 = Application.application("test1").withTitle("Test 1").withCredentials(creds).build();
 
 		appStore.persist(app1);
 
-		Application retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("test1");
 
-		assertEquals(app1.getSlug(), retrieved.getSlug());
-		assertEquals(app1.getTitle(), retrieved.getTitle());
+		assertEquals(app1.getSlug(), retrieved.get().getSlug());
+		assertEquals(app1.getTitle(), retrieved.get().getTitle());
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testPersitenceOfApplicationsWithSameSlugs() {
-		Application app1 = new Application("test1");
-		app1.setTitle("Application A");
-		Application app2 = new Application("test1");
-		app2.setTitle("Application B");
+	public void testPersitenceOfApplicationsWithSameSlugsFails() {
+	    Application app1 = Application.application("testa").withTitle("Test 1").withCredentials(creds).build();
+	    Application app2 = Application.application("testa").withTitle("Test 2").withCredentials(creds).build();
 
-		appStore.persist(app1);
+	    appStore.persist(app1);
 		appStore.persist(app2);
 
-		Application retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("test1");
 
-		assertEquals(app1.getSlug(), retrieved.getSlug());
-		assertEquals(app1.getTitle(), retrieved.getTitle());
+		assertEquals(app1.getSlug(), retrieved.get().getSlug());
+		assertEquals(app1.getTitle(), retrieved.get().getTitle());
 	}
 	
 	@Test
 	public void testConfigurationPublisherPersistence() {
-		Application app1 = new Application("test1");
-		app1.setTitle("Application A");
+	    Application app1 = Application.application("testb").withTitle("Test 1").withCredentials(creds).build();
 		
 		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
 		
-		app1.setConfiguration(config);
+		app1 = app1.copy().withConfiguration(config).build();
 		
 		appStore.persist(app1);
 		
-		Application retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("test1");
 
-		assertEquals(2, retrieved.getConfiguration().getIncludedPublishers().size());
+		assertEquals(2, retrieved.get().getConfiguration().getIncludedPublishers().size());
 	}
 	
 	@Test
 	public void testCredentialAPIKeyPersistence() {
-		Application app1 = new Application("test1");
-		
-		ApplicationCredentials credentials = new ApplicationCredentials();
-		credentials.setApiKey("I'm an API Key");
-		
-		app1.setCredentials(credentials);
+	    Application app1 = Application.application("testc").withTitle("Test 1").withCredentials(creds).build();
 		
 		appStore.persist(app1);
 		
-		Application retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("test1");
 		
-		assertEquals(app1.getCredentials().getApiKey(), retrieved.getCredentials().getApiKey());
+		assertEquals(app1.getCredentials().getApiKey(), retrieved.get().getCredentials().getApiKey());
 	}
 	
 	@Test
 	public void testCredentialIPAddressPersistence() throws UnknownHostException {
-		Application app1 = new Application("test1");
+	    Application app1 = Application.application("testd").withTitle("Test 1").withCredentials(creds).build();
 		
-		ApplicationCredentials credentials = new ApplicationCredentials();
-		credentials.setIpAddresses(ImmutableList.of(new IpRange(InetAddress.getLocalHost())));
+		ApplicationCredentials credentials = app1.getCredentials().copyWithIpAddresses(ImmutableList.of(new IpRange(InetAddress.getLocalHost())));
 		
-		app1.setCredentials(credentials);
+		app1 = app1.copy().withCredentials(credentials).build();
 		
 		appStore.persist(app1);
 		
-		Application retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("test1");
 		
-		assertEquals(app1.getCredentials().getIpAddressRanges(), retrieved.getCredentials().getIpAddressRanges());
+		assertEquals(app1.getCredentials().getIpAddressRanges(), retrieved.get().getCredentials().getIpAddressRanges());
 	}
 	
 	@Test
 	public void testGetApplicationByAPIKey() {
-		Application app1 = new Application("test1");
-		
-		ApplicationCredentials credentials = new ApplicationCredentials();
-		String key = "apikey";
-		credentials.setApiKey(key);
-		
-		app1.setCredentials(credentials);
+	    Application app1 = Application.application("teste").withTitle("Test 1").withCredentials(creds).build();
 		
 		appStore.persist(app1);
 		
-		Application retrieved = appStore.applicationForKey(key);
+		Optional<Application> retrieved = appStore.applicationForKey(app1.getCredentials().getApiKey());
 		
-		assertEquals(app1, retrieved);
+		assertEquals(app1, retrieved.get());
 	}
 }
