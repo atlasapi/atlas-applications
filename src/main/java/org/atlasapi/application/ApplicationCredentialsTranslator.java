@@ -1,4 +1,4 @@
-package org.atlasapi.application.persistence;
+package org.atlasapi.application;
 
 import org.atlasapi.application.ApplicationCredentials;
 

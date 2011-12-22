@@ -32,7 +32,11 @@ public class UserAuthCallbackHandler implements AuthCallbackHandler {
             return new RedirectView(redirectUri);
         } else {
             User user = userStore.userForRef(userRef).or(newUser);
-            return new RedirectView(String.format("/admin/users/%id/applications",idCodec.encode(BigInteger.valueOf(user.getId()))));
+            if (user.getUserRef() == null) {
+                user.setUserRef(userRef);
+                userStore.store(user);
+            }
+            return new RedirectView(String.format("/admin/users/%s/applications",idCodec.encode(BigInteger.valueOf(user.getId()))));
         }
     }
 

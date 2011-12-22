@@ -1,4 +1,4 @@
-package org.atlasapi.application.persistence;
+package org.atlasapi.application;
 
 import org.atlasapi.application.Application;
 
@@ -26,7 +26,7 @@ public class ApplicationTranslator {
 		    TranslatorUtils.from(dbo, APPLICATION_SLUG_KEY, application.getSlug());
 		    TranslatorUtils.from(dbo, APPLICATION_TITLE_KEY, application.getTitle());
 		    TranslatorUtils.from(dbo, APPLICATION_DESCRIPTION_KEY, application.getDescription());
-		    TranslatorUtils.from(dbo, APPLICATION_CREATED_KEY, application.getCreated());
+		    TranslatorUtils.fromDateTime(dbo, APPLICATION_CREATED_KEY, application.getCreated());
 		    TranslatorUtils.from(dbo, APPLICATION_CONFIG_KEY, configurationTranslator.toDBObject(application.getConfiguration()));
 		    TranslatorUtils.from(dbo, APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
 		}

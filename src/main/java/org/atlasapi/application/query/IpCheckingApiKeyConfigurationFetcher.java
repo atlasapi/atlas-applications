@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.ApplicationCredentials;
-import org.atlasapi.application.persistence.ApplicationReader;
+import org.atlasapi.application.ApplicationStore;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -25,9 +25,9 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     private static final String X_FORWARDED_FOR = "X-Forwarded-For";
     public static final String API_KEY_QUERY_PARAMETER = "apiKey";
     
-    private final ApplicationReader reader;
+    private final ApplicationStore reader;
 
-    public IpCheckingApiKeyConfigurationFetcher(ApplicationReader reader) {
+    public IpCheckingApiKeyConfigurationFetcher(ApplicationStore reader) {
         this.reader = reader;
     }
 

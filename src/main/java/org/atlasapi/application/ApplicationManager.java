@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.media.entity.Publisher;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.net.IpRange;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class ApplicationManager implements ApplicationStore {
 
@@ -37,6 +38,8 @@ public class ApplicationManager implements ApplicationStore {
         
         Application application = application(slug)
                 .withTitle(title)
+                .withDescription(null)
+                .createdAt(new DateTime(DateTimeZones.UTC))
                 .withCredentials(new ApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", "")))
                 .withConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION).build();
         
@@ -45,32 +48,39 @@ public class ApplicationManager implements ApplicationStore {
         userStore.store(user);
         
     }
-
-    public Application addPublisher(String slug, Publisher publisher) {
+    
+    public Application requestPublisher(String slug, Publisher publisher) {
         Preconditions.checkNotNull(publisher);
         
         Application app = applicationForSlug(slug);
         
-        Set<Publisher> currentPublishers = Sets.newHashSet(app.getConfiguration().getIncludedPublishers());
-        currentPublishers.add(publisher);
-        
-        app = app.copy().withConfiguration(app.getConfiguration().copyWithIncludedPublishers(currentPublishers)).build();
-        update(app);
-        
-        return app;
+        return update(app.copy().withConfiguration(app.getConfiguration().request(publisher)).build());
     }
 
-    public Application removePublisher(String slug, Publisher publisher) {
+    public Application enablePublisher(String slug, Publisher publisher) {
         Preconditions.checkNotNull(publisher);
         
         Application app = applicationForSlug(slug);
         
-        Set<Publisher> newPublishers = Sets.newHashSet(app.getConfiguration().getIncludedPublishers());
-        newPublishers.remove(publisher);
-        app = app.copy().withConfiguration(app.getConfiguration().copyWithIncludedPublishers(newPublishers)).build();
-        update(app);
+        return update(app.copy().withConfiguration(app.getConfiguration().enable(publisher)).build());
         
-        return app;
+    }
+
+    public Application disablePublisher(String slug, Publisher publisher) {
+        Preconditions.checkNotNull(publisher);
+        
+        Application app = applicationForSlug(slug);
+        
+        return update(app.copy().withConfiguration(app.getConfiguration().disable(publisher)).build());
+        
+    }
+
+    public Application approvePublisher(String slug, Publisher publisher) {
+        Preconditions.checkNotNull(publisher);
+        
+        Application app = applicationForSlug(slug);
+        
+        return update(app.copy().withConfiguration(app.getConfiguration().approve(publisher)).build());
     }
 
     public Application setSourcePrecedence(String slug, List<Publisher> publishers) {
@@ -133,13 +143,18 @@ public class ApplicationManager implements ApplicationStore {
     }
 
     @Override
-    public void persist(Application application) {
-        delegate.persist(application);
+    public Application persist(Application application) {
+        return delegate.persist(application);
     }
 
     @Override
-    public void update(Application application) {
-        delegate.update(application);
+    public Application update(Application application) {
+        return delegate.update(application);
+    }
+
+    @Override
+    public Set<Application> applicationsFor(Publisher source) {
+        return delegate.applicationsFor(source);
     }
     
 }

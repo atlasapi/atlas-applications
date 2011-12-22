@@ -1,6 +1,7 @@
-package org.atlasapi.application.persistence;
+package org.atlasapi.application;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -8,12 +9,14 @@ import java.net.UnknownHostException;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.MongoApplicationStore;
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 
@@ -52,15 +55,15 @@ public class MongoApplicationStoreTest {
 	public void testConfigurationPublisherPersistence() {
 	    Application app1 = Application.application("testb").withTitle("Test 1").withCredentials(creds).build();
 		
-		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC,Publisher.FIVE));
+		ApplicationConfiguration config = new ApplicationConfiguration(ImmutableMap.of(Publisher.FIVE, SourceStatus.AVAILABLE_ENABLED), null);
 		
 		app1 = app1.copy().withConfiguration(config).build();
 		
 		appStore.persist(app1);
 		
-		Optional<Application> retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("testb");
 
-		assertEquals(2, retrieved.get().getConfiguration().getIncludedPublishers().size());
+		assertTrue(retrieved.get().getConfiguration().getEnabledSources().contains(Publisher.FIVE));
 	}
 	
 	@Test
@@ -69,7 +72,7 @@ public class MongoApplicationStoreTest {
 		
 		appStore.persist(app1);
 		
-		Optional<Application> retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("testc");
 		
 		assertEquals(app1.getCredentials().getApiKey(), retrieved.get().getCredentials().getApiKey());
 	}
@@ -84,7 +87,7 @@ public class MongoApplicationStoreTest {
 		
 		appStore.persist(app1);
 		
-		Optional<Application> retrieved = appStore.applicationFor("test1");
+		Optional<Application> retrieved = appStore.applicationFor("testd");
 		
 		assertEquals(app1.getCredentials().getIpAddressRanges(), retrieved.get().getCredentials().getIpAddressRanges());
 	}

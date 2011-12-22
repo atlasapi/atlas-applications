@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.UserModelBuilder;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.media.entity.Publisher;
 import org.springframework.stereotype.Controller;
@@ -35,6 +36,7 @@ public class ApplicationController {
 
     private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
     private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
+    private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
 
     public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore) {
         this.manager = appManager;
@@ -45,6 +47,13 @@ public class ApplicationController {
     private Optional<User> user() {
         return userStore.userForRef(authProvider.principal());
     }
+
+    
+    private Map<String, Object> standardModel(Map<String, Object> model) {
+        model.put("user", userModelBuilder.build(user().get()));
+        return model;
+    }
+    
 
     public String sendError(HttpServletResponse response, int responseCode) {
         response.setStatus(responseCode);
@@ -85,33 +94,47 @@ public class ApplicationController {
             sendError(response, HttpServletResponse.SC_NOT_FOUND);
         }
 
-        model.put("application", modelBuilder.build(application.get()));
+        standardModel(model).put("application", modelBuilder.build(application.get()));
         return APPLICATION_TEMPLATE;
     }
 
-    @RequestMapping(value="/admin/applications/{appSlug}/publishers", method=RequestMethod.POST)
-	public String addPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+    @RequestMapping(value="/admin/applications/{appSlug}/publishers/requested", method=RequestMethod.POST)
+    public String requestPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+        
+        Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
+        if (publisher == null) {
+            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+        }
+        
+        Application app = manager.requestPublisher(slug, publisher);
+        
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+
+    @RequestMapping(value="/admin/applications/{appSlug}/publishers/enabled", method=RequestMethod.POST)
+	public String enabledPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
 		
 	    Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
 	    if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
 	    }
 	    
-		Application app = manager.addPublisher(slug, publisher);
+		Application app = manager.enablePublisher(slug, publisher);
 		
 		model.put("application", modelBuilder.build(app));
 		return APPLICATION_TEMPLATE;
 	}
 
-    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/{pubKey}", method = RequestMethod.DELETE)
-    public String removePublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @PathVariable("pubKey") String pubKey) {
+    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/enabled/{pubKey}", method = RequestMethod.DELETE)
+    public String disablePublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @PathVariable("pubKey") String pubKey) {
 
-        Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
+        Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
         if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
         
-        Application app = manager.removePublisher(slug, publisher);
+        Application app = manager.disablePublisher(slug, publisher);
 
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;

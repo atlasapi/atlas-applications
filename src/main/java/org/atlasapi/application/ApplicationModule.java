@@ -8,13 +8,10 @@ import static org.atlasapi.application.auth.TwitterAuthController.LOGOUT;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.application.auth.ApplicationManagementInterceptor;
+import org.atlasapi.application.auth.AdminAuthenticationInterceptor;
 import org.atlasapi.application.auth.AuthCallbackHandler;
 import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
-import org.atlasapi.application.persistence.ApplicationStore;
-import org.atlasapi.application.persistence.CacheBackedApplicationStore;
-import org.atlasapi.application.persistence.MongoApplicationStore;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.users.CacheBackedUserStore;
@@ -37,7 +34,6 @@ import com.google.common.collect.Maps;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.anonymous.AnonymousUserProvider;
 import com.metabroadcast.common.social.anonymous.CookieBasedAnonymousUserProvider;
-import com.metabroadcast.common.social.auth.AuthenticationInterceptor;
 import com.metabroadcast.common.social.auth.CookieTranslator;
 import com.metabroadcast.common.social.auth.DESUserRefKeyEncrypter;
 import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
@@ -106,18 +102,12 @@ public class ApplicationModule {
 	
     public @Bean DefaultAnnotationHandlerMapping controllerMappings() {
         DefaultAnnotationHandlerMapping controllerClassNameHandlerMapping = new DefaultAnnotationHandlerMapping();
-        Object[] interceptors = { getAuthenticationInterceptor(), applicationManagementInterceptor() };
+        Object[] interceptors = { getAuthenticationInterceptor() };
         controllerClassNameHandlerMapping.setInterceptors(interceptors);
         return controllerClassNameHandlerMapping;
     }
-    
-    public @Bean ApplicationManagementInterceptor applicationManagementInterceptor() {
-        ApplicationManagementInterceptor interceptor = new ApplicationManagementInterceptor(userStore());
-        interceptor.setAuthService(authProvider);
-        return interceptor;
-    }
-	
-    public @Bean AuthenticationInterceptor getAuthenticationInterceptor() {
+
+    public @Bean AdminAuthenticationInterceptor getAuthenticationInterceptor() {
         Map<String, List<String>> methodToPath = Maps.newHashMap();
         
         methodToPath.put("GET", ImmutableList.of("/admin"));
@@ -127,12 +117,13 @@ public class ApplicationModule {
         
         List<String> exceptions = ImmutableList.of(LOGIN_URL, CALLBACK_URL, LOGIN_FAILED_URL, LOGOUT, "/includes/javascript");
         
-        AuthenticationInterceptor authenticationInterceptor = new AuthenticationInterceptor();
+        AdminAuthenticationInterceptor authenticationInterceptor = new AdminAuthenticationInterceptor();
         authenticationInterceptor.setViewResolver(viewResolver);
         authenticationInterceptor.setLoginView("redirect:/admin/login");
         authenticationInterceptor.setAuthService(authProvider);
         authenticationInterceptor.setAuthenticationRequiredByMethod(methodToPath);
         authenticationInterceptor.setExceptions(exceptions);
+        authenticationInterceptor.setUserStore(userStore());
         return authenticationInterceptor;
     }
 }

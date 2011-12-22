@@ -1,10 +1,11 @@
-package org.atlasapi.application.persistence;
+package org.atlasapi.application;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.application.Application;
 import org.atlasapi.application.users.User;
+import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
@@ -19,14 +20,14 @@ public class CacheBackedApplicationStore implements ApplicationStore {
 
     public CacheBackedApplicationStore(final ApplicationStore delegate) {
         this.delegate = delegate;
-        this.slugCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<Application>>() {
+        this.slugCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<Application>>() {
 
             @Override
             public Optional<Application> load(String key) throws Exception {
                 return delegate.applicationFor(key);
             }
         });
-        this.keyCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<Application>>() {
+        this.keyCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<Application>>() {
 
             @Override
             public Optional<Application> load(String key) throws Exception {
@@ -51,17 +52,24 @@ public class CacheBackedApplicationStore implements ApplicationStore {
     }
     
     @Override
-    public void persist(Application application) {
-        delegate.persist(application);
+    public Application persist(Application application) {
+        Application delegated = delegate.persist(application);
         slugCache.invalidate(application.getSlug());
         keyCache.invalidate(application.getCredentials().getApiKey());
+        return delegated;
     }
 
     @Override
-    public void update(Application application) {
-        delegate.update(application);
+    public Application update(Application application) {
+        Application delegated = delegate.update(application);
         slugCache.invalidate(application.getSlug());
         keyCache.invalidate(application.getCredentials().getApiKey());
+        return delegated;
+    }
+
+    @Override
+    public Set<Application> applicationsFor(Publisher source) {
+        return delegate.applicationsFor(source);
     }
 
 }

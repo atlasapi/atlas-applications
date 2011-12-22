@@ -6,6 +6,7 @@ import org.atlasapi.application.Application;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.social.model.UserRef;
 
 public class User {
@@ -15,7 +16,7 @@ public class User {
     private Role role = Role.REGULAR;
     
     private Set<String> applicationSlugs = ImmutableSet.of();
-    private Set<Publisher> publisher = ImmutableSet.of();
+    private Set<Publisher> publishers = ImmutableSet.of();
     
     public User(Long id) {
         this.id = id;
@@ -56,13 +57,17 @@ public class User {
     public boolean manages(String applicationSlug) {
         return applicationSlugs.contains(applicationSlug);
     }
+    
+    public boolean manages(Maybe<Publisher> possibleSource) {
+        return possibleSource.hasValue() && publishers.contains(possibleSource.requireValue());
+    }
 
     public Set<Publisher> getSources() {
-        return this.publisher;
+        return this.publishers;
     }
 
     public void setSources(Set<Publisher> publisher) {
-        this.publisher = publisher;
+        this.publishers = publisher;
     }
 
     public Long getId() {

@@ -1,14 +1,14 @@
-package org.atlasapi.application.www;
+package org.atlasapi.application.users;
 
 import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.persistence.ApplicationStore;
-import org.atlasapi.application.users.Role;
-import org.atlasapi.application.users.User;
-import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.ApplicationStore;
+import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.sources.SourceModelBuilder;
+import org.atlasapi.application.www.ApplicationModelBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +38,7 @@ public class UserController {
         this.appStore = appStore;
         this.idCodec = new SubstitutionTableNumberCodec();
         this.appModelBuilder = new ApplicationModelBuilder();
-        this.sourceModelBuilder = new SourceModelBuilder(idCodec);
+        this.sourceModelBuilder = new SourceModelBuilder(new SourceIdCodec(idCodec));
     }
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
