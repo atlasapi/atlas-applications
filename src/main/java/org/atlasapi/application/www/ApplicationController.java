@@ -2,263 +2,185 @@ package org.atlasapi.application.www;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.Application;
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
-import org.atlasapi.application.persistence.ApplicationPersistor;
-import org.atlasapi.application.persistence.ApplicationReader;
+import org.atlasapi.application.ApplicationManager;
+import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.UserModelBuilder;
+import org.atlasapi.application.users.UserStore;
 import org.atlasapi.media.entity.Publisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
 import com.metabroadcast.common.net.IpRange;
+import com.metabroadcast.common.social.auth.AuthenticationProvider;
 
 @Controller
 public class ApplicationController {
-	
-	private final ApplicationReader reader;
-	private final ApplicationPersistor persistor;
-	
-	private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
-	private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
 
-	public ApplicationController(ApplicationReader reader, ApplicationPersistor persistor){
-		this.reader = reader;
-		this.persistor = persistor;
-	}
+    private static final String APPLICATION_TEMPLATE = "applications/application";
+    private static final String APPLICATIONS_INDEX_TEMPLATE = "applications/index";
+    private final AuthenticationProvider authProvider;
+    private final UserStore userStore;
+    private final ApplicationManager manager;
+
+    private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
+    private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
+    private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
+
+    public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore) {
+        this.manager = appManager;
+        this.authProvider = authProvider;
+        this.userStore = userStore;
+    }
+
+    private Optional<User> user() {
+        return userStore.userForRef(authProvider.principal());
+    }
+
     
-    @RequestMapping(value="/admin/applications", method=RequestMethod.GET)
+    private Map<String, Object> standardModel(Map<String, Object> model) {
+        model.put("user", userModelBuilder.build(user().get()));
+        return model;
+    }
+    
+
+    public String sendError(HttpServletResponse response, int responseCode) {
+        response.setStatus(responseCode);
+        response.setContentLength(0);
+        return null;
+    }
+
+    @RequestMapping(value = "/admin/applications", method = RequestMethod.GET)
     public String applications(Map<String, Object> model) {
-    	
-    	model.put("applications", modelListBuilder.build(reader.applications()));
-    	
-        return "applications/index";
+
+        model.put("applications", modelListBuilder.build(manager.applicationsFor(user())));
+
+        return APPLICATIONS_INDEX_TEMPLATE;
     }
-    
-    @RequestMapping(value="/admin/applications", method=RequestMethod.POST)
+
+    @RequestMapping(value = "/admin/applications", method = RequestMethod.POST)
     public String createApplication(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) {
-    	String slug = request.getParameter("slug");
-    	String title= request.getParameter("title");
-    	
-    	if (slug == null || !slug.matches("[a-z0-9][a-z0-9\\-]{1,255}") ||title == null) {
-    		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    		response.setContentLength(0);
-    		return null;
-    	}
-    	
-    	Application newApp = createNewApplication(slug, title);
-    	
-    	try {
-    		persistor.persist(newApp);
-    	
-    		model.put("applications", modelListBuilder.build(reader.applications()));
-    		response.setStatus(HttpServletResponse.SC_OK);
-    	
-    		return "applications/index";
-    	} catch (IllegalArgumentException iae) {
-    		response.setStatus(HttpServletResponse.SC_CONFLICT);
-    		response.setContentLength(0);
-    		return null;
-    	}
+
+        Optional<User> possibleUser = user();
+
+        if (!possibleUser.isPresent()) {
+            return sendError(response, HttpServletResponse.SC_FORBIDDEN);
+        }
+
+        manager.createNewApplication(possibleUser.get(), request.getParameter("slug"), request.getParameter("title"));
+
+        model.put("applications", modelListBuilder.build(manager.applicationsFor(possibleUser)));
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        return APPLICATIONS_INDEX_TEMPLATE;
     }
-    
-    @RequestMapping(value="/admin/applications/{appSlug}", method=RequestMethod.GET)
+
+    @RequestMapping(value = "/admin/applications/{appSlug}", method = RequestMethod.GET)
     public String application(Map<String, Object> model, @PathVariable("appSlug") String slug, HttpServletResponse response) {
-    	Application application = reader.applicationFor(slug);
-    	
-    	if (application == null) {
-    		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-    		return null;
-    	}
-    	
-    	model.put("application", modelBuilder.build(application));
-    	return "applications/application";
-    }
-    
-	private Application createNewApplication(String slug, String title) {
-    	Application application = new Application(slug);
-    	application.setTitle(title);
-    	
-    	ApplicationCredentials credentials = new ApplicationCredentials();
-    	String apiKey = UUID.randomUUID().toString().replaceAll("-", "");
-    	credentials.setApiKey(apiKey);
-    	
-    	application.setCredentials(credentials);
-    	
-    	ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
-    	
-    	application.setConfiguration(config);
-    	
-    	return application;
-    }
-	
-	@RequestMapping(value="/admin/applications/{appSlug}/publishers", method=RequestMethod.POST)
-	public String addPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
-		Application app = reader.applicationFor(slug);
-		if (app == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-			return null;
-		}
+        Optional<Application> application = manager.applicationFor(slug);
 
-		Publisher publisher = getPublisherFrom(request.getParameter("pubkey"));
-		if (publisher == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		Set<Publisher> currentPublishers = app.getConfiguration().getIncludedPublishers();
-		app.setConfiguration(app.getConfiguration().copyWithIncludedPublishers(Iterables.concat(currentPublishers, ImmutableSet.of(publisher))));
-		persistor.update(app);
-		
-		model.put("application", modelBuilder.build(app));
-		return "applications/application";
-	}
-	
-	@RequestMapping(value="/admin/applications/{appSlug}/precedence", method=RequestMethod.POST)
-	public String setPrecidence(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
-		Application app = reader.applicationFor(slug);
-		if (app == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-			return null;
-		}
+        if (!application.isPresent()) {
+            sendError(response, HttpServletResponse.SC_NOT_FOUND);
+        }
 
-		List<Publisher> publishers = getPublishersFrom(request.getParameter("precedence"));
+        standardModel(model).put("application", modelBuilder.build(application.get()));
+        return APPLICATION_TEMPLATE;
+    }
+
+    @RequestMapping(value="/admin/applications/{appSlug}/publishers/requested", method=RequestMethod.POST)
+    public String requestPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+        
+        Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
+        if (publisher == null) {
+            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+        }
+        
+        Application app = manager.requestPublisher(slug, publisher);
+        
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+
+    @RequestMapping(value="/admin/applications/{appSlug}/publishers/enabled", method=RequestMethod.POST)
+	public String enabledPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
 		
-		app.setConfiguration(app.getConfiguration().copyWithPrecedence(publishers));
-		persistor.update(app);
-		
-		model.put("application", modelBuilder.build(app));
-		return "applications/application";
-	}
-	
-	@RequestMapping(value="/admin/applications/{appSlug}/publishers/{pubKey}", method=RequestMethod.DELETE)
-	public String removePublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @PathVariable("pubKey") String pubKey) {
-		Application app = reader.applicationFor(slug);
-		if (app == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		Publisher publisher = getPublisherFrom(pubKey);
-		if (publisher == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		Set<Publisher> newPublishers = Sets.newHashSet(app.getConfiguration().getIncludedPublishers());
-		newPublishers.remove(publisher);
-		app.setConfiguration(app.getConfiguration().copyWithIncludedPublishers(newPublishers));
-		persistor.update(app);
+	    Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
+	    if (publisher == null) {
+            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+	    }
+	    
+		Application app = manager.enablePublisher(slug, publisher);
 		
 		model.put("application", modelBuilder.build(app));
-		
-		return "applications/application";
+		return APPLICATION_TEMPLATE;
 	}
-	
-	private Publisher getPublisherFrom(String keyParam) {
-		if (keyParam == null){
-			return null;
-		}
-		return Publisher.fromKey(keyParam).valueOrNull();
-	}
-	
-	private List<Publisher> getPublishersFrom(String keyParam) {
-		if (keyParam == null){
-			return null;
-		}
-		return Publisher.fromCsv(keyParam);
-	}
-	
-	@RequestMapping(value="/admin/applications/{appSlug}/ipranges", method=RequestMethod.POST)
-	public String addIpAddress(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug){
-		Application app = reader.applicationFor(slug);
-		if (app == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		String addressString = request.getParameter("ipaddress");
-		IpRange range;
-		if (addressString == null || (range = IpRange.fromString(addressString)) == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		Set<IpRange> currentIps = app.getCredentials().getIpAddressRanges();
-		try {
-			app.getCredentials().setIpAddresses(Iterables.concat(currentIps, ImmutableList.of(range)));
-			persistor.update(app);
-			
-			response.setStatus(HttpServletResponse.SC_OK);
-			return "";
-		} catch (IllegalArgumentException iae) {
-			app.getCredentials().setIpAddresses(currentIps);
-			response.setStatus(HttpServletResponse.SC_CONFLICT);
-			response.setContentLength(0);
-			return null;
-		}
-	}
-	
-	@RequestMapping(value="/admin/applications/{appSlug}/ipranges/delete", method=RequestMethod.POST)
-	public String deleteIpAddress(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
-		Application app = reader.applicationFor(slug);
-		if (app == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		String rangeString = request.getParameter("range");
-		if (rangeString == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		IpRange range = IpRange.fromString(rangeString);
-		if (range == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    		response.setContentLength(0);
-			return null;
-		}
-		
-		Set<IpRange> currentRanges = app.getCredentials().getIpAddressRanges();
-		
-		if (!currentRanges.contains(range)) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    		response.setContentLength(0);
-		}
-		
-		Set<IpRange> newIps = Sets.newHashSet(currentRanges);
-		newIps.remove(range);
-		
-		app.getCredentials().setIpAddresses(newIps);
-		persistor.update(app);
-		
-		response.setStatus(HttpServletResponse.SC_OK);
-		return "";
-	}
+
+    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/enabled/{pubKey}", method = RequestMethod.DELETE)
+    public String disablePublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @PathVariable("pubKey") String pubKey) {
+
+        Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
+        if (publisher == null) {
+            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+        }
+        
+        Application app = manager.disablePublisher(slug, publisher);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+
+    @RequestMapping(value = "/admin/applications/{appSlug}/precedence", method = RequestMethod.POST)
+    public String setPrecedence(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        Application app = manager.setSourcePrecedence(slug, getPublishersFrom(request.getParameter("precedence")));
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+
+    private List<Publisher> getPublishersFrom(String keyParam) {
+        if (keyParam == null) {
+            return null;
+        }
+        return Publisher.fromCsv(keyParam);
+    }
+
+    @RequestMapping(value = "/admin/applications/{appSlug}/ipranges", method = RequestMethod.POST)
+    public String addIpAddress(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        IpRange range = IpRange.fromString(Strings.nullToEmpty(request.getParameter("range")));
+        if (range == null) {
+            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+        }
+
+        manager.addIpRange(slug, range);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        return "";
+    }
+
+    @RequestMapping(value = "/admin/applications/{appSlug}/ipranges/delete", method = RequestMethod.POST)
+    public String deleteIpAddress(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        IpRange range = IpRange.fromString(Strings.nullToEmpty(request.getParameter("range")));
+        if (range == null) {
+            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+        }
+
+        manager.removeIpRange(slug, range);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        return "";
+    }
 }
