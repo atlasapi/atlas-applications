@@ -29,6 +29,7 @@ public class UserTranslator {
         TranslatorUtils.from(dbo, "userRef", userTranslator.toDBObject(user.getUserRef()));
         TranslatorUtils.from(dbo, "apps", user.getApplications());
         TranslatorUtils.from(dbo, "manages", Iterables.transform(user.getSources(), Publisher.TO_KEY));
+        TranslatorUtils.from(dbo, "role", user.getRole().toString().toLowerCase());
         
         return dbo;
     }
@@ -43,6 +44,7 @@ public class UserTranslator {
         user.setUserRef(userTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, "userRef")));
         user.setApplications(TranslatorUtils.toSet(dbo, "apps"));
         user.setSources(ImmutableSet.copyOf(Iterables.transform(TranslatorUtils.toSet(dbo, "manages"),Publisher.FROM_KEY)));
+        user.setRole(Role.valueOf(TranslatorUtils.toString(dbo, "role").toUpperCase()));
         
         return user;
     }

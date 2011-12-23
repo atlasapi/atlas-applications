@@ -2,6 +2,7 @@ package org.atlasapi.application.www;
 
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.ApplicationStore;
+import org.atlasapi.application.auth.LoginController;
 import org.atlasapi.application.sources.SourceController;
 import org.atlasapi.application.users.UserController;
 import org.atlasapi.application.users.UserStore;
@@ -30,5 +31,9 @@ public class ApplicationWebModule {
 	
 	@Bean public SourceController sourceController() {
 	    return new SourceController(new ApplicationManager(appStore, userStore));
+	}
+	
+	@Bean public LoginController loginController() {
+	    return new LoginController();
 	}
 }
