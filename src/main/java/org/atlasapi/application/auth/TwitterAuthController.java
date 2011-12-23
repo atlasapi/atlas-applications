@@ -32,7 +32,7 @@ import com.metabroadcast.common.url.UrlEncoding;
 public class TwitterAuthController {
 
     public static final String LOGOUT = "/admin/logout";
-    public static final String LOGIN_URL = "/admin/login";
+    public static final String LOGIN_URL = "/admin/login/twitter";
     public static final String LOGIN_FAILED_URL = "/admin/login/failed";
     public static final String CALLBACK_URL = "/admin/login/oauth-callback";
 

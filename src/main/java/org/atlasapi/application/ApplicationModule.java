@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.atlasapi.application.auth.AdminAuthenticationInterceptor;
 import org.atlasapi.application.auth.AuthCallbackHandler;
+import org.atlasapi.application.auth.LoginController;
 import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
@@ -115,11 +116,11 @@ public class ApplicationModule {
         methodToPath.put("PUT", ImmutableList.of("/admin"));
         methodToPath.put("DELETE", ImmutableList.of("/admin"));
         
-        List<String> exceptions = ImmutableList.of(LOGIN_URL, CALLBACK_URL, LOGIN_FAILED_URL, LOGOUT, "/includes/javascript");
+        List<String> exceptions = ImmutableList.of(LoginController.ADMIN_LOGIN, LOGIN_URL, CALLBACK_URL, LOGIN_FAILED_URL, LOGOUT, "/includes/javascript");
         
         AdminAuthenticationInterceptor authenticationInterceptor = new AdminAuthenticationInterceptor();
         authenticationInterceptor.setViewResolver(viewResolver);
-        authenticationInterceptor.setLoginView("redirect:/admin/login");
+        authenticationInterceptor.setLoginView("redirect:" + LoginController.ADMIN_LOGIN);
         authenticationInterceptor.setAuthService(authProvider);
         authenticationInterceptor.setAuthenticationRequiredByMethod(methodToPath);
         authenticationInterceptor.setExceptions(exceptions);
