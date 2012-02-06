@@ -93,5 +93,10 @@ public class MongoApplicationStore implements ApplicationStore {
     private Iterable<String> states() {
         return Iterables.transform(ImmutableSet.of(SourceState.AVAILABLE, SourceState.REQUESTED), Functions.compose(MoreStrings.TO_LOWER, Functions.toStringFunction()));
     }
+
+    @Override
+    public Iterable<Application> allApplications() {
+        return Iterables.transform(applications.find(where().build()), translatorFunction);
+    }
 	
 }

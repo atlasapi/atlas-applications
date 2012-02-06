@@ -46,7 +46,6 @@ public class ApplicationManager implements ApplicationStore {
         persist(application);
         user.addApplication(application);
         userStore.store(user);
-        
     }
     
     public Application requestPublisher(String slug, Publisher publisher) {
@@ -157,4 +156,8 @@ public class ApplicationManager implements ApplicationStore {
         return delegate.applicationsFor(source);
     }
     
+    @Override
+    public Iterable<Application> allApplications() {
+        return delegate.allApplications();
+    }
 }

@@ -72,4 +72,9 @@ public class CacheBackedApplicationStore implements ApplicationStore {
         return delegate.applicationsFor(source);
     }
 
+    @Override
+    public Iterable<Application> allApplications() {
+        return delegate.allApplications();
+    }
+
 }

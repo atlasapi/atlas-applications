@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
+import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserModelBuilder;
 import org.atlasapi.application.users.UserStore;
@@ -23,6 +24,8 @@ import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
 import com.metabroadcast.common.net.IpRange;
+import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.social.auth.AuthenticationProvider;
 
 @Controller
@@ -30,6 +33,7 @@ public class ApplicationController {
 
     private static final String APPLICATION_TEMPLATE = "applications/application";
     private static final String APPLICATIONS_INDEX_TEMPLATE = "applications/index";
+    
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
     private final ApplicationManager manager;
@@ -37,6 +41,7 @@ public class ApplicationController {
     private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
     private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
     private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
+    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(25).withMaxLimit(50);
 
     public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore) {
         this.manager = appManager;
@@ -62,9 +67,16 @@ public class ApplicationController {
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.GET)
-    public String applications(Map<String, Object> model) {
+    public String applications(Map<String, Object> model, HttpServletRequest request) {
 
-        model.put("applications", modelListBuilder.build(manager.applicationsFor(user())));
+        Selection selection = selectionBuilder.build(request);
+        Optional<User> user = user();
+
+        if(user.isPresent() && user.get().is(Role.ADMIN)) {
+            model.put("applications", modelListBuilder.build(selection.applyTo(manager.allApplications())));
+        } else {
+            model.put("applications", modelListBuilder.build(manager.applicationsFor(user)));
+        }
 
         return APPLICATIONS_INDEX_TEMPLATE;
     }
@@ -91,7 +103,7 @@ public class ApplicationController {
         Optional<Application> application = manager.applicationFor(slug);
 
         if (!application.isPresent()) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND);
+            return sendError(response, HttpServletResponse.SC_NOT_FOUND);
         }
 
         standardModel(model).put("application", modelBuilder.build(application.get()));
