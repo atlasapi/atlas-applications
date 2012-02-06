@@ -30,7 +30,7 @@ public class ApplicationWebModule {
 	}
 	
 	@Bean public SourceController sourceController() {
-	    return new SourceController(new ApplicationManager(appStore, userStore));
+	    return new SourceController(authProvider, new ApplicationManager(appStore, userStore), userStore);
 	}
 	
 	@Bean public LoginController loginController() {

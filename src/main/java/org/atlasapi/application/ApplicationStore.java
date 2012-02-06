@@ -8,6 +8,8 @@ import org.atlasapi.media.entity.Publisher;
 import com.google.common.base.Optional;
 
 public interface ApplicationStore {
+    
+    Iterable<Application> allApplications();
 
     Set<Application> applicationsFor(Optional<User> user);
     
