@@ -10,6 +10,6 @@ public class ApplicationTest {
 
     @Test
     public void shouldCreateApplication() {
-        assertNotNull(new Application("test-slug"));
+        assertNotNull(Application.application("test-slug").withCredentials(new ApplicationCredentials("apiKey")).build());
     }
 }

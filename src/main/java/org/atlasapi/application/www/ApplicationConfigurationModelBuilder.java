@@ -1,6 +1,9 @@
 package org.atlasapi.application.www;
 
+import java.util.Map;
+
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
@@ -15,29 +18,26 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
 	public SimpleModel build(final ApplicationConfiguration target) {
 		SimpleModel model = new SimpleModel();
 		
-		model.put("publishers", ImmutableList.copyOf(Iterables.transform(target.publishersInOrder(), new Function<Publisher, SimpleModel>(){
+		final Map<Publisher, SourceStatus> sourceStatuses = target.sourceStatuses();
+		model.put("publishers", ImmutableList.copyOf(Iterables.transform(target.orderdPublishers(), new Function<Publisher, SimpleModel>(){
 			@Override
 			public SimpleModel apply(Publisher publisher) {
-				SimpleModel publisherModel = toBasicPublisherModel().apply(publisher);
-				return publisherModel.put("enabled", target.getIncludedPublishers().contains(publisher));
+			    return model(publisher, sourceStatuses.get(publisher));
 			}
+
 		})));
+		
 		if (target.precedenceEnabled()) {
 			model.put("precedence", true);
 		}
 		return model;
 	}
 
-	private Function<Publisher, SimpleModel> toBasicPublisherModel() {
-		return new Function<Publisher, SimpleModel>(){
-			@Override
-			public SimpleModel apply(Publisher publisher) {
-				SimpleModel publisherModel = new SimpleModel();
-				publisherModel.put("key", publisher.key());
-				publisherModel.put("title", publisher.title());
-				publisherModel.put("name", publisher.name());
-				return publisherModel;
-			}
-		};
-	}
+    protected SimpleModel model(Publisher publisher, SourceStatus sourceStatus) {
+        return new SimpleModel()
+            .put("key", publisher.key())
+            .put("title", publisher.title())
+            .put("state",sourceStatus.getState().toString().toLowerCase())
+            .put("enabled", sourceStatus.isEnabled());
+    }
 }

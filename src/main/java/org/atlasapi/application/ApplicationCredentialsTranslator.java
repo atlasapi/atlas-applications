@@ -1,9 +1,9 @@
-package org.atlasapi.application.persistence;
+package org.atlasapi.application;
 
 import org.atlasapi.application.ApplicationCredentials;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.net.IpRange;
@@ -15,7 +15,13 @@ public class ApplicationCredentialsTranslator {
 
 	//public static final Pattern IP_ADDRESS_PATTERN = Pattern.compile("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b");
 	
-	public static final String IP_ADDRESS_KEY = "ip_addresses";
+	private static final Function<String, IpRange> TO_IP_RANGE = new Function<String, IpRange>(){
+    	@Override
+    	public IpRange apply(String address) {
+    		return IpRange.fromString(address);
+    	}
+    };
+    public static final String IP_ADDRESS_KEY = "ip_addresses";
 	public static final String API_KEY_KEY = "api_key";
 
 	public DBObject toDBObject(ApplicationCredentials credentials) {
@@ -37,28 +43,8 @@ public class ApplicationCredentialsTranslator {
 	}
 	
 	public ApplicationCredentials fromDBObject(DBObject dbo) {
-		ApplicationCredentials credentials = new ApplicationCredentials();
+		ApplicationCredentials credentials = new ApplicationCredentials(TranslatorUtils.toString(dbo, API_KEY_KEY));
 		
-		if (dbo.containsField(API_KEY_KEY)) {
-			credentials.setApiKey((String) dbo.get(API_KEY_KEY));
-		}
-		
-		Predicate<IpRange> IpRangeNotNull = new Predicate<IpRange>(){
-			@Override
-			public boolean apply(IpRange range) {
-				return range != null;
-			}
-		};
-		
-		Function<String, IpRange> stringToInetAddress = new Function<String, IpRange>(){
-			@Override
-			public IpRange apply(String address) {
-				return IpRange.fromString(address);
-			}
-		};
-		
-		credentials.setIpAddresses(Iterables.filter(Iterables.transform(TranslatorUtils.toList(dbo, IP_ADDRESS_KEY), stringToInetAddress), IpRangeNotNull));
-		
-		return credentials;
+		return credentials.copyWithIpAddresses(Iterables.filter(Iterables.transform(TranslatorUtils.toList(dbo, IP_ADDRESS_KEY), TO_IP_RANGE), Predicates.notNull()));
 	}
 }
