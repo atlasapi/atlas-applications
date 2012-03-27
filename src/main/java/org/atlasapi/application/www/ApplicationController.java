@@ -160,7 +160,16 @@ public class ApplicationController {
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
     }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/precedenceOff", method = RequestMethod.POST)
+    public String setPrecedenceOff(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
 
+        Application app = manager.setSourcePrecedence(slug, null);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
     private List<Publisher> getPublishersFrom(String keyParam) {
         if (keyParam == null) {
             return null;
