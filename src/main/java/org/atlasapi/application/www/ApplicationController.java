@@ -17,6 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -109,7 +111,7 @@ public class ApplicationController {
         standardModel(model).put("application", modelBuilder.build(application.get()));
         return APPLICATION_TEMPLATE;
     }
-
+    
     @RequestMapping(value="/admin/applications/{appSlug}/publishers/requested", method=RequestMethod.POST)
     public String requestPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
         
@@ -203,5 +205,12 @@ public class ApplicationController {
 
         response.setStatus(HttpServletResponse.SC_OK);
         return "";
+    }
+    
+    @RequestMapping(value = "/admin")
+    public View logout(HttpServletResponse response) {
+        
+        
+        return new RedirectView("/admin/applications");
     }
 }
