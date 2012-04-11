@@ -1,11 +1,14 @@
 package org.atlasapi.application.www;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlas.application.notification.EmailNotificationSender;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.users.Role;
@@ -17,6 +20,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -37,16 +43,18 @@ public class ApplicationController {
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
     private final ApplicationManager manager;
+    private final EmailNotificationSender emailSender;
 
     private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
     private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
     private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
     private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(25).withMaxLimit(50);
 
-    public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore) {
+    public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore, EmailNotificationSender emailSender) {
         this.manager = appManager;
         this.authProvider = authProvider;
         this.userStore = userStore;
+        this.emailSender = emailSender;
     }
 
     private Optional<User> user() {
@@ -109,18 +117,21 @@ public class ApplicationController {
         standardModel(model).put("application", modelBuilder.build(application.get()));
         return APPLICATION_TEMPLATE;
     }
-
+    
     @RequestMapping(value="/admin/applications/{appSlug}/publishers/requested", method=RequestMethod.POST)
-    public String requestPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
-        
+    public String requestPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @RequestParam(defaultValue="") String email, @RequestParam(defaultValue="") String reason) throws UnsupportedEncodingException, MessagingException {
         Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
         if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
         
         Application app = manager.requestPublisher(slug, publisher);
-        
+
         model.put("application", modelBuilder.build(app));
+        
+        // send notification of request
+        emailSender.sendNotificationOfPublisherRequest(app, publisher, email, reason);
+        
         return APPLICATION_TEMPLATE;
     }
 
@@ -160,7 +171,16 @@ public class ApplicationController {
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
     }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/precedenceOff", method = RequestMethod.POST)
+    public String setPrecedenceOff(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
 
+        Application app = manager.setSourcePrecedence(slug, null);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
     private List<Publisher> getPublishersFrom(String keyParam) {
         if (keyParam == null) {
             return null;
@@ -194,5 +214,12 @@ public class ApplicationController {
 
         response.setStatus(HttpServletResponse.SC_OK);
         return "";
+    }
+    
+    @RequestMapping(value = "/admin")
+    public View logout(HttpServletResponse response) {
+        
+        
+        return new RedirectView("/admin/applications");
     }
 }
