@@ -1,5 +1,7 @@
 package org.atlasapi.application.www;
 
+import org.atlas.application.notification.EmailNotificationSender;
+import org.atlas.application.notification.JavaMailSenderFactory;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.ApplicationStore;
 import org.atlasapi.application.auth.LoginController;
@@ -7,6 +9,7 @@ import org.atlasapi.application.sources.SourceController;
 import org.atlasapi.application.users.UserController;
 import org.atlasapi.application.users.UserStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,9 +23,10 @@ public class ApplicationWebModule {
     @Autowired UserStore userStore;
     @Autowired RequestScopedAuthenticationProvider authProvider;
     @Autowired DatabasedMongo mongo;
+    @Autowired EmailNotificationSender emailSender;
     
 	@Bean public ApplicationController applicationController() {
-        return new ApplicationController(new ApplicationManager(appStore, userStore), authProvider, userStore);
+        return new ApplicationController(new ApplicationManager(appStore, userStore), authProvider, userStore, emailSender);
     }
 
 	@Bean public UserController userController() {
@@ -36,4 +40,6 @@ public class ApplicationWebModule {
 	@Bean public LoginController loginController() {
 	    return new LoginController();
 	}
+	
+	
 }

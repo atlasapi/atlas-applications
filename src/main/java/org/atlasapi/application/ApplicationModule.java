@@ -8,6 +8,7 @@ import static org.atlasapi.application.auth.TwitterAuthController.LOGOUT;
 import java.util.List;
 import java.util.Map;
 
+import org.atlas.application.notification.NotifierModule;
 import org.atlasapi.application.auth.AdminAuthenticationInterceptor;
 import org.atlasapi.application.auth.AuthCallbackHandler;
 import org.atlasapi.application.auth.LoginController;
@@ -47,7 +48,7 @@ import com.metabroadcast.common.social.user.FixedAppIdUserRefBuilder;
 import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
 
 @Configuration
-@Import({ApplicationWebModule.class})
+@Import({ApplicationWebModule.class, NotifierModule.class})
 @ImportResource("atlas-applications.xml")
 public class ApplicationModule {
     

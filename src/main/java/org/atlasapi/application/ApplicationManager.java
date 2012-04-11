@@ -84,9 +84,12 @@ public class ApplicationManager implements ApplicationStore {
 
     public Application setSourcePrecedence(String slug, List<Publisher> publishers) {
         Application app = applicationForSlug(slug);
-        
-        app = app.copy().withConfiguration(app.getConfiguration().copyWithPrecedence(publishers)).build();
-        
+        if (publishers == null) {
+        	app = app.copy().withConfiguration(app.getConfiguration().copyWithNullPrecedence()).build();
+        }
+        else {
+            app = app.copy().withConfiguration(app.getConfiguration().copyWithPrecedence(publishers)).build();
+        }
         update(app);
         return app;
     }
