@@ -7,8 +7,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.atlasapi.application.Application;
 import org.atlasapi.media.entity.Publisher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -17,33 +15,61 @@ import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.webapp.soy.TemplateRenderer;
 
 public class EmailNotificationSender {
-	private final JavaMailSender sender;
+	
+	public static final Builder emailNotificationSender(JavaMailSender mailSender, TemplateRenderer renderer) {
+		return new Builder(mailSender, renderer);
+	}
+	
+	public final static class Builder {
 
-    private String from;
-    private String fromFriendlyName;
-    private String to;
-    private final TemplateRenderer renderer;
-    private static final String NOTIFICATION_TEMPLATE = "atlas.templates.applications.email.body";
-    private static final String NOTIFICATION_SUBJECT_TEMPLATE = "atlas.templates.applications.email.subject";
-    
-    public EmailNotificationSender(JavaMailSender sender, TemplateRenderer renderer) {
+		private final JavaMailSender sender;
+		private final TemplateRenderer renderer;
+
+		private String from;
+		private String fromFriendlyName;
+		private String to;
+		    
+		public Builder(JavaMailSender sender, TemplateRenderer renderer) {
+			this.sender = sender;
+			this.renderer = renderer;
+		}
+		
+		public Builder withToField(String to) {
+			this.to = to;	
+			return this;
+		}
+		
+		public Builder withFromField(String from) {
+			this.from = from;
+			return this;
+		}
+		public Builder withFriendlyFromName(String fromFriendlyName) {
+			this.fromFriendlyName = fromFriendlyName;
+			return this;
+		}
+		
+		public EmailNotificationSender build() {
+			EmailNotificationSender emailNotificationSender = new EmailNotificationSender(this.sender, this.renderer, this.from, this.fromFriendlyName, this.to);		
+			return emailNotificationSender;
+		}
+	}
+	
+	private static final String NOTIFICATION_TEMPLATE = "atlas.templates.applications.email.body";
+	private static final String NOTIFICATION_SUBJECT_TEMPLATE = "atlas.templates.applications.email.subject";
+	
+	private final JavaMailSender sender;
+	private final TemplateRenderer renderer;
+
+    private final String from;
+    private final String fromFriendlyName;
+    private final String to;
+
+    private EmailNotificationSender(JavaMailSender sender, TemplateRenderer renderer, String from, String fromFriendlyName, String to) {
     	this.sender = sender;
     	this.renderer = renderer;
-    }
-    
-    @Autowired(required = true)
-    public void setFrom(@Value("${notifications.email.from}") String from) {
-        this.from = from;
-    }
-
-    @Autowired(required = true)
-    public void setFromFriendlyName(@Value("${notifications.email.fromFriendlyName}") String fromFriendlyName) {
-        this.fromFriendlyName = fromFriendlyName;
-    }
-
-    @Autowired(required = true)
-    public void setTo(@Value("${notifications.email.to}") String to) {
-        this.to = to;
+    	this.from = from;
+    	this.fromFriendlyName = fromFriendlyName;
+    	this.to = to;
     }
     
     public void sendNotificationOfPublisherRequest(Application app, Publisher publisher, String email, String reason) throws MessagingException, UnsupportedEncodingException {
