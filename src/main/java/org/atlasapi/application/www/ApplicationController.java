@@ -15,7 +15,7 @@ import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserModelBuilder;
 import org.atlasapi.application.users.UserStore;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

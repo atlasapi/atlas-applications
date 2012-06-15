@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.application.Application;
 import org.atlasapi.application.users.User;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;

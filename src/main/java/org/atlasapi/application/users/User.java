@@ -3,7 +3,7 @@ package org.atlasapi.application.users;
 import java.util.Set;
 
 import org.atlasapi.application.Application;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;

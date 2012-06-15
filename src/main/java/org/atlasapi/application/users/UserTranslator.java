@@ -1,6 +1,6 @@
 package org.atlasapi.application.users;
 
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;

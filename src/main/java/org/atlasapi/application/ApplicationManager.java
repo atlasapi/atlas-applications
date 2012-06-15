@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserStore;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;

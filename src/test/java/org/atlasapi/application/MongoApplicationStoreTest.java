@@ -11,7 +11,7 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.application.MongoApplicationStore;
 import org.atlasapi.application.SourceStatus;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 import org.junit.Test;
 
 import com.google.common.base.Optional;

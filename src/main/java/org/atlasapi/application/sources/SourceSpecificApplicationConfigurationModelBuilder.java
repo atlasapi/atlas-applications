@@ -2,7 +2,7 @@ package org.atlasapi.application.sources;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.www.ApplicationConfigurationModelBuilder;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;

@@ -2,7 +2,7 @@ package org.atlasapi.application.sources;
 
 import java.math.BigInteger;
 
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;

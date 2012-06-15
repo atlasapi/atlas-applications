@@ -6,7 +6,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.atlasapi.application.Application;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;

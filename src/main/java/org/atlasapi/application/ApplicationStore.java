@@ -3,7 +3,7 @@ package org.atlasapi.application;
 import java.util.Set;
 
 import org.atlasapi.application.users.User;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Optional;
 
