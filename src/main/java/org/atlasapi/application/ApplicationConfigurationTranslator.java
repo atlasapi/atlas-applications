@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;

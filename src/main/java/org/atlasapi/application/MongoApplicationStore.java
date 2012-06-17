@@ -13,7 +13,7 @@ import java.util.Set;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.users.User;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;

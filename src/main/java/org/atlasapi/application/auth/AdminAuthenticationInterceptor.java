@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserStore;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.View;
