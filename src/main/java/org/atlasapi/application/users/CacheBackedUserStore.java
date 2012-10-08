@@ -3,16 +3,16 @@ package org.atlasapi.application.users;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Optional;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.metabroadcast.common.social.model.UserRef;
 
 public class CacheBackedUserStore implements UserStore {
 
     private final UserStore delegate;
-    private Cache<UserRef, Optional<User>> userRefCache;
-    private Cache<Long, Optional<User>> idCache;
+    private LoadingCache<UserRef, Optional<User>> userRefCache;
+    private LoadingCache<Long, Optional<User>> idCache;
 
     public CacheBackedUserStore(final UserStore delegate) {
         this.delegate = delegate;

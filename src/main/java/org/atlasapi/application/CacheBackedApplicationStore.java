@@ -3,20 +3,19 @@ package org.atlasapi.application;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.application.Application;
 import org.atlasapi.application.users.User;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class CacheBackedApplicationStore implements ApplicationStore {
 
     private final ApplicationStore delegate;
-    private Cache<String, Optional<Application>> slugCache;
-    private Cache<String, Optional<Application>> keyCache;
+    private LoadingCache<String, Optional<Application>> slugCache;
+    private LoadingCache<String, Optional<Application>> keyCache;
 
     public CacheBackedApplicationStore(final ApplicationStore delegate) {
         this.delegate = delegate;
