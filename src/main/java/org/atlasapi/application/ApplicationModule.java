@@ -31,6 +31,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -39,6 +40,7 @@ import com.metabroadcast.common.social.anonymous.CookieBasedAnonymousUserProvide
 import com.metabroadcast.common.social.auth.CookieTranslator;
 import com.metabroadcast.common.social.auth.DESUserRefKeyEncrypter;
 import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
+import com.metabroadcast.common.social.auth.UserRefEncrypter;
 import com.metabroadcast.common.social.auth.credentials.CredentialsStore;
 import com.metabroadcast.common.social.auth.credentials.MongoDBCredentialsStore;
 import com.metabroadcast.common.social.auth.facebook.AccessTokenChecker;
@@ -46,6 +48,7 @@ import com.metabroadcast.common.social.twitter.TwitterApplication;
 import com.metabroadcast.common.social.user.AccessTokenProcessor;
 import com.metabroadcast.common.social.user.FixedAppIdUserRefBuilder;
 import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
+import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
 @Import({ApplicationWebModule.class, NotifierModule.class})
@@ -100,6 +103,10 @@ public class ApplicationModule {
 
     public @Bean CookieTranslator cookieTranslator() {
         return new CookieTranslator(new DESUserRefKeyEncrypter(SALT), COOKIE_NAME, SALT);
+    }
+    
+    public @Bean UserRefEncrypter userRefEncrypter() {
+        return new UserRefEncrypter(new DESUserRefKeyEncrypter(SALT), SALT, Optional.<String>absent(), false, new SystemClock());
     }
 	
     public @Bean DefaultAnnotationHandlerMapping controllerMappings() {

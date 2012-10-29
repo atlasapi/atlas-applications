@@ -25,6 +25,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
@@ -39,6 +40,7 @@ public class ApplicationController {
 
     private static final String APPLICATION_TEMPLATE = "applications/application";
     private static final String APPLICATIONS_INDEX_TEMPLATE = "applications/index";
+    private static final Splitter CSV_SPLITTER = Splitter.on(",");
     
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
@@ -156,9 +158,27 @@ public class ApplicationController {
         if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
-        
         Application app = manager.disablePublisher(slug, publisher);
 
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/update", method = RequestMethod.POST)
+    public String updatePublishers(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @RequestParam("enabled") String enabled, @RequestParam("disabled") String disabled) {
+        Application app = null;
+        for (String pubKey : CSV_SPLITTER.split(enabled)) {
+        	Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
+        	if (publisher != null) {
+        		app = manager.enablePublisher(slug, publisher);
+        	}
+        }
+        for (String pubKey : CSV_SPLITTER.split(disabled)) {
+        	Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
+        	if (publisher != null) {
+        		app = manager.disablePublisher(slug, publisher);
+        	}
+        }
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
     }
