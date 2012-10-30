@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.media.entity.Publisher;
 
@@ -23,6 +21,7 @@ public class ApplicationConfigurationTranslator {
     public static final String PUBLISHER_KEY = "publisher";
     public static final String SOURCES_KEY = "sources";
 	public static final String PRECEDENCE_KEY = "precedence";
+	public static final String WRITABLE_KEY = "writable";
 
 	public DBObject toDBObject(ApplicationConfiguration configuration) {
 		BasicDBObject dbo = new BasicDBObject();
@@ -34,6 +33,9 @@ public class ApplicationConfigurationTranslator {
 		} else {
 			dbo.put(PRECEDENCE_KEY, null);
 		}
+		
+		dbo.put(WRITABLE_KEY, Lists.transform(configuration.writableSources().asList(), Publisher.TO_KEY));
+		
 		return dbo;
 	}
 	
@@ -50,12 +52,23 @@ public class ApplicationConfigurationTranslator {
     }
 	
 	public ApplicationConfiguration fromDBObject(DBObject dbo) {
-	    Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY));
+	    List<DBObject> statusDbos = TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY);
+        Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos);
 	
-		List<Publisher> precedence = dbo.get(PRECEDENCE_KEY) == null ? null : Lists.transform(TranslatorUtils.toList(dbo, PRECEDENCE_KEY), Publisher.FROM_KEY);
+		List<Publisher> precedence = sourcePrecedenceFrom(dbo);
 
-		return new ApplicationConfiguration(sourceStatuses, precedence);
+		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
+        Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
+        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources);
 	}
+
+    private List<Publisher> sourcePrecedenceFrom(DBObject dbo) {
+        if (dbo.get(PRECEDENCE_KEY) == null) {
+            return null;
+        }
+        List<String> sourceKeys = TranslatorUtils.toList(dbo, PRECEDENCE_KEY);
+        return Lists.transform(sourceKeys, Publisher.FROM_KEY);
+    }
 	
     private Map<Publisher, SourceStatus> sourceStatusesFrom(List<DBObject> list) {
         Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
@@ -66,7 +79,6 @@ public class ApplicationConfigurationTranslator {
             );
         }
         return builder.build();
-        
     }
 
     private SourceStatus sourceStatusFrom(DBObject dbo) {
