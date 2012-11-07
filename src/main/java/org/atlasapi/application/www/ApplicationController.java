@@ -139,7 +139,6 @@ public class ApplicationController {
 
     @RequestMapping(value="/admin/applications/{appSlug}/publishers/enabled", method=RequestMethod.POST)
 	public String enabledPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
-		
 	    Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
 	    if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
@@ -167,17 +166,13 @@ public class ApplicationController {
     @RequestMapping(value = "/admin/applications/{appSlug}/publishers/update", method = RequestMethod.POST)
     public String updatePublishers(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @RequestParam("enabled") String enabled, @RequestParam("disabled") String disabled) {
         Application app = null;
-        for (String pubKey : CSV_SPLITTER.split(enabled)) {
-        	Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
-        	if (publisher != null) {
-        		app = manager.enablePublisher(slug, publisher);
-        	}
+        List<Publisher> enabledPubs = Publisher.fromCsv(enabled);
+        for (Publisher publisher : enabledPubs) {
+        	app = manager.enablePublisher(slug, publisher);
         }
-        for (String pubKey : CSV_SPLITTER.split(disabled)) {
-        	Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
-        	if (publisher != null) {
-        		app = manager.disablePublisher(slug, publisher);
-        	}
+        List<Publisher> disabledPubs = Publisher.fromCsv(disabled);
+        for (Publisher publisher : disabledPubs) {
+        	app = manager.disablePublisher(slug, publisher);
         }
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
