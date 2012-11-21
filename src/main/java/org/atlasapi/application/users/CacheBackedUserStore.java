@@ -16,18 +16,22 @@ public class CacheBackedUserStore implements UserStore {
 
     public CacheBackedUserStore(final UserStore delegate) {
         this.delegate = delegate;
-        this.userRefCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(new CacheLoader<UserRef, Optional<User>>() {
-            @Override
-            public Optional<User> load(UserRef key) throws Exception {
-                return delegate.userForRef(key);
-            }
-        });
-        this.idCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(new CacheLoader<Long, Optional<User>>() {
-            @Override
-            public Optional<User> load(Long key) throws Exception {
-                return delegate.userForId(key);
-            }
-        });
+        this.userRefCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<UserRef, Optional<User>>() {
+                    @Override
+                    public Optional<User> load(UserRef key) throws Exception {
+                        return delegate.userForRef(key);
+                    }
+                });
+        this.idCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<Long, Optional<User>>() {
+                    @Override
+                    public Optional<User> load(Long key) throws Exception {
+                        return delegate.userForId(key);
+                    }
+                });
     }
     
     @Override

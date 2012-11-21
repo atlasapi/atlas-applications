@@ -19,20 +19,22 @@ public class CacheBackedApplicationStore implements ApplicationStore {
 
     public CacheBackedApplicationStore(final ApplicationStore delegate) {
         this.delegate = delegate;
-        this.slugCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<Application>>() {
-
-            @Override
-            public Optional<Application> load(String key) throws Exception {
-                return delegate.applicationFor(key);
-            }
-        });
-        this.keyCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<Application>>() {
-
-            @Override
-            public Optional<Application> load(String key) throws Exception {
-                return delegate.applicationForKey(key);
-            }
-        });
+        this.slugCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, Optional<Application>>() {
+                    @Override
+                    public Optional<Application> load(String key) throws Exception {
+                        return delegate.applicationFor(key);
+                    }
+                });
+        this.keyCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, Optional<Application>>() {
+                    @Override
+                    public Optional<Application> load(String key) throws Exception {
+                        return delegate.applicationForKey(key);
+                    }
+                });
     }
 
     @Override
