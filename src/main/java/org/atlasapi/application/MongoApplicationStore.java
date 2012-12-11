@@ -21,10 +21,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.text.MoreStrings;
 import com.mongodb.CommandResult;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.ReadPreference;
 
 public class MongoApplicationStore implements ApplicationStore {
 	
@@ -45,6 +47,7 @@ public class MongoApplicationStore implements ApplicationStore {
 	
 	public MongoApplicationStore(DatabasedMongo mongo) {
 		this.applications = mongo.collection(APPLICATION_COLLECTION);
+		this.applications.setReadPreference(ReadPreference.primary());
 		this.mongo = mongo;
 	}
 	
