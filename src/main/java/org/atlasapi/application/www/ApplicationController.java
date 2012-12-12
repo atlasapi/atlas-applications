@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,10 +26,13 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
+import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
@@ -75,17 +79,33 @@ public class ApplicationController {
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.GET)
-    public String applications(Map<String, Object> model, HttpServletRequest request) {
+    public String applications(Map<String, Object> model, HttpServletRequest request, @RequestParam(defaultValue="") final String search) {
 
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
-
+        
+        Iterable<Application> apps = null;
+    	
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
-            model.put("applications", modelListBuilder.build(selection.applyTo(manager.allApplications())));
+           apps = manager.allApplications();
         } else {
-            model.put("applications", modelListBuilder.build(manager.applicationsFor(user)));
+           apps = manager.applicationsFor(user);
         }
-
+        
+        // apply filter if specified
+        if (search.length() > 1) {
+        	apps = Iterables.filter(apps, new Predicate<Application>() {
+				@Override
+				public boolean apply(@Nullable Application input) {
+					return input.getSlug().contains(search) || input.getTitle().contains(search);
+				}
+        	});
+        }
+        SimpleModel page = new SimpleModel();
+        page.put("search", search);
+        model.put("page", page);
+        model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
+        
         return APPLICATIONS_INDEX_TEMPLATE;
     }
 

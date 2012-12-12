@@ -3,8 +3,10 @@ package org.atlasapi.application.users;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationStore;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.sources.SourceModelBuilder;
@@ -13,11 +15,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
 import com.metabroadcast.common.social.auth.AuthenticationProvider;
 import com.metabroadcast.common.social.model.UserRef;
@@ -60,7 +66,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
-    public String showUserApplications(HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id) throws IOException {
+    public String showUserApplications(HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) throws IOException {
 
         Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
 
@@ -79,8 +85,21 @@ public class UserController {
             response.setContentLength(0);
             return null;
         }
-
-        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, appStore.applicationsFor(existingUser)));
+        
+        Iterable<Application> apps = appStore.applicationsFor(existingUser);
+        // apply filter if specified
+        if (search.length() > 1) {
+        	apps = Iterables.filter(apps, new Predicate<Application>() {
+				@Override
+				public boolean apply(@Nullable Application input) {
+					return input.getSlug().contains(search) || input.getTitle().contains(search);
+				}
+        	});
+        }
+        SimpleModel page = new SimpleModel();
+        page.put("search", search);
+        model.put("page", page);
+        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, apps));
         return "applications/index";
     }
     
