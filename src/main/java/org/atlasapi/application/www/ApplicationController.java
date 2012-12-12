@@ -37,12 +37,14 @@ import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.social.auth.AuthenticationProvider;
+import com.metabroadcast.common.url.Urls;
 
 @Controller
 public class ApplicationController {
 
     private static final String APPLICATION_TEMPLATE = "applications/application";
     private static final String APPLICATIONS_INDEX_TEMPLATE = "applications/index";
+    private static final int DEFAULT_PAGE_SIZE = 15;
     
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
@@ -52,7 +54,7 @@ public class ApplicationController {
     private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
     private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
     private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
-    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(25).withMaxLimit(50);
+    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
 
     public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore, EmailNotificationSender emailSender) {
         this.manager = appManager;
@@ -83,7 +85,6 @@ public class ApplicationController {
 
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
-        
         Iterable<Application> apps = null;
     	
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
@@ -101,12 +102,37 @@ public class ApplicationController {
 				}
         	});
         }
-        SimpleModel page = new SimpleModel();
-        page.put("search", search);
-        model.put("page", page);
-        model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
         
+        model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
+        model.put("page", getPagination(request, selection, Iterables.size(apps), search));
+
         return APPLICATIONS_INDEX_TEMPLATE;
+    }
+    
+    public SimpleModel getPagination(HttpServletRequest request, Selection selection, int max, String search) {
+    	// build page model for prev/next buttons
+        SimpleModel page = new SimpleModel();
+        page.put("limit", selection.getLimit());
+        page.put("offset", selection.getOffset());
+        page.put("max", max);
+        page.put("search", search);
+        String url = request.getRequestURI();
+        if (search.length() > 1) {
+        	url = Urls.appendParameters(url, "search", search);
+        }
+        if (selection.hasNonZeroOffset()) {
+        	int offset = selection.getOffset() - selection.getLimit();
+        	if (offset < 0) {
+        		offset = 0;
+        	}
+            Selection prev = selection.withOffset(offset);
+            page.put("prevUrl", prev.appendToUrl(url));
+        }
+        if ((selection.getOffset() + selection.getLimit()) < max) {
+            Selection next = selection.withOffsetPlus(selection.getLimit());
+            page.put("nextUrl", next.appendToUrl(url));
+        }
+        return page;
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.POST)

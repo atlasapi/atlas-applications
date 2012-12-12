@@ -2,8 +2,8 @@ package org.atlasapi.application.users;
 
 import java.io.IOException;
 import java.util.Map;
-
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.Application;
@@ -25,8 +25,11 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
+import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.social.auth.AuthenticationProvider;
 import com.metabroadcast.common.social.model.UserRef;
+import com.metabroadcast.common.url.Urls;
 
 @Controller
 public class UserController {
@@ -37,6 +40,8 @@ public class UserController {
     private final ApplicationStore appStore;
     private final ApplicationModelBuilder appModelBuilder;
     private final SourceModelBuilder sourceModelBuilder;
+    private static final int DEFAULT_PAGE_SIZE = 15;
+    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
 
     public UserController(AuthenticationProvider authProvider, UserStore userStore, ApplicationStore appStore) {
         this.authProvider = authProvider;
@@ -66,8 +71,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
-    public String showUserApplications(HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) throws IOException {
-
+    public String showUserApplications(HttpServletRequest request, HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) throws IOException {
         Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
 
         if (!existingUser.isPresent()) {
@@ -85,7 +89,6 @@ public class UserController {
             response.setContentLength(0);
             return null;
         }
-        
         Iterable<Application> apps = appStore.applicationsFor(existingUser);
         // apply filter if specified
         if (search.length() > 1) {
@@ -96,10 +99,10 @@ public class UserController {
 				}
         	});
         }
-        SimpleModel page = new SimpleModel();
-        page.put("search", search);
-        model.put("page", page);
-        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, apps));
+        Selection selection = selectionBuilder.build(request);
+
+        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, selection.applyTo(apps)));
+        model.put("page", getPagination(request, selection, Iterables.size(apps), search));
         return "applications/index";
     }
     
@@ -127,5 +130,32 @@ public class UserController {
 
         return "applications/sources";
         
+    }
+    
+    public SimpleModel getPagination(HttpServletRequest request, Selection selection, int max, String search) {
+    	// build page model for prev/next buttons
+        SimpleModel page = new SimpleModel();
+        page.put("limit", selection.getLimit());
+        page.put("offset", selection.getOffset());
+        page.put("max", max);
+        page.put("search", search);
+        String url = request.getRequestURI();
+        if (search.length() > 1) {
+        	url = Urls.appendParameters(url, "search", search);
+        }
+        // UrlEncoding.encode(accessToken)
+        if (selection.hasNonZeroOffset()) {
+        	int offset = selection.getOffset() - selection.getLimit();
+        	if (offset < 0) {
+        		offset = 0;
+        	}
+            Selection prev = selection.withOffset(offset);
+            page.put("prevUrl", prev.appendToUrl(url));
+        }
+        if ((selection.getOffset() + selection.getLimit()) < max) {
+            Selection next = selection.withOffsetPlus(selection.getLimit());
+            page.put("nextUrl", next.appendToUrl(url));
+        }
+        return page;
     }
 }
