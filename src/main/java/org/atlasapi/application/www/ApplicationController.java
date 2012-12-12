@@ -26,9 +26,11 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
+import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
@@ -39,6 +41,7 @@ public class ApplicationController {
 
     private static final String APPLICATION_TEMPLATE = "applications/application";
     private static final String APPLICATIONS_INDEX_TEMPLATE = "applications/index";
+    private static final int DEFAULT_PAGE_SIZE = 15;
     
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
@@ -48,7 +51,7 @@ public class ApplicationController {
     private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
     private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
     private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
-    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(25).withMaxLimit(50);
+    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
 
     public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore, EmailNotificationSender emailSender) {
         this.manager = appManager;
@@ -79,14 +82,39 @@ public class ApplicationController {
 
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
+        Iterable<Application> apps = null;
 
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
-            model.put("applications", modelListBuilder.build(selection.applyTo(manager.allApplications())));
+            apps = manager.allApplications();
         } else {
-            model.put("applications", modelListBuilder.build(manager.applicationsFor(user)));
+            apps = manager.applicationsFor(user);
         }
+        
+        model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
+        model.put("page", getPagination(request, selection, Iterables.size(apps)));
 
         return APPLICATIONS_INDEX_TEMPLATE;
+    }
+    
+    public SimpleModel getPagination(HttpServletRequest request, Selection selection, int max) {
+    	// build page model for prev/next buttons
+        SimpleModel page = new SimpleModel();
+        page.put("limit", selection.getLimit());
+        page.put("offset", selection.getOffset());
+        page.put("max", max);
+        if (selection.getOffset() > 0) {
+        	int offset = selection.getOffset() - selection.getLimit();
+        	if (offset < 0) {
+        		offset = 0;
+        	}
+            Selection prev = selection.withOffset(offset);
+            page.put("prevUrl", prev.appendToUrl(request.getRequestURI()));
+        }
+        if ((selection.getOffset() + selection.getLimit()) < max) {
+            Selection next = selection.withOffsetPlus(selection.getLimit());
+            page.put("nextUrl", next.appendToUrl(request.getRequestURI()));
+        }
+        return page;
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.POST)
