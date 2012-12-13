@@ -216,6 +216,24 @@ public class ApplicationController {
         return "";
     }
     
+    @RequestMapping(value = "/admin/applications/{appSlug}/enable", method = RequestMethod.POST)
+    public String setEnabled(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        Application app = manager.enableApplication(slug);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/disable", method = RequestMethod.POST)
+    public String setDisabled(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        Application app = manager.disableApplication(slug);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
     @RequestMapping(value = "/admin")
     public View logout(HttpServletResponse response) {
         

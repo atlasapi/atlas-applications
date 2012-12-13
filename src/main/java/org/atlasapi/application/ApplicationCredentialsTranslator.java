@@ -23,6 +23,7 @@ public class ApplicationCredentialsTranslator {
     };
     public static final String IP_ADDRESS_KEY = "ip_addresses";
 	public static final String API_KEY_KEY = "api_key";
+	public static final String ENABLED = "enabled";
 
 	public DBObject toDBObject(ApplicationCredentials credentials) {
 		DBObject dbo = new BasicDBObject();
@@ -39,11 +40,18 @@ public class ApplicationCredentialsTranslator {
 			})), IP_ADDRESS_KEY);
 		}
 		
+		TranslatorUtils.from(dbo, ENABLED, credentials.isEnabled());
+		
 		return dbo;
 	}
 	
 	public ApplicationCredentials fromDBObject(DBObject dbo) {
-		ApplicationCredentials credentials = new ApplicationCredentials(TranslatorUtils.toString(dbo, API_KEY_KEY));
+		// Set enabled to true if entry missing for backward compatibility
+		boolean enabled = true;
+		if (dbo.containsField(ENABLED)) {
+			enabled = TranslatorUtils.toBoolean(dbo, ENABLED);
+		}
+		ApplicationCredentials credentials = new ApplicationCredentials(TranslatorUtils.toString(dbo, API_KEY_KEY), enabled);
 		
 		return credentials.copyWithIpAddresses(Iterables.filter(Iterables.transform(TranslatorUtils.toList(dbo, IP_ADDRESS_KEY), TO_IP_RANGE), Predicates.notNull()));
 	}

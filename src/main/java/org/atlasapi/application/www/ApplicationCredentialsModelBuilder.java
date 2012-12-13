@@ -24,7 +24,7 @@ public class ApplicationCredentialsModelBuilder implements ModelBuilder<Applicat
 			}
 			
 		})));
-		
+		model.put("enabled", target.isEnabled());
 		return model;
 	}
 

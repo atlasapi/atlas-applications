@@ -40,7 +40,7 @@ public class ApplicationManager implements ApplicationStore {
                 .withTitle(title)
                 .withDescription(null)
                 .createdAt(new DateTime(DateTimeZones.UTC))
-                .withCredentials(new ApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", "")))
+                .withCredentials(new ApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", ""), true))
                 .withConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION).build();
         
         persist(application);
@@ -121,6 +121,20 @@ public class ApplicationManager implements ApplicationStore {
         
         update(app);
         return app;
+    }
+    
+    public Application enableApplication(String slug) {
+    	 Application app = applicationForSlug(slug);
+         app = app.copy().withCredentials(app.getCredentials().copyEnabled()).build();
+         update(app);
+         return app;
+    }
+    
+    public Application disableApplication(String slug) {
+    	 Application app = applicationForSlug(slug);
+         app = app.copy().withCredentials(app.getCredentials().copyDisabled()).build();
+         update(app);
+         return app;
     }
 
     private Application applicationForSlug(String slug) {
