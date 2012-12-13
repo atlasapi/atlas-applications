@@ -25,6 +25,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
@@ -39,6 +40,7 @@ public class ApplicationController {
 
     private static final String APPLICATION_TEMPLATE = "applications/application";
     private static final String APPLICATIONS_INDEX_TEMPLATE = "applications/index";
+    private static final Splitter CSV_SPLITTER = Splitter.on(",");
     
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
@@ -137,7 +139,6 @@ public class ApplicationController {
 
     @RequestMapping(value="/admin/applications/{appSlug}/publishers/enabled", method=RequestMethod.POST)
 	public String enabledPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
-		
 	    Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
 	    if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
@@ -156,9 +157,23 @@ public class ApplicationController {
         if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
-        
         Application app = manager.disablePublisher(slug, publisher);
 
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/update", method = RequestMethod.POST)
+    public String updatePublishers(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug, @RequestParam("enabled") String enabled, @RequestParam("disabled") String disabled) {
+        Application app = null;
+        List<Publisher> enabledPubs = Publisher.fromCsv(enabled);
+        for (Publisher publisher : enabledPubs) {
+        	app = manager.enablePublisher(slug, publisher);
+        }
+        List<Publisher> disabledPubs = Publisher.fromCsv(disabled);
+        for (Publisher publisher : disabledPubs) {
+        	app = manager.disablePublisher(slug, publisher);
+        }
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
     }
