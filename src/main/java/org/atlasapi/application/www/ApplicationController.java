@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
@@ -36,6 +38,7 @@ import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.social.auth.AuthenticationProvider;
+import com.metabroadcast.common.url.Urls;
 
 @Controller
 public class ApplicationController {
@@ -80,41 +83,56 @@ public class ApplicationController {
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.GET)
-    public String applications(Map<String, Object> model, HttpServletRequest request) {
+    public String applications(Map<String, Object> model, HttpServletRequest request, @RequestParam(defaultValue="") final String search) {
 
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
         Iterable<Application> apps = null;
-
+    	
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
-            apps = manager.allApplications();
+           apps = manager.allApplications();
         } else {
-            apps = manager.applicationsFor(user);
+           apps = manager.applicationsFor(user);
+        }
+        
+        // apply filter if specified
+        if (search.length() > 1) {
+        	apps = Iterables.filter(apps, new Predicate<Application>() {
+				@Override
+				public boolean apply(@Nullable Application input) {
+					return input.getSlug().contains(search) || input.getTitle().contains(search);
+				}
+        	});
         }
         
         model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
-        model.put("page", getPagination(request, selection, Iterables.size(apps)));
+        model.put("page", getPagination(request, selection, Iterables.size(apps), search));
 
         return APPLICATIONS_INDEX_TEMPLATE;
     }
     
-    public SimpleModel getPagination(HttpServletRequest request, Selection selection, int max) {
+    public SimpleModel getPagination(HttpServletRequest request, Selection selection, int max, String search) {
     	// build page model for prev/next buttons
         SimpleModel page = new SimpleModel();
         page.put("limit", selection.getLimit());
         page.put("offset", selection.getOffset());
         page.put("max", max);
-        if (selection.getOffset() > 0) {
+        page.put("search", search);
+        String url = request.getRequestURI();
+        if (search.length() > 1) {
+        	url = Urls.appendParameters(url, "search", search);
+        }
+        if (selection.hasNonZeroOffset()) {
         	int offset = selection.getOffset() - selection.getLimit();
         	if (offset < 0) {
         		offset = 0;
         	}
             Selection prev = selection.withOffset(offset);
-            page.put("prevUrl", prev.appendToUrl(request.getRequestURI()));
+            page.put("prevUrl", prev.appendToUrl(url));
         }
         if ((selection.getOffset() + selection.getLimit()) < max) {
             Selection next = selection.withOffsetPlus(selection.getLimit());
-            page.put("nextUrl", next.appendToUrl(request.getRequestURI()));
+            page.put("nextUrl", next.appendToUrl(url));
         }
         return page;
     }
