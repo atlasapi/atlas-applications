@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +26,9 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
@@ -75,16 +78,29 @@ public class ApplicationController {
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.GET)
-    public String applications(Map<String, Object> model, HttpServletRequest request) {
+    public String applications(Map<String, Object> model, HttpServletRequest request, @RequestParam(defaultValue="no",required=false) boolean showEnabledOnly) {
 
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
 
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
-            model.put("applications", modelListBuilder.build(selection.applyTo(manager.allApplications())));
+        	Iterable<Application> apps = manager.allApplications();
+        	if (showEnabledOnly) {
+        		apps = Iterables.filter(apps, new Predicate<Application>() {
+
+					@Override
+					public boolean apply(@Nullable Application input) {
+						return input.getCredentials().isEnabled();
+					}
+        			
+        		});
+        	}
+            model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
         } else {
             model.put("applications", modelListBuilder.build(manager.applicationsFor(user)));
         }
+        model.put("user", userModelBuilder.build(user().get()));
+        model.put("showEnabledOnly", showEnabledOnly);
 
         return APPLICATIONS_INDEX_TEMPLATE;
     }
@@ -113,7 +129,6 @@ public class ApplicationController {
         if (!application.isPresent()) {
             return sendError(response, HttpServletResponse.SC_NOT_FOUND);
         }
-
         standardModel(model).put("application", modelBuilder.build(application.get()));
         return APPLICATION_TEMPLATE;
     }

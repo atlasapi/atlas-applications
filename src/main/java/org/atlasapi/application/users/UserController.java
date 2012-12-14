@@ -3,8 +3,10 @@ package org.atlasapi.application.users;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationStore;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.sources.SourceModelBuilder;
@@ -13,11 +15,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModelList;
 import com.metabroadcast.common.social.auth.AuthenticationProvider;
 import com.metabroadcast.common.social.model.UserRef;
@@ -31,6 +37,7 @@ public class UserController {
     private final ApplicationStore appStore;
     private final ApplicationModelBuilder appModelBuilder;
     private final SourceModelBuilder sourceModelBuilder;
+    private final ModelBuilder<User> userModelBuilder;
 
     public UserController(AuthenticationProvider authProvider, UserStore userStore, ApplicationStore appStore) {
         this.authProvider = authProvider;
@@ -39,6 +46,7 @@ public class UserController {
         this.idCodec = new SubstitutionTableNumberCodec();
         this.appModelBuilder = new ApplicationModelBuilder();
         this.sourceModelBuilder = new SourceModelBuilder(new SourceIdCodec(idCodec));
+        this.userModelBuilder = new UserModelBuilder();
     }
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
@@ -60,7 +68,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
-    public String showUserApplications(HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id) throws IOException {
+    public String showUserApplications(HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="no",required=false) boolean showEnabledOnly) throws IOException {
 
         Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
 
@@ -79,8 +87,22 @@ public class UserController {
             response.setContentLength(0);
             return null;
         }
+        Iterable<Application> apps = appStore.applicationsFor(existingUser);
+        if (userStore.userForRef(principal).get().is(Role.ADMIN) && showEnabledOnly) {
+    		apps = Iterables.filter(apps, new Predicate<Application>() {
 
-        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, appStore.applicationsFor(existingUser)));
+				@Override
+				public boolean apply(@Nullable Application input) {
+					return input.getCredentials().isEnabled();
+				}
+    			
+    		});
+    	}
+
+        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, apps));
+
+        model.put("user", userModelBuilder.build(user));
+        model.put("showEnabledOnly", showEnabledOnly);
         return "applications/index";
     }
     
