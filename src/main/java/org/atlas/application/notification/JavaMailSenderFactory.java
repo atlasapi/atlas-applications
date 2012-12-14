@@ -35,9 +35,6 @@ public class JavaMailSenderFactory implements FactoryBean<JavaMailSender> {
 
 	public void setHost(@Value("${notifications.email.host}") String host) {
 		sender.setHost(host);
-		System.out.print("******** HOST:");
-		System.out.println(sender.getHost());
-				
 	}
 
 	public void setUsername(@Value("${notifications.email.username}") String username) {
