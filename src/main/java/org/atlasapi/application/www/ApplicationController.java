@@ -83,14 +83,24 @@ public class ApplicationController {
     }
 
     @RequestMapping(value = "/admin/applications", method = RequestMethod.GET)
-    public String applications(Map<String, Object> model, HttpServletRequest request, @RequestParam(defaultValue="") final String search) {
-
+    public String applications(Map<String, Object> model, HttpServletRequest request, @RequestParam(defaultValue="") final String search, @RequestParam(defaultValue="no",required=false) boolean showEnabledOnly) {
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
         Iterable<Application> apps = null;
     	
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
            apps = manager.allApplications();
+        	if (showEnabledOnly) {
+        		apps = Iterables.filter(apps, new Predicate<Application>() {
+
+					@Override
+					public boolean apply(@Nullable Application input) {
+						return input.getCredentials().isEnabled();
+					}
+        			
+        		});
+        	}
+            model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
         } else {
            apps = manager.applicationsFor(user);
         }
@@ -104,9 +114,10 @@ public class ApplicationController {
 				}
         	});
         }
-        
         model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
         model.put("page", getPagination(request, selection, Iterables.size(apps), search));
+        model.put("user", userModelBuilder.build(user().get()));
+        model.put("showEnabledOnly", showEnabledOnly);
 
         return APPLICATIONS_INDEX_TEMPLATE;
     }
@@ -161,7 +172,6 @@ public class ApplicationController {
         if (!application.isPresent()) {
             return sendError(response, HttpServletResponse.SC_NOT_FOUND);
         }
-
         standardModel(model).put("application", modelBuilder.build(application.get()));
         return APPLICATION_TEMPLATE;
     }
@@ -280,6 +290,24 @@ public class ApplicationController {
 
         response.setStatus(HttpServletResponse.SC_OK);
         return "";
+    }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/enable", method = RequestMethod.POST)
+    public String setEnabled(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        Application app = manager.enableApplication(slug);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
+    }
+    
+    @RequestMapping(value = "/admin/applications/{appSlug}/disable", method = RequestMethod.POST)
+    public String setDisabled(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
+
+        Application app = manager.disableApplication(slug);
+
+        model.put("application", modelBuilder.build(app));
+        return APPLICATION_TEMPLATE;
     }
     
     @RequestMapping(value = "/admin")
