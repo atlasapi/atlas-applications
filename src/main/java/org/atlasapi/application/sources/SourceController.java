@@ -121,6 +121,58 @@ public class SourceController {
         
         return "applications/source";
     }
+    
+    @RequestMapping(value="/admin/sources/{id}/writable/applications/add", method=RequestMethod.POST)
+    public String addWritableApplication(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
+        
+        Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
+        
+        if (decodedPublisher.isNothing()) {
+            return sendError(response, HttpStatusCode.NOT_FOUND.code());
+        }
+        
+        Optional<User> possibleUser = user();
+        if (!(possibleUser.isPresent() && (possibleUser.get().manages(decodedPublisher) || possibleUser.get().is(Role.ADMIN)))) {
+            return sendError(response, HttpStatusCode.FORBIDDEN.code());
+        }
+        
+        Publisher publisher = decodedPublisher.requireValue();
+        
+        Application application = appManager.addWritableSource(request.getParameter("application"), publisher);
+
+        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
+        model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
+        model.put("source", sourceModelBuilder.build(publisher));
+        
+        return "applications/source";
+    }
+    
+    @RequestMapping(value="/admin/sources/{id}/writable/applications/remove", method=RequestMethod.POST)
+    public String removeWritableApplication(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
+        
+        Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
+        
+        if (decodedPublisher.isNothing()) {
+            return sendError(response, HttpStatusCode.NOT_FOUND.code());
+        }
+        
+        Optional<User> possibleUser = user();
+        if (!(possibleUser.isPresent() && (possibleUser.get().manages(decodedPublisher) || possibleUser.get().is(Role.ADMIN)))) {
+            return sendError(response, HttpStatusCode.FORBIDDEN.code());
+        }
+        
+        Publisher publisher = decodedPublisher.requireValue();
+        
+        Application application = appManager.removeWritableSource(request.getParameter("application"), publisher);
+
+        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
+        model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
+        model.put("source", sourceModelBuilder.build(publisher));
+        
+        return "applications/source";
+    }
+
+
 
     public String sendError(HttpServletResponse response, final int code) {
         response.setStatus(code);
