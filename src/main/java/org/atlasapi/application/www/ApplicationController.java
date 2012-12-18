@@ -110,7 +110,7 @@ public class ApplicationController {
         	apps = Iterables.filter(apps, new Predicate<Application>() {
 				@Override
 				public boolean apply(@Nullable Application input) {
-					return input.getSlug().contains(search) || input.getTitle().contains(search);
+					return input.getSlug().toLowerCase().contains(search.toLowerCase()) || input.getTitle().toLowerCase().contains(search.toLowerCase()) || input.getCredentials().getApiKey().equals(search);
 				}
         	});
         }
