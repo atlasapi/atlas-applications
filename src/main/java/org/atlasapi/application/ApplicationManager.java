@@ -165,10 +165,16 @@ public class ApplicationManager implements ApplicationStore {
     }
     
     public Application addWritableSource(String slug, Publisher publisher) {
-    	return null;
+    	 Preconditions.checkNotNull(publisher);
+         Application app = applicationForSlug(slug);
+         return update(app.copy().withConfiguration(app.getConfiguration().enableWritableSource(publisher)).build());
+         
     }
     
     public Application removeWritableSource(String slug, Publisher publisher) {
-    	return null;
+   	     Preconditions.checkNotNull(publisher);
+         Application app = applicationForSlug(slug);
+         return update(app.copy().withConfiguration(app.getConfiguration().disableWritableSource(publisher)).build());
+ 
     }
 }

@@ -137,7 +137,7 @@ public class SourceController {
         }
         
         Publisher publisher = decodedPublisher.requireValue();
-        
+
         Application application = appManager.addWritableSource(request.getParameter("application"), publisher);
 
         ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
