@@ -163,4 +163,12 @@ public class ApplicationManager implements ApplicationStore {
     public Iterable<Application> allApplications() {
         return delegate.allApplications();
     }
+    
+    public Application addWritableSource(String slug, Publisher publisher) {
+    	return null;
+    }
+    
+    public Application removeWritableSource(String slug, Publisher publisher) {
+    	return null;
+    }
 }
