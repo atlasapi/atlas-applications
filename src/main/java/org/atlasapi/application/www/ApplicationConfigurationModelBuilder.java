@@ -22,7 +22,7 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
 		model.put("publishers", ImmutableList.copyOf(Iterables.transform(target.orderdPublishers(), new Function<Publisher, SimpleModel>(){
 			@Override
 			public SimpleModel apply(Publisher publisher) {
-			    return model(publisher, sourceStatuses.get(publisher));
+			    return model(publisher, sourceStatuses.get(publisher), target.canWrite(publisher));
 			}
 
 		})));
@@ -33,11 +33,12 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
 		return model;
 	}
 
-    protected SimpleModel model(Publisher publisher, SourceStatus sourceStatus) {
+    protected SimpleModel model(Publisher publisher, SourceStatus sourceStatus, boolean canWrite) {
         return new SimpleModel()
             .put("key", publisher.key())
             .put("title", publisher.title())
             .put("state",sourceStatus.getState().toString().toLowerCase())
-            .put("enabled", sourceStatus.isEnabled());
+            .put("enabled", sourceStatus.isEnabled())
+            .put("canWrite", canWrite);
     }
 }
