@@ -30,6 +30,15 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
 		if (target.precedenceEnabled()) {
 			model.put("precedence", true);
 		}
+		
+		model.put("writable", ImmutableList.copyOf(Iterables.transform(target.writableSources(), new Function<Publisher, SimpleModel>(){
+			@Override
+			public SimpleModel apply(Publisher publisher) {
+			    return modelWritable(publisher);
+			}
+
+		})));
+		
 		return model;
 	}
 
@@ -40,5 +49,11 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
             .put("state",sourceStatus.getState().toString().toLowerCase())
             .put("enabled", sourceStatus.isEnabled())
             .put("canWrite", canWrite);
+    }
+    
+    protected SimpleModel modelWritable(Publisher publisher) {
+        return new SimpleModel()
+            .put("key", publisher.key())
+            .put("title", publisher.title());
     }
 }
