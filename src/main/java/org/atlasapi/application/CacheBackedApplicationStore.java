@@ -76,4 +76,9 @@ public class CacheBackedApplicationStore implements ApplicationStore {
         return delegate.allApplications();
     }
 
+	@Override
+	public Set<Application> writersFor(Publisher source) {
+		return delegate.writersFor(source);
+	}
+
 }

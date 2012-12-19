@@ -190,4 +190,9 @@ public class ApplicationManager implements ApplicationStore {
          return update(app.copy().withConfiguration(app.getConfiguration().disableWritableSource(publisher)).build());
  
     }
+
+	@Override
+	public Set<Application> writersFor(Publisher source) {
+		return delegate.writersFor(source);
+	}
 }

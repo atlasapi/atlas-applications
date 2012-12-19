@@ -98,13 +98,41 @@ public class SourceController {
         
         ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder , selection.applyTo(appManager.applicationsFor(publisher))));
+        model.put("writable", SimpleModelList.fromBuilder(applicationModelBuilder , selection.applyTo(appManager.writersFor(publisher))));
+
         model.put("source", sourceModelBuilder.build(publisher));
         
-        return "applications/source";
+        return "applications/sourceReaders";
     }
     
-    @RequestMapping(value="/admin/sources/{id}/applications/writable", method=RequestMethod.GET)
-    public String writableApplicationsForSource(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) {
+    @RequestMapping(value="/admin/sources/{id}/applications/writers", method=RequestMethod.GET)
+    public String writersForSource(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
+    
+        Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
+        
+        if (decodedPublisher.isNothing()) {
+            return sendError(response, HttpStatusCode.NOT_FOUND.code());
+        }
+        
+        Optional<User> possibleUser = user();
+        if (!(possibleUser.isPresent() && (possibleUser.get().manages(decodedPublisher) || possibleUser.get().is(Role.ADMIN)))) {
+            return sendError(response, HttpStatusCode.FORBIDDEN.code());
+        }
+        
+        Publisher publisher = decodedPublisher.requireValue();
+        
+        Selection selection = Selection.builder().build(request);
+        
+        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
+        model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder , selection.applyTo(appManager.writersFor(publisher))));
+
+        model.put("source", sourceModelBuilder.build(publisher));
+        
+        return "applications/sourceWriters";
+    }
+    
+    @RequestMapping(value="/admin/sources/{id}/applications/writers/add", method=RequestMethod.GET)
+    public String addWritableApplicationsForSource(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) {
     
         Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
         
@@ -137,7 +165,7 @@ public class SourceController {
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder , selection.applyTo(apps)));
         model.put("source", sourceModelBuilder.build(publisher));
         model.put("page", getPagination(request, selection, Iterables.size(apps), search));
-        return "applications/writableSources";
+        return "applications/addRemoveWritables";
     }
 
     @RequestMapping(value="/admin/sources/{id}/applications/approved", method=RequestMethod.POST)
@@ -162,7 +190,7 @@ public class SourceController {
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
         model.put("source", sourceModelBuilder.build(publisher));
         
-        return "applications/source";
+        return "applications/sourceReaders";
     }
     
     @RequestMapping(value="/admin/sources/{id}/writable/applications/add", method=RequestMethod.POST)
@@ -187,7 +215,7 @@ public class SourceController {
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
         model.put("source", sourceModelBuilder.build(publisher));
         
-        return "applications/source";
+        return "applications/sourceWriters";
     }
     
     @RequestMapping(value="/admin/sources/{id}/writable/applications/remove", method=RequestMethod.POST)
@@ -212,7 +240,7 @@ public class SourceController {
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
         model.put("source", sourceModelBuilder.build(publisher));
         
-        return "applications/source";
+        return "applications/sourceWriters";
     }
     
     public SimpleModel getPagination(HttpServletRequest request, Selection selection, int max, String search) {
