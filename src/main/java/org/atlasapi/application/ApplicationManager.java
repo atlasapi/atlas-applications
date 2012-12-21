@@ -177,4 +177,23 @@ public class ApplicationManager implements ApplicationStore {
     public Iterable<Application> allApplications() {
         return delegate.allApplications();
     }
+    
+    public Application addWritableSource(String slug, Publisher publisher) {
+    	 Preconditions.checkNotNull(publisher);
+         Application app = applicationForSlug(slug);
+         return update(app.copy().withConfiguration(app.getConfiguration().enableWritableSource(publisher)).build());
+         
+    }
+    
+    public Application removeWritableSource(String slug, Publisher publisher) {
+   	     Preconditions.checkNotNull(publisher);
+         Application app = applicationForSlug(slug);
+         return update(app.copy().withConfiguration(app.getConfiguration().disableWritableSource(publisher)).build());
+ 
+    }
+
+	@Override
+	public Set<Application> writersFor(Publisher source) {
+		return delegate.writersFor(source);
+	}
 }

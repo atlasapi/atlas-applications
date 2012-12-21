@@ -18,7 +18,9 @@ public class SourceSpecificApplicationConfigurationModelBuilder extends Applicat
     @Override
     public SimpleModel build(ApplicationConfiguration target) {
         SimpleModel model = super.build(target);
-        model.put("publishers", SimpleModelList.containing(model(source, target.sourceStatuses().get(source))));
+        model.put("publishers", SimpleModelList.containing(model(source, 
+        		target.sourceStatuses().get(source), 
+            	target.canWrite(source))));
         return model;
     }
 
