@@ -2,7 +2,6 @@ package org.atlas.application.notification;
 
 import java.util.Properties;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
@@ -33,15 +32,15 @@ public class JavaMailSenderFactory implements FactoryBean<JavaMailSender> {
 		return true;
 	}
 
-	public void setHost(@Value("${notifications.email.host}") String host) {
+	public void setHost(String host) {
 		sender.setHost(host);
 	}
 
-	public void setUsername(@Value("${notifications.email.username}") String username) {
+	public void setUsername(String username) {
 		sender.setUsername(username);
 	}
 
-	public void setPassword(@Value("${notifications.email.password}") String password) {
+	public void setPassword(String password) {
 		sender.setPassword(password);
 	}
 }

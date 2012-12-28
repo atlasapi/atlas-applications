@@ -25,6 +25,7 @@ public class NotifierModule {
         factory.setHost(emailHost);
         factory.setUsername(emailUsername);
         factory.setPassword(emailPassword);
+        
 		return emailNotificationSender(factory.getObject(), soyRenderer)
 				.withToField(to)
 				.withFromField(from)
