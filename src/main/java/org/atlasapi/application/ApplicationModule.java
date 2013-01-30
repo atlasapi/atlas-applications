@@ -72,11 +72,11 @@ public class ApplicationModule {
 	}
 	
 	public @Bean ApplicationStore applicationStore(){
-		return new CacheBackedApplicationStore(new MongoApplicationStore(mongo));
+		return new MongoApplicationStore(mongo);
 	}
 	
 	public @Bean UserStore userStore() {
-	    return new CacheBackedUserStore(new MongoUserStore(mongo));
+		return new MongoUserStore(mongo);
 	}
 	
 	public @Bean CredentialsStore credentialsStore() {
