@@ -1,6 +1,10 @@
 package org.atlasapi.application.www;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +33,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.metabroadcast.common.model.DelegatingModelListBuilder;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.ModelListBuilder;
@@ -180,6 +190,33 @@ public class ApplicationController {
         
         return APPLICATION_TEMPLATE;
     }
+    
+    public static class PublisherKeyDeserializer implements JsonDeserializer<Publisher>  {
+
+		@Override
+		public Publisher deserialize(JsonElement json, Type type,
+				JsonDeserializationContext context) throws JsonParseException {
+			String pubKey = json.getAsJsonPrimitive().getAsString();
+			if (Publisher.fromKey(pubKey).hasValue()) {
+				return Publisher.fromKey(pubKey).requireValue();
+			} else {
+				throw new JsonParseException("Cannot parse " + pubKey);
+			}
+		}
+    	
+    }
+    
+    @RequestMapping(value="/admin/applications/{appSlug}/publishers", method=RequestMethod.POST)
+    public String changePublisherConfiguration(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) throws IOException {
+    	Reader reader = new InputStreamReader(request.getInputStream());
+		Gson deserializer = new GsonBuilder()
+		                   .registerTypeAdapter(Publisher.class, new PublisherKeyDeserializer())
+		                   .create();
+    	PublisherConfiguration configuration = deserializer.fromJson(reader, PublisherConfiguration.class);
+        Application app = manager.setPublisherConfiguration(slug, configuration);	
+		model.put("application", modelBuilder.build(app));
+		return APPLICATION_TEMPLATE;
+	}
 
     @RequestMapping(value="/admin/applications/{appSlug}/publishers/enabled", method=RequestMethod.POST)
 	public String enabledPublisher(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) {
