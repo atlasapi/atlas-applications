@@ -60,7 +60,6 @@ public class ApplicationModule {
     private static final String COOKIE_NAME = "atlastw";
 
     @Autowired DatabasedMongo mongo;
-    @Autowired DatabasedMongo adminMongo;
     @Autowired ViewResolver viewResolver;
     @Autowired RequestScopedAuthenticationProvider authProvider;
 	
@@ -73,12 +72,10 @@ public class ApplicationModule {
 	}
 	
 	public @Bean ApplicationStore applicationStore(){
-		//return new CacheBackedApplicationStore(new MongoApplicationStore(mongo));
 		return new MongoApplicationStore(mongo);
 	}
 	
 	public @Bean UserStore userStore() {
-	    //return new CacheBackedUserStore(new MongoUserStore(mongo));
 		return new MongoUserStore(mongo);
 	}
 	

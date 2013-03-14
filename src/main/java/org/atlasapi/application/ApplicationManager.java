@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.www.PublisherConfiguration;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 
@@ -72,6 +73,18 @@ public class ApplicationManager implements ApplicationStore {
         
         return update(app.copy().withConfiguration(app.getConfiguration().disable(publisher)).build());
         
+    }
+    
+    public Application setPublisherConfiguration(String slug, PublisherConfiguration configuration) {
+    	Application app = applicationForSlug(slug);
+    	ApplicationConfiguration appConfiguration = app.getConfiguration();
+    	for (Publisher source : configuration.getEnabled()) {
+    		appConfiguration = appConfiguration.enable(source);
+    	}
+    	for (Publisher source : configuration.getDisabled()) {
+    		appConfiguration = appConfiguration.disable(source);
+    	}
+    	return update(app.copy().withConfiguration(appConfiguration).build());
     }
 
     public Application approvePublisher(String slug, Publisher publisher) {
