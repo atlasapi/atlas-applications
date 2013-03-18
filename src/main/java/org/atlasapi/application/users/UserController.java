@@ -24,6 +24,7 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.model.SimpleModel;
+import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModelList;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
@@ -42,6 +43,7 @@ public class UserController {
     private final SourceModelBuilder sourceModelBuilder;
     private static final int DEFAULT_PAGE_SIZE = 15;
     private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
+    private final ModelBuilder<User> userModelBuilder;
 
     public UserController(AuthenticationProvider authProvider, UserStore userStore, ApplicationStore appStore) {
         this.authProvider = authProvider;
@@ -50,6 +52,7 @@ public class UserController {
         this.idCodec = new SubstitutionTableNumberCodec();
         this.appModelBuilder = new ApplicationModelBuilder();
         this.sourceModelBuilder = new SourceModelBuilder(new SourceIdCodec(idCodec));
+        this.userModelBuilder = new UserModelBuilder();
     }
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
@@ -71,8 +74,8 @@ public class UserController {
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
-    public String showUserApplications(HttpServletRequest request, HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) throws IOException {
-        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+    public String showUserApplications(HttpServletRequest request, HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search, @RequestParam(defaultValue="no",required=false) boolean showEnabledOnly) throws IOException {
+       Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
 
         if (!existingUser.isPresent()) {
             response.setStatus(HttpStatusCode.NOT_FOUND.code());
@@ -90,6 +93,7 @@ public class UserController {
             return null;
         }
         Iterable<Application> apps = appStore.applicationsFor(existingUser);
+        
         // apply filter if specified
         if (search.length() > 1) {
         	apps = Iterables.filter(apps, new Predicate<Application>() {
@@ -99,10 +103,23 @@ public class UserController {
 				}
         	});
         }
-        Selection selection = selectionBuilder.build(request);
+        
+        if (userStore.userForRef(principal).get().is(Role.ADMIN) && showEnabledOnly) {
+    		apps = Iterables.filter(apps, new Predicate<Application>() {
 
+				@Override
+				public boolean apply(@Nullable Application input) {
+					return input.getCredentials().isEnabled();
+				}
+    			
+    		});
+    	}
+
+        Selection selection = selectionBuilder.build(request);
         model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, selection.applyTo(apps)));
         model.put("page", getPagination(request, selection, Iterables.size(apps), search));
+        model.put("user", userModelBuilder.build(user));
+        model.put("showEnabledOnly", showEnabledOnly);
         return "applications/index";
     }
     

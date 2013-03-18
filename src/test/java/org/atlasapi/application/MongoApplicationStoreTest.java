@@ -22,7 +22,7 @@ import com.metabroadcast.common.persistence.MongoTestHelper;
 
 public class MongoApplicationStoreTest {
 
-    private final ApplicationCredentials creds = new ApplicationCredentials("apiKey");
+    private final ApplicationCredentials creds = new ApplicationCredentials("apiKey", true);
 	private final MongoApplicationStore appStore = new MongoApplicationStore(MongoTestHelper.anEmptyTestDatabase());
 	
 	@Test
