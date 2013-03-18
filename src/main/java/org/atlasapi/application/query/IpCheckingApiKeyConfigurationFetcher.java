@@ -38,10 +38,9 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
             if (apiKey != null) {
                 Optional<Application> app = reader.applicationForKey(apiKey);
                 
-                if (!app.isPresent() || !app.get().getCredentials().isEnabled()) {
+                if (app.isPresent() && !app.get().getCredentials().isEnabled()) {
                 	throw new InvalidAPIKeyException("API key not enabled", apiKey);
-                }
-                if (app.isPresent() 
+                } else if (app.isPresent() 
                 		&& validIp(app.get().getCredentials(), request)) {
                     return Maybe.fromPossibleNullValue(app.get().getConfiguration());
                 }
