@@ -8,6 +8,6 @@ import com.metabroadcast.common.base.Maybe;
 
 public interface ApplicationConfigurationFetcher {
 	
-	Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) throws InvalidAPIKeyException;
+	Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request);
 
 }

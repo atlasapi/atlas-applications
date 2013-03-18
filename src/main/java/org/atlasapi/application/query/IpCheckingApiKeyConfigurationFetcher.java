@@ -32,7 +32,7 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     }
 
     @Override
-    public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) throws InvalidAPIKeyException {
+    public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request)  {
         if (request != null) {
             String apiKey = request.getParameter(API_KEY_QUERY_PARAMETER);
             if (apiKey != null) {
