@@ -97,9 +97,9 @@ public class ApplicationController {
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
         Iterable<Application> apps = null;
-    	
+        
         if(user.isPresent() && user.get().is(Role.ADMIN)) {
-           apps = manager.allApplications();
+        	apps = manager.allApplications();
         	if (showEnabledOnly) {
         		apps = Iterables.filter(apps, new Predicate<Application>() {
 
@@ -110,7 +110,6 @@ public class ApplicationController {
         			
         		});
         	}
-            model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
         } else {
            apps = manager.applicationsFor(user);
         }
@@ -123,12 +122,11 @@ public class ApplicationController {
 					return input.getSlug().toLowerCase().contains(search.toLowerCase()) || input.getTitle().toLowerCase().contains(search.toLowerCase()) || input.getCredentials().getApiKey().equals(search);
 				}
         	});
-        }
-        model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
+        }       
         model.put("page", getPagination(request, selection, Iterables.size(apps), search));
+        model.put("applications", modelListBuilder.build(selection.applyTo(apps)));
         model.put("user", userModelBuilder.build(user().get()));
         model.put("showEnabledOnly", showEnabledOnly);
-
         return APPLICATIONS_INDEX_TEMPLATE;
     }
     

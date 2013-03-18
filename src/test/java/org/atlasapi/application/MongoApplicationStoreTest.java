@@ -1,6 +1,7 @@
 package org.atlasapi.application;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
@@ -101,5 +102,24 @@ public class MongoApplicationStoreTest {
 		Optional<Application> retrieved = appStore.applicationForKey(app1.getCredentials().getApiKey());
 		
 		assertEquals(app1, retrieved.get());
+	}
+	
+	@Test
+	public void testDisableEnableApplicationKey() {
+		Application app1 = Application.application("teste")
+				               .withTitle("Test 1")
+				               .withCredentials(creds)
+				               .build();
+	
+		// Disabled
+		appStore.persist(app1.copy().withCredentials(app1.getCredentials().copyDisabled()).build());
+		Optional<Application> retrieved = appStore.applicationForKey(app1.getCredentials().getApiKey());
+		assertFalse(retrieved.get().getCredentials().isEnabled());
+		app1 = retrieved.get();
+		
+		// Enabled	
+		appStore.update(app1.copy().withCredentials(app1.getCredentials().copyEnabled()).build());
+	    retrieved = appStore.applicationForKey(app1.getCredentials().getApiKey());
+		assertTrue(retrieved.get().getCredentials().isEnabled());
 	}
 }

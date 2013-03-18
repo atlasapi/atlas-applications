@@ -1,6 +1,6 @@
 package org.atlasapi.application.query;
 
-public class InvalidAPIKeyException extends Exception {
+public class InvalidAPIKeyException extends RuntimeException {
 	private String apiKey;
 
 	public InvalidAPIKeyException() {

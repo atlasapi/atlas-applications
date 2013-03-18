@@ -102,10 +102,7 @@ public class UserController {
 				}
         	});
         }
-        Selection selection = selectionBuilder.build(request);
 
-        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, selection.applyTo(apps)));
-        model.put("page", getPagination(request, selection, Iterables.size(apps), search));
         if (userStore.userForRef(principal).get().is(Role.ADMIN) && showEnabledOnly) {
     		apps = Iterables.filter(apps, new Predicate<Application>() {
 
@@ -117,8 +114,9 @@ public class UserController {
     		});
     	}
 
-        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, apps));
-
+        Selection selection = selectionBuilder.build(request);
+        model.put("applications", SimpleModelList.fromBuilder(appModelBuilder, selection.applyTo(apps)));
+        model.put("page", getPagination(request, selection, Iterables.size(apps), search));
         model.put("user", userModelBuilder.build(user));
         model.put("showEnabledOnly", showEnabledOnly);
         return "applications/index";
