@@ -61,10 +61,13 @@ public class ApplicationController {
     private final ApplicationManager manager;
     private final EmailNotificationSender emailSender;
 
-    private ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
-    private ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
-    private ModelBuilder<User> userModelBuilder = new UserModelBuilder();
-    private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
+    private final ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
+    private final ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
+    private final ModelBuilder<User> userModelBuilder = new UserModelBuilder();
+    private final SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
+	private final Gson publisherKeyDeserializer = new GsonBuilder()
+	                   .registerTypeAdapter(Publisher.class, new PublisherKeyDeserializer())
+	                   .create();
 
     public ApplicationController(ApplicationManager appManager, AuthenticationProvider authProvider, UserStore userStore, EmailNotificationSender emailSender) {
         this.manager = appManager;
@@ -209,10 +212,7 @@ public class ApplicationController {
     @RequestMapping(value="/admin/applications/{appSlug}/publishers", method=RequestMethod.POST)
     public String changePublisherConfiguration(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("appSlug") String slug) throws IOException {
     	Reader reader = new InputStreamReader(request.getInputStream());
-		Gson deserializer = new GsonBuilder()
-		                   .registerTypeAdapter(Publisher.class, new PublisherKeyDeserializer())
-		                   .create();
-    	PublisherConfiguration configuration = deserializer.fromJson(reader, PublisherConfiguration.class);
+		PublisherConfiguration configuration = publisherKeyDeserializer.fromJson(reader, PublisherConfiguration.class);
         Application app = manager.setPublisherConfiguration(slug, configuration);	
 		model.put("application", modelBuilder.build(app));
 		return APPLICATION_TEMPLATE;

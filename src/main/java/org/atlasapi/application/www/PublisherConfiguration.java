@@ -4,6 +4,7 @@ import java.util.Set;
 import org.atlasapi.media.entity.Publisher;
 
 public class PublisherConfiguration {
+	
 	private Set<Publisher> enabled;
 	private Set<Publisher> disabled;
 	
