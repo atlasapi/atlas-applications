@@ -224,7 +224,7 @@ public class ApplicationController {
 
     }
 
-    @RequestMapping(value = "/admin/applications/{appSlug}/publishers", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/applications/{appSlug}/configuration/publishers", method = RequestMethod.POST)
     public String changePublisherConfiguration(Map<String, Object> model,
             HttpServletRequest request, HttpServletResponse response,
             @PathVariable("appSlug") String slug) throws IOException {
@@ -235,38 +235,7 @@ public class ApplicationController {
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
     }
-
-    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/enabled", method = RequestMethod.POST)
-    public String enabledPublisher(Map<String, Object> model, HttpServletRequest request,
-            HttpServletResponse response, @PathVariable("appSlug") String slug) {
-
-        Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
-        if (publisher == null) {
-            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-        }
-
-        Application app = manager.enablePublisher(slug, publisher);
-
-        model.put("application", modelBuilder.build(app));
-        return APPLICATION_TEMPLATE;
-    }
-
-    @RequestMapping(value = "/admin/applications/{appSlug}/publishers/enabled/{pubKey}", method = RequestMethod.DELETE)
-    public String disablePublisher(Map<String, Object> model, HttpServletRequest request,
-            HttpServletResponse response, @PathVariable("appSlug") String slug,
-            @PathVariable("pubKey") String pubKey) {
-
-        Publisher publisher = Publisher.fromKey(pubKey).valueOrNull();
-        if (publisher == null) {
-            return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-        }
-
-        Application app = manager.disablePublisher(slug, publisher);
-
-        model.put("application", modelBuilder.build(app));
-        return APPLICATION_TEMPLATE;
-    }
-
+    
     @RequestMapping(value = "/admin/applications/{appSlug}/precedence", method = RequestMethod.POST)
     public String setPrecedence(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response, @PathVariable("appSlug") String slug) {

@@ -76,15 +76,15 @@ public class ApplicationManager implements ApplicationStore {
     }
     
     public Application setPublisherConfiguration(String slug, PublisherConfiguration configuration) {
-    	Application app = applicationForSlug(slug);
-    	ApplicationConfiguration appConfiguration = app.getConfiguration();
-    	for (Publisher source : configuration.getEnabled()) {
-    		appConfiguration = appConfiguration.enable(source);
-    	}
-    	for (Publisher source : configuration.getDisabled()) {
-    		appConfiguration = appConfiguration.disable(source);
-    	}
-    	return update(app.copy().withConfiguration(appConfiguration).build());
+        Application app = applicationForSlug(slug);
+        ApplicationConfiguration appConfiguration = app.getConfiguration();
+        for (Publisher source : configuration.getEnabled()) {
+            appConfiguration = appConfiguration.enable(source);
+        }
+        for (Publisher source : configuration.getDisabled()) {
+            appConfiguration = appConfiguration.disable(source);
+        }
+        return update(app.copy().withConfiguration(appConfiguration).build());
     }
 
     public Application approvePublisher(String slug, Publisher publisher) {
