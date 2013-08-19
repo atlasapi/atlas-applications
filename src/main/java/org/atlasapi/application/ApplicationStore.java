@@ -15,6 +15,8 @@ public interface ApplicationStore {
     
     Set<Application> applicationsFor(Publisher source);
     
+    Set<Application> writersFor(Publisher source);
+    
     Optional<Application> applicationFor(String slug);
     
     Optional<Application> applicationForKey(String key);
