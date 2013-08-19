@@ -7,7 +7,7 @@ import static org.atlasapi.application.ApplicationConfigurationTranslator.PUBLIS
 import static org.atlasapi.application.ApplicationConfigurationTranslator.SOURCES_KEY;
 import static org.atlasapi.application.ApplicationConfigurationTranslator.STATE_KEY;
 import static org.atlasapi.application.ApplicationTranslator.APPLICATION_CONFIG_KEY;
-
+import static org.atlasapi.application.ApplicationConfigurationTranslator.WRITABLE_KEY;
 import java.util.Set;
 
 import org.atlasapi.application.Application;
@@ -101,5 +101,10 @@ public class MongoApplicationStore implements ApplicationStore {
     public Iterable<Application> allApplications() {
         return Iterables.transform(applications.find(where().build()), translatorFunction);
     }
-	
+
+	@Override
+	public Set<Application> writersFor(Publisher source) {
+	    String sourceField = String.format("%s.%s", APPLICATION_CONFIG_KEY, WRITABLE_KEY);
+	    return ImmutableSet.copyOf(Iterables.transform(applications.find(where().fieldEquals(sourceField, source.key()).build()), translatorFunction));
+	}
 }
