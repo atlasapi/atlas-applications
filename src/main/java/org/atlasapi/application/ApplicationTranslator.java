@@ -1,9 +1,11 @@
 package org.atlasapi.application;
 
 import org.atlasapi.application.Application;
+import org.joda.time.DateTime;
 
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -13,6 +15,7 @@ public class ApplicationTranslator {
 	public static final String APPLICATION_TITLE_KEY = "title";
 	public static final String APPLICATION_DESCRIPTION_KEY = "desc";
 	public static final String APPLICATION_CREATED_KEY = "created";
+	public static final String APPLICATION_LAST_UPDATED_KEY = "lastUpdated";
 	public static final String APPLICATION_CONFIG_KEY = "configuration";
 	public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
 	
@@ -27,6 +30,7 @@ public class ApplicationTranslator {
 		    TranslatorUtils.from(dbo, APPLICATION_TITLE_KEY, application.getTitle());
 		    TranslatorUtils.from(dbo, APPLICATION_DESCRIPTION_KEY, application.getDescription());
 		    TranslatorUtils.fromDateTime(dbo, APPLICATION_CREATED_KEY, application.getCreated());
+		    TranslatorUtils.fromDateTime(dbo, APPLICATION_LAST_UPDATED_KEY, application.getLastUpdated());
 		    TranslatorUtils.from(dbo, APPLICATION_CONFIG_KEY, configurationTranslator.toDBObject(application.getConfiguration()));
 		    TranslatorUtils.from(dbo, APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
 		}
@@ -44,10 +48,16 @@ public class ApplicationTranslator {
 			return null;
 		}
 		
+		DateTime lastUpdated = null;
+		if (dbo.containsField(APPLICATION_LAST_UPDATED_KEY)) {
+		    lastUpdated = TranslatorUtils.toDateTime(dbo, APPLICATION_LAST_UPDATED_KEY);
+		}
+		
 		return Application.application(applicationSlug)
 		        .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))
 		        .withDescription(TranslatorUtils.toString(dbo, APPLICATION_DESCRIPTION_KEY))
 		        .createdAt(TranslatorUtils.toDateTime(dbo, APPLICATION_CREATED_KEY))
+		        .withLastUpdated(lastUpdated)
 		        .withConfiguration(configurationTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CONFIG_KEY)))
 		        .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CREDENTIALS_KEY))).build();
 	}
