@@ -58,7 +58,7 @@ public class ApplicationTranslator {
         if (dbo.containsField(REVOKED_KEY)) {
             revoked = TranslatorUtils.toBoolean(dbo, REVOKED_KEY);
         }
-		
+
 		return Application.application(applicationSlug)
 		        .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))
 		        .withDescription(TranslatorUtils.toString(dbo, APPLICATION_DESCRIPTION_KEY))
