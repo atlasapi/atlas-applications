@@ -41,6 +41,7 @@ public class ApplicationManager implements ApplicationStore {
                 .withTitle(title)
                 .withDescription(null)
                 .createdAt(new DateTime(DateTimeZones.UTC))
+                .withLastUpdated(new DateTime(DateTimeZones.UTC))
                 .withCredentials(new ApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", "")))
                 .withConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION).build();
         
@@ -164,7 +165,7 @@ public class ApplicationManager implements ApplicationStore {
 
     @Override
     public Application update(Application application) {
-        return delegate.update(application);
+        return delegate.update(application.copy().withLastUpdated(new DateTime(DateTimeZones.UTC)).build());
     }
 
     @Override
