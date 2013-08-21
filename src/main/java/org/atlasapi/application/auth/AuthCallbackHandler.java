@@ -9,6 +9,6 @@ import com.metabroadcast.common.social.model.UserRef;
 
 public interface AuthCallbackHandler {
 
-    View handle(HttpServletResponse response, HttpServletRequest request, UserRef user, String redirectUri);
+    View handle(HttpServletResponse response, HttpServletRequest request, UserRef user, String screenName, String redirectUri);
     
 }

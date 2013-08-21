@@ -27,13 +27,14 @@ public class UserAuthCallbackHandler implements AuthCallbackHandler {
     }
 
     @Override
-    public View handle(HttpServletResponse response, HttpServletRequest request, UserRef userRef, String redirectUri) {
+    public View handle(HttpServletResponse response, HttpServletRequest request, UserRef userRef, String screenName, String redirectUri) {
         if (redirectUri != null) {
             return new RedirectView(redirectUri);
         } else {
             User user = userStore.userForRef(userRef).or(newUser);
-            if (user.getUserRef() == null) {
+            if (user.getUserRef() == null || user.getScreenName() == null) {
                 user.setUserRef(userRef);
+                user.setScreenName(screenName);
                 userStore.store(user);
             }
             return new RedirectView(String.format("/admin/users/%s/applications",idCodec.encode(BigInteger.valueOf(user.getId()))));

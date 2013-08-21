@@ -13,6 +13,7 @@ public class User {
 
     private final Long id;
     private UserRef userRef;
+    private String screenName;
     private Role role = Role.REGULAR;
     
     private Set<String> applicationSlugs = ImmutableSet.of();
@@ -28,6 +29,14 @@ public class User {
 
     public void setUserRef(UserRef userRef) {
         this.userRef = userRef;
+    }
+    
+    public String getScreenName() {
+        return screenName;
+    }
+    
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
     }
 
     public Role getRole() {

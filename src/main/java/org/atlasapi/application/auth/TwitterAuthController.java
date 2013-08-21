@@ -62,7 +62,6 @@ public class TwitterAuthController {
             RequestToken requestToken = twitter.getOAuthRequestToken(getCallbackUrl(Maybe.fromPossibleNullValue(targetUri)));
             request.getSession().setAttribute("requestToken", requestToken);
             request.getSession().setAttribute("twitter", twitter);
-
             return new RedirectView(requestToken.getAuthenticationURL());
         } catch (TwitterException e) {
             throw new RuntimeException(e);
@@ -90,10 +89,11 @@ public class TwitterAuthController {
             request.getSession().removeAttribute("requestToken");
 
             Maybe<UserRef> user = accessTokenProcessor.process(new AuthToken(token.getToken(), token.getTokenSecret(), UserNamespace.TWITTER, null));
-
+            twitter.setOAuthAccessToken(token);
+            String screenName = twitter.getScreenName();
             if (user.hasValue()) {
                 cookieTranslator.toResponse(response, user.requireValue());
-                return callbackHandler.handle(response, request, user.requireValue(), targetUri);
+                return callbackHandler.handle(response, request, user.requireValue(), screenName, targetUri);
             } else {
                 return new RedirectView(LOGIN_FAILED_URL);
             }
