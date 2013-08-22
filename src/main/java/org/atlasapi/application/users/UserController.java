@@ -69,6 +69,41 @@ public class UserController {
         
         return "";//"applications/users";
     }
+    
+    @RequestMapping(value = "/admin/users/{id}/profile", method = RequestMethod.GET)
+    public String showUserProfileForm(HttpServletRequest request, HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id) {
+        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+
+        if (!existingUser.isPresent()) {
+            response.setStatus(HttpStatusCode.NOT_FOUND.code());
+            response.setContentLength(0);
+            return null;
+        }
+
+        UserRef principal = authProvider.principal();
+        User user = existingUser.get();
+
+        //This is the not logged-in user's page or the logged-in user is not an administrator.
+        if (!(user.getUserRef().equals(principal) || userStore.userForRef(principal).get().is(Role.ADMIN))) {
+            response.setStatus(HttpStatusCode.FORBIDDEN.code());
+            response.setContentLength(0);
+            return null;
+        }
+        SimpleModel userModel = new SimpleModel();
+        userModel.put("fullName", user.getFullName());
+        userModel.put("company", user.getCompany());
+        userModel.put("email", user.getEmail());
+        userModel.put("website", user.getWebsite());
+        model.put("user", userModel);
+        return "users/profile";
+    }
+    
+    @RequestMapping(value = "/admin/users/{id}/profile", method = RequestMethod.POST)
+   public View updateUserProfile(Map<String, Object> model, HttpServletRequest request,
+    HttpServletResponse response) {
+        
+        return new Redirect
+    }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
     public String showUserApplications(HttpServletRequest request, HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id, @RequestParam(defaultValue="") final String search) throws IOException {
