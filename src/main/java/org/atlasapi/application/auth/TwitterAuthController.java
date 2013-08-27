@@ -108,15 +108,20 @@ public class TwitterAuthController {
     
     private UserDetails getUserDetails(Twitter twitter, UserRef user) throws TwitterException {
         UserDetails userDetails = new UserDetails(user);
+      
         long userIds[] = new long[1];
         userIds[0] = Long.valueOf(user.getUserId());
         ResponseList<User> lookupResult = twitter.lookupUsers(userIds);
         if (!lookupResult.isEmpty()) {
             User twUser = lookupResult.get(0);
+            String homepageUrl = twUser.getURLEntity().getExpandedURL();
+            if (homepageUrl == null) {
+                homepageUrl = twUser.getURLEntity().getURL();
+            }
             userDetails = userDetails
                           .withScreenName(twUser.getScreenName())
                           .withFullName(twUser.getName())
-                          .withProfileUrl(twUser.getURL());
+                          .withProfileUrl(homepageUrl);
         }
         return userDetails;
     }
