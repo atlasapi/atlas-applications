@@ -78,7 +78,7 @@ public class UserController {
                                       Map<String, Object> model, 
                                       @PathVariable("id") String id,
                                       @RequestParam(defaultValue = "") String redirectUri) {
-   
+
         Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
 
         if (!existingUser.isPresent()) {

@@ -24,7 +24,7 @@ import twitter4j.conf.ConfigurationBuilder;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.social.auth.CookieTranslator;
 import com.metabroadcast.common.social.auth.credentials.AuthToken;
-import com.metabroadcast.common.social.model.UserDetails;
+import com.metabroadcast.common.social.model.TwitterUserDetails;
 import com.metabroadcast.common.social.model.UserRef;
 import com.metabroadcast.common.social.model.UserRef.UserNamespace;
 import com.metabroadcast.common.social.twitter.TwitterApplication;
@@ -95,7 +95,7 @@ public class TwitterAuthController {
             twitter.setOAuthAccessToken(token);
             if (user.hasValue()) {
                 cookieTranslator.toResponse(response, user.requireValue());
-                UserDetails userDetails = getUserDetails(twitter, user.requireValue());
+                TwitterUserDetails userDetails = getUserDetails(twitter, user.requireValue());
                 return callbackHandler.handle(response, request, userDetails, targetUri);
             } else {
                 return new RedirectView(LOGIN_FAILED_URL);
@@ -106,8 +106,8 @@ public class TwitterAuthController {
         }
     }
     
-    private UserDetails getUserDetails(Twitter twitter, UserRef user) throws TwitterException {
-        UserDetails userDetails = new UserDetails(user);
+    private TwitterUserDetails getUserDetails(Twitter twitter, UserRef user) throws TwitterException {
+        TwitterUserDetails userDetails = new TwitterUserDetails(user);
       
         long userIds[] = new long[1];
         userIds[0] = Long.valueOf(user.getUserId());
@@ -118,10 +118,9 @@ public class TwitterAuthController {
             if (homepageUrl == null) {
                 homepageUrl = twUser.getURLEntity().getURL();
             }
-            userDetails = userDetails
-                          .withScreenName(twUser.getScreenName())
-                          .withFullName(twUser.getName())
-                          .withProfileUrl(homepageUrl);
+            userDetails.withHomepageUrl(homepageUrl);
+            userDetails.withScreenName(twUser.getScreenName());
+            userDetails.withFullName(twUser.getName());
         }
         return userDetails;
     }

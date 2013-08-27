@@ -12,7 +12,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
-import com.metabroadcast.common.social.model.UserDetails;
+import com.metabroadcast.common.social.model.TwitterUserDetails;
 
 public class UserAuthCallbackHandler implements AuthCallbackHandler {
 
@@ -27,7 +27,7 @@ public class UserAuthCallbackHandler implements AuthCallbackHandler {
     }
 
     @Override
-    public View handle(HttpServletResponse response, HttpServletRequest request, UserDetails userDetails, String redirectUri) {
+    public View handle(HttpServletResponse response, HttpServletRequest request, TwitterUserDetails userDetails, String redirectUri) {
         if (redirectUri != null) {
             return new RedirectView(redirectUri);
         } else {
@@ -47,7 +47,7 @@ public class UserAuthCallbackHandler implements AuthCallbackHandler {
         }
     }
     
-    private User populateFromUserDetails(User user, UserDetails userDetails) {
+    private User populateFromUserDetails(User user, TwitterUserDetails userDetails) {
         if (isMissing(user.getScreenName())) {
             user.setScreenName(userDetails.getScreenName());
         }
@@ -55,7 +55,7 @@ public class UserAuthCallbackHandler implements AuthCallbackHandler {
             user.setFullName(userDetails.getFullName());
         }
         if (isMissing(user.getWebsite())) {
-            user.setWebsite(userDetails.getProfileUrl());
+            user.setWebsite(userDetails.getHomepageUrl());
         }
         // These values are not available through Twitter
         if (isMissing(user.getEmail())) {
