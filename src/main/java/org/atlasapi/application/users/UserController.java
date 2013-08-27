@@ -1,6 +1,7 @@
 package org.atlasapi.application.users;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -90,6 +93,7 @@ public class UserController {
             return null;
         }
         SimpleModel userModel = new SimpleModel();
+        userModel.put("id", id);
         userModel.put("fullName", user.getFullName());
         userModel.put("company", user.getCompany());
         userModel.put("email", user.getEmail());
@@ -99,10 +103,28 @@ public class UserController {
     }
     
     @RequestMapping(value = "/admin/users/{id}/profile", method = RequestMethod.POST)
-   public View updateUserProfile(Map<String, Object> model, HttpServletRequest request,
-    HttpServletResponse response) {
-        
-        return new Redirect
+    public View updateUserProfile(Map<String, Object> model, HttpServletRequest request,
+    HttpServletResponse response, @PathVariable("id") String id) {
+        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+        if (!existingUser.isPresent()) {
+            response.setStatus(HttpStatusCode.NOT_FOUND.code());
+            response.setContentLength(0);
+            return null;
+        }
+        UserRef principal = authProvider.principal();
+        User user = existingUser.get();
+        //This is the not logged-in user's page or the logged-in user is not an administrator.
+        if (!(user.getUserRef().equals(principal) || userStore.userForRef(principal).get().is(Role.ADMIN))) {
+            response.setStatus(HttpStatusCode.FORBIDDEN.code());
+            response.setContentLength(0);
+            return null;
+        }
+        user.setFullName(request.getParameter("fullName"));
+        user.setWebsite(request.getParameter("website"));
+        user.setEmail(request.getParameter("email"));
+        user.setCompany(request.getParameter("company"));
+        userStore.store(user);
+        return new RedirectView("/admin/users/" + id + "/profile");
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
