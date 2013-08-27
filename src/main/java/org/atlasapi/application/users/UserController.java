@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -68,6 +70,77 @@ public class UserController {
         response.setContentLength(0);
         
         return "";//"applications/users";
+    }
+    
+    @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.GET)
+    public String showUserProfileForm(HttpServletRequest request, 
+                                      HttpServletResponse response, 
+                                      Map<String, Object> model, 
+                                      @PathVariable("id") String id,
+                                      @RequestParam(defaultValue = "") String redirectUri) {
+
+        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+
+        if (!existingUser.isPresent()) {
+            response.setStatus(HttpStatusCode.NOT_FOUND.code());
+            response.setContentLength(0);
+            return null;
+        }
+
+        UserRef principal = authProvider.principal();
+        User user = existingUser.get();
+
+        //This is the not logged-in user's page or the logged-in user is not an administrator.
+        if (!(user.getUserRef().equals(principal) || userStore.userForRef(principal).get().is(Role.ADMIN))) {
+            response.setStatus(HttpStatusCode.FORBIDDEN.code());
+            response.setContentLength(0);
+            return null;
+        }
+        SimpleModel userModel = new SimpleModel();
+        userModel.put("id", id);
+        userModel.put("fullName", user.getFullName());
+        userModel.put("company", user.getCompany());
+        userModel.put("email", user.getEmail());
+        userModel.put("website", user.getWebsite());
+        model.put("user", userModel);
+        if (redirectUri.isEmpty()) {
+            model.put("redirectUri", "/admin/users/" + id + "/account");
+        } else {
+            model.put("redirectUri", redirectUri);
+        }
+        return "users/account";
+    }
+    
+    @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.POST)
+    public View updateUserProfile(Map<String, Object> model, 
+            HttpServletRequest request,
+            HttpServletResponse response, 
+            @PathVariable("id") String id,
+            @RequestParam("fullName") String fullName,
+            @RequestParam("website") String website,
+            @RequestParam("email") String email,
+            @RequestParam("company") String company,
+            @RequestParam("redirectUri") String redirectUri) {
+        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+        if (!existingUser.isPresent()) {
+            response.setStatus(HttpStatusCode.NOT_FOUND.code());
+            response.setContentLength(0);
+            return null;
+        }
+        UserRef principal = authProvider.principal();
+        User user = existingUser.get();
+        //This is the not logged-in user's page or the logged-in user is not an administrator.
+        if (!(user.getUserRef().equals(principal) || userStore.userForRef(principal).get().is(Role.ADMIN))) {
+            response.setStatus(HttpStatusCode.FORBIDDEN.code());
+            response.setContentLength(0);
+            return null;
+        }
+        user.setFullName(fullName);
+        user.setWebsite(website);
+        user.setEmail(email);
+        user.setCompany(company);
+        userStore.store(user);
+        return new RedirectView(redirectUri);
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)

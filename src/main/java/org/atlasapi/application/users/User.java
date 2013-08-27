@@ -13,6 +13,11 @@ public class User {
 
     private final Long id;
     private UserRef userRef;
+    private String screenName;
+    private String fullName;
+    private String company;
+    private String email;
+    private String website;
     private Role role = Role.REGULAR;
     
     private Set<String> applicationSlugs = ImmutableSet.of();
@@ -28,6 +33,47 @@ public class User {
 
     public void setUserRef(UserRef userRef) {
         this.userRef = userRef;
+    }
+    
+    public String getScreenName() {
+        return screenName;
+    }
+    
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
+    }
+    
+    public String getFullName() {
+        return fullName;
+    }
+
+    
+    public String getCompany() {
+        return company;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public String getWebsite() {
+        return website;
+    }
+    
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+    
+    public void setCompany(String company) {
+        this.company = company;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    public void setWebsite(String website) {
+        this.website = website;
     }
 
     public Role getRole() {
