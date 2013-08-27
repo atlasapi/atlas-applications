@@ -1,7 +1,6 @@
 package org.atlasapi.application.users;
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Map;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -73,8 +72,13 @@ public class UserController {
         return "";//"applications/users";
     }
     
-    @RequestMapping(value = "/admin/users/{id}/profile", method = RequestMethod.GET)
-    public String showUserProfileForm(HttpServletRequest request, HttpServletResponse response, Map<String, Object> model, @PathVariable("id") String id) {
+    @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.GET)
+    public String showUserProfileForm(HttpServletRequest request, 
+                                      HttpServletResponse response, 
+                                      Map<String, Object> model, 
+                                      @PathVariable("id") String id,
+                                      @RequestParam(defaultValue = "") String redirectUri) {
+   
         Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
 
         if (!existingUser.isPresent()) {
@@ -99,12 +103,24 @@ public class UserController {
         userModel.put("email", user.getEmail());
         userModel.put("website", user.getWebsite());
         model.put("user", userModel);
-        return "users/profile";
+        if (redirectUri.isEmpty()) {
+            model.put("redirectUri", "/admin/users/" + id + "/account");
+        } else {
+            model.put("redirectUri", redirectUri);
+        }
+        return "users/account";
     }
     
-    @RequestMapping(value = "/admin/users/{id}/profile", method = RequestMethod.POST)
-    public View updateUserProfile(Map<String, Object> model, HttpServletRequest request,
-    HttpServletResponse response, @PathVariable("id") String id) {
+    @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.POST)
+    public View updateUserProfile(Map<String, Object> model, 
+            HttpServletRequest request,
+            HttpServletResponse response, 
+            @PathVariable("id") String id,
+            @RequestParam("fullName") String fullName,
+            @RequestParam("website") String website,
+            @RequestParam("email") String email,
+            @RequestParam("company") String company,
+            @RequestParam("redirectUri") String redirectUri) {
         Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
         if (!existingUser.isPresent()) {
             response.setStatus(HttpStatusCode.NOT_FOUND.code());
@@ -119,12 +135,12 @@ public class UserController {
             response.setContentLength(0);
             return null;
         }
-        user.setFullName(request.getParameter("fullName"));
-        user.setWebsite(request.getParameter("website"));
-        user.setEmail(request.getParameter("email"));
-        user.setCompany(request.getParameter("company"));
+        user.setFullName(fullName);
+        user.setWebsite(website);
+        user.setEmail(email);
+        user.setCompany(company);
         userStore.store(user);
-        return new RedirectView("/admin/users/" + id + "/profile");
+        return new RedirectView(redirectUri);
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)
