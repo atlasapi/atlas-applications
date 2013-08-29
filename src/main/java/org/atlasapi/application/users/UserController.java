@@ -41,6 +41,7 @@ public class UserController {
     private final NumberToShortStringCodec idCodec;
     private final ApplicationStore appStore;
     private final ApplicationModelBuilder appModelBuilder;
+    private final UserModelBuilder userModelBuilder;
     private final SourceModelBuilder sourceModelBuilder;
     private static final int DEFAULT_PAGE_SIZE = 15;
     private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
@@ -51,11 +52,16 @@ public class UserController {
         this.appStore = appStore;
         this.idCodec = new SubstitutionTableNumberCodec();
         this.appModelBuilder = new ApplicationModelBuilder();
+        this.userModelBuilder = new UserModelBuilder();
         this.sourceModelBuilder = new SourceModelBuilder(new SourceIdCodec(idCodec));
     }
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
-    public String forwardToUser(HttpServletResponse response) {
+    public String listAllUsers(HttpServletRequest request,
+                               HttpServletResponse response, 
+                               Map<String, Object> model,
+                               @RequestParam(defaultValue="") final String search) {
+        
         UserRef principal = authProvider.principal();
 
         Optional<User> existingUser = userStore.userForRef(principal);
@@ -66,10 +72,29 @@ public class UserController {
             return "";
         }
         
-        response.setStatus(HttpStatusCode.SERVICE_UNAVAILABLE.code());
-        response.setContentLength(0);
+        Iterable<User> users = userStore.allUsers();
         
-        return "";//"applications/users";
+        Selection selection = selectionBuilder.build(request);
+        // apply filter if specified
+        if (search.length() > 1) {
+            users = Iterables.filter(users, new Predicate<User>() {
+                @Override
+                public boolean apply(@Nullable User input) {
+                    return contains(input.getFullName(), search) 
+                            || contains(input.getCompany(), search) 
+                            || contains(input.getEmail(), search)
+                            || contains(input.getWebsite(), search);
+                }
+            });
+        }
+
+        model.put("users", SimpleModelList.fromBuilder(userModelBuilder, selection.applyTo(users)));
+        model.put("page", getPagination(request, selection, Iterables.size(users), search));
+        return "users/list";
+    }
+    
+    private boolean contains(String target, String search) {
+        return target != null && target.toLowerCase().contains(search.toLowerCase());
     }
     
     @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.GET)
@@ -96,13 +121,7 @@ public class UserController {
             response.setContentLength(0);
             return null;
         }
-        SimpleModel userModel = new SimpleModel();
-        userModel.put("id", id);
-        userModel.put("fullName", user.getFullName());
-        userModel.put("company", user.getCompany());
-        userModel.put("email", user.getEmail());
-        userModel.put("website", user.getWebsite());
-        model.put("user", userModel);
+        model.put("user", userModelBuilder.build(user));
         if (redirectUri.isEmpty()) {
             model.put("redirectUri", "/admin/users/" + id + "/account");
         } else {
