@@ -27,6 +27,12 @@ public class UserModelBuilder implements ModelBuilder<User> {
         return new SimpleModel()
             .put("id", idCodec.encode(BigInteger.valueOf(target.getId())))
             .put("role", target.getRole().toString().toLowerCase())
+            .put("twitterId", target.getUserRef().getUserId())
+            .put("screenName", target.getScreenName())
+            .put("fullName", target.getFullName())
+            .put("company", target.getCompany())
+            .put("email", target.getEmail())
+            .put("website", target.getWebsite())
             .putStrings("apps", target.getApplications())
             .putStrings("sources", ImmutableSet.copyOf(Iterables.transform(target.getSources(), new Function<Publisher, String>() {
                 @Override

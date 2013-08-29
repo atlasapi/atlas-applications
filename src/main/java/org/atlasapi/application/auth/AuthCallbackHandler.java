@@ -5,10 +5,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.View;
 
-import com.metabroadcast.common.social.model.UserRef;
+import com.metabroadcast.common.social.model.TwitterUserDetails;
 
 public interface AuthCallbackHandler {
 
-    View handle(HttpServletResponse response, HttpServletRequest request, UserRef user, String redirectUri);
+    View handle(HttpServletResponse response, HttpServletRequest request, TwitterUserDetails userDetails, String redirectUri);
     
 }
