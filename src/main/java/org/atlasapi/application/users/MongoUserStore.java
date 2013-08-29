@@ -1,10 +1,13 @@
 package org.atlasapi.application.users;
 
+import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.UPSERT;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.model.UserRef;
 import com.metabroadcast.common.social.model.translator.UserRefTranslator;
@@ -24,9 +27,21 @@ public class MongoUserStore implements UserStore {
         this.translator = new UserTranslator(userRefTranslator);
     }
     
+    private final Function<DBObject, User> translatorFunction = new Function<DBObject, User>(){
+        @Override
+        public User apply(DBObject dbo) {
+            return translator.fromDBObject(dbo);
+        }
+    };
+    
     @Override
     public Optional<User> userForRef(UserRef ref) {
         return Optional.fromNullable(translator.fromDBObject(users.findOne(userRefTranslator.toQuery(ref, "userRef").build())));
+    }
+
+    @Override
+    public Iterable<User> allUsers() {
+        return Iterables.transform(users.find(where().build()), translatorFunction);
     }
 
     @Override
@@ -42,5 +57,6 @@ public class MongoUserStore implements UserStore {
     public void store(final DBObject dbo) {
         this.users.update(new BasicDBObject(ID, dbo.get(ID)), dbo, UPSERT, SINGLE);
     }
+
 
 }

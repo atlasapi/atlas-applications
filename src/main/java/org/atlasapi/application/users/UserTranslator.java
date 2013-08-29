@@ -61,7 +61,7 @@ public class UserTranslator {
         }
         if (dbo.containsField(FULL_NAME_KEY)) {
             user.setFullName(TranslatorUtils.toString(dbo, FULL_NAME_KEY));
-        }
+        } 
         if (dbo.containsField(COMPANY_KEY)) {
             user.setCompany(TranslatorUtils.toString(dbo, COMPANY_KEY));
         }
