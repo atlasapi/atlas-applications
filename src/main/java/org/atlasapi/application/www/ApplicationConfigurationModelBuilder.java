@@ -46,6 +46,7 @@ public class ApplicationConfigurationModelBuilder implements ModelBuilder<Applic
         return new SimpleModel()
             .put("key", publisher.key())
             .put("title", publisher.title())
+            .put("restriction", publisher.restriction())
             .put("state",sourceStatus.getState().toString().toLowerCase())
             .put("enabled", sourceStatus.isEnabled())
             .put("canWrite", canWrite);
