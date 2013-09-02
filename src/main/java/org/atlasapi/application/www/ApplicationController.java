@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlas.application.notification.EmailNotificationSender;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
+import org.atlasapi.application.sources.UsageType;
 import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserModelBuilder;
@@ -194,6 +195,9 @@ public class ApplicationController {
             @RequestParam(defaultValue = "") String email,
             @RequestParam(defaultValue = "") String reason) throws UnsupportedEncodingException,
             MessagingException {
+        
+        UsageType usageType = UsageType.valueOf(request.getParameter("usageType").toUpperCase());
+        
         Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
         if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
@@ -204,7 +208,7 @@ public class ApplicationController {
         model.put("application", modelBuilder.build(app));
 
         // send notification of request
-        emailSender.sendNotificationOfPublisherRequest(app, publisher, email, reason);
+        emailSender.sendNotificationOfPublisherRequest(app, publisher, usageType, email, reason);
 
         return APPLICATION_TEMPLATE;
     }
