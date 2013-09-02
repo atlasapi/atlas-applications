@@ -193,7 +193,8 @@ public class ApplicationController {
     public String requestPublisher(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response, @PathVariable("appSlug") String slug,
             @RequestParam(defaultValue = "") String email,
-            @RequestParam(defaultValue = "") String reason) throws UnsupportedEncodingException,
+            @RequestParam(defaultValue = "") String reason,
+            @RequestParam(defaultValue = "") String appUrl) throws UnsupportedEncodingException,
             MessagingException {
         
         UsageType usageType = UsageType.valueOf(request.getParameter("usageType").toUpperCase());
@@ -208,7 +209,7 @@ public class ApplicationController {
         model.put("application", modelBuilder.build(app));
 
         // send notification of request
-        emailSender.sendNotificationOfPublisherRequest(app, publisher, usageType, email, reason);
+        emailSender.sendNotificationOfPublisherRequest(app, publisher, usageType, email, reason, appUrl);
 
         return APPLICATION_TEMPLATE;
     }

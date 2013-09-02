@@ -73,7 +73,7 @@ public class EmailNotificationSender {
     	this.to = to;
     }
     
-    public void sendNotificationOfPublisherRequest(Application app, Publisher publisher, UsageType usageType, String email, String reason) throws MessagingException, UnsupportedEncodingException {
+    public void sendNotificationOfPublisherRequest(Application app, Publisher publisher, UsageType usageType, String email, String reason, String appUrl) throws MessagingException, UnsupportedEncodingException {
     	 MimeMessage message = sender.createMimeMessage();
     	 
          MimeMessageHelper helper = new MimeMessageHelper(message, false, Charsets.UTF_8.name());
@@ -82,6 +82,7 @@ public class EmailNotificationSender {
          model.put("publisher_title", publisher.title());
          model.put("usage_type", usageType.title());
          model.put("email", email);
+         model.put("appUrl", appUrl);
          model.put("reason", reason);
          model.put("slug", app.getSlug());
          model.put("application_title", app.getTitle());
