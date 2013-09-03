@@ -198,7 +198,6 @@ public class ApplicationController {
     @RequestMapping(value = "/admin/applications/{appSlug}/publishers/requested", method = RequestMethod.POST)
     public String requestPublisher(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response, @PathVariable("appSlug") String slug,
-            @RequestParam(defaultValue = "") String email,
             @RequestParam(defaultValue = "") String reason,
             @RequestParam(defaultValue = "") String appUrl) throws UnsupportedEncodingException,
             MessagingException {
@@ -211,11 +210,11 @@ public class ApplicationController {
         }
 
         Application app = manager.requestPublisher(slug, publisher);
-
+        Optional<User> user = user();
         model.put("application", modelBuilder.build(app));
         SourceRequest sourceRequest = SourceRequest.builder()
                 .withAppSlug(app.getSlug())
-                .withEmail(email)
+                .withEmail(user.get().getEmail())
                 .withPublisher(publisher)
                 .withReason(reason)
                 .withUsageType(usageType)
