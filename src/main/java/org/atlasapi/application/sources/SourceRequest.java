@@ -9,15 +9,17 @@ public class SourceRequest {
     private final String email;
     private final String appUrl;
     private final String reason;
+    private final boolean approved;
     
     private SourceRequest(String appSlug, Publisher publisher, UsageType usageType,
-            String email, String appUrl, String reason) {
+            String email, String appUrl, String reason, boolean approved) {
         this.appSlug = appSlug;
         this.publisher = publisher;
         this.usageType = usageType;
         this.email = email;
         this.appUrl = appUrl;
         this.reason = reason;
+        this.approved = approved;
     }
     
     public String getAppSlug() {
@@ -42,10 +44,25 @@ public class SourceRequest {
     
     public String getReason() {
         return reason;
-    }    
+    }
+    
+    public boolean isApproved() {
+        return approved;
+    }
     
     public static Builder builder() {
         return new Builder();
+    }
+    
+    public Builder copy() {
+        return new Builder()
+            .withAppSlug(appSlug)
+            .withPublisher(publisher)
+            .withUsageType(usageType)
+            .withEmail(email)
+            .withAppUrl(appUrl)
+            .withReason(reason)
+            .withApproved(approved);
     }
     
     public static class Builder {
@@ -55,6 +72,7 @@ public class SourceRequest {
         private String email;
         private String appUrl;
         private String reason;
+        private boolean approved;
         
         public Builder() {
         }
@@ -89,9 +107,14 @@ public class SourceRequest {
             return this;
         }
         
+        public Builder withApproved(boolean approved) {
+            this.approved = approved;
+            return this;
+        }
+        
         public SourceRequest build() {
             return new SourceRequest(appSlug, publisher, usageType,
-                    email, appUrl, reason);
+                    email, appUrl, reason, approved);
         }
     }
 }

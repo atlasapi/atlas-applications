@@ -218,6 +218,8 @@ public class ApplicationController {
                 .withPublisher(publisher)
                 .withReason(reason)
                 .withUsageType(usageType)
+                .withAppUrl(appUrl)
+                .withApproved(false)
                 .build();
         
         sourceRequestStore.store(sourceRequest);

@@ -1,11 +1,14 @@
 package org.atlasapi.application.sources;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Map;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlas.application.notification.EmailNotificationSender;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.users.Role;
@@ -39,14 +42,22 @@ public class SourceController {
     private final SourceIdCodec sourceIdCodec;
     private final SourceModelBuilder sourceModelBuilder;
     private SubstitutionTableNumberCodec idCodec;
+    private final EmailNotificationSender emailSender;
+    private final SourceRequestStore sourceRequestStore;
 
-    public SourceController(AuthenticationProvider authProvider, ApplicationManager appManager, UserStore userStore) {
+    public SourceController(AuthenticationProvider authProvider, 
+            ApplicationManager appManager, 
+            UserStore userStore,
+            SourceRequestStore sourceRequestStore,
+            EmailNotificationSender emailSender) {
         this.authProvider = authProvider;
         this.appManager = appManager;
         this.userStore = userStore;
         this.idCodec = new SubstitutionTableNumberCodec();
         this.sourceIdCodec = new SourceIdCodec(idCodec);
         this.sourceModelBuilder = new SourceModelBuilder(sourceIdCodec);
+        this.sourceRequestStore = sourceRequestStore;
+        this.emailSender = emailSender;
     }
 
     private Optional<User> user() {
@@ -98,7 +109,7 @@ public class SourceController {
     }
 
     @RequestMapping(value="/admin/sources/{id}/applications/approved", method=RequestMethod.POST)
-    public String approveApplication(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
+    public String approveApplication(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) throws UnsupportedEncodingException, MessagingException {
         
         Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
         
@@ -118,7 +129,11 @@ public class SourceController {
         ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
         model.put("source", sourceModelBuilder.build(publisher));
-        
+        Optional<SourceRequest> sourceRequest = sourceRequestStore.getBy(application, publisher);
+        if (sourceRequest.isPresent()) {
+            sourceRequestStore.store(sourceRequest.get().copy().withApproved(true).build());
+            emailSender.sendNotificationOfPublisherRequestSuccessToUser(application, sourceRequest.get());
+        }
         return "applications/source";
     }
 

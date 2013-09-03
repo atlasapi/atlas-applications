@@ -34,7 +34,7 @@ public class ApplicationWebModule {
 	}
 	
 	@Bean public SourceController sourceController() {
-	    return new SourceController(authProvider, new ApplicationManager(appStore, userStore), userStore);
+	    return new SourceController(authProvider, new ApplicationManager(appStore, userStore), userStore, sourceRequestStore(), emailSender);
 	}
 	
 	@Bean public LoginController loginController() {
