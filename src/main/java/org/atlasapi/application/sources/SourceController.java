@@ -136,6 +136,34 @@ public class SourceController {
         }
         return "applications/source";
     }
+    
+    @RequestMapping(value="/admin/sources/{id}/requests", method=RequestMethod.GET)
+    public String sourceRequestsForSource(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
+    
+        Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
+        
+        if (decodedPublisher.isNothing()) {
+            return sendError(response, HttpStatusCode.NOT_FOUND.code());
+        }
+        
+        Optional<User> possibleUser = user();
+        if (!(possibleUser.isPresent() && (possibleUser.get().manages(decodedPublisher) || possibleUser.get().is(Role.ADMIN)))) {
+            return sendError(response, HttpStatusCode.FORBIDDEN.code());
+        }
+        
+        Publisher publisher = decodedPublisher.requireValue();
+        
+        Selection selection = Selection.builder().build(request);
+      
+        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
+
+        ModelBuilder<SourceRequest> sourceRequestModelBuilder = new SourceRequestModelBuilder(appManager, applicationModelBuilder);
+        model.put("source_requests", SimpleModelList.fromBuilder(sourceRequestModelBuilder , selection.applyTo(sourceRequestStore.sourceRequestsFor(publisher))));
+        model.put("source", sourceModelBuilder.build(publisher));
+        
+        return "applications/sourceRequests";
+    }
+    
 
     public String sendError(HttpServletResponse response, final int code) {
         response.setStatus(code);

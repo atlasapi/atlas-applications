@@ -1,11 +1,17 @@
 package org.atlasapi.application.sources;
 
+import java.util.Set;
+
 import org.atlasapi.application.Application;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 
@@ -16,6 +22,13 @@ public static final String SOURCE_REQUESTS_COLLECTION = "sourceRequests";
     private final SourceRequestTranslator translator = new SourceRequestTranslator();
     
     private final DBCollection sourceRequests;
+    
+    private final Function<DBObject, SourceRequest> translatorFunction = new Function<DBObject, SourceRequest>(){
+        @Override
+        public SourceRequest apply(DBObject dbo) {
+            return translator.fromDBObject(dbo);
+        }
+    };
     
     public MongoSourceRequestStore(DatabasedMongo mongo) {
         this.sourceRequests = mongo.collection(SOURCE_REQUESTS_COLLECTION);
@@ -28,4 +41,8 @@ public static final String SOURCE_REQUESTS_COLLECTION = "sourceRequests";
     public Optional<SourceRequest> getBy(Application application, Publisher publisher) {
         return Optional.fromNullable(translator.fromDBObject(this.sourceRequests.findOne(where().idEquals(translator.createKey(application, publisher)).build())));
     }
+    @Override
+    public Set<SourceRequest> sourceRequestsFor(Publisher publisher) {
+        return ImmutableSet.copyOf(Iterables.transform(sourceRequests.find(where().fieldEquals(SourceRequestTranslator.PUBLISHER_KEY, publisher.key()).build()), translatorFunction));
+   }
 }

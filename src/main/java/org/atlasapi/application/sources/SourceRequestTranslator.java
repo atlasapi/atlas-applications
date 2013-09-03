@@ -10,13 +10,13 @@ import com.mongodb.DBObject;
 
 
 public class SourceRequestTranslator {
-    private static final String APPSLUG_KEY = "appSlug";
-    private static final String PUBLISHER_KEY = "publisher";
-    private static final String USAGE_TYPE_KEY = "usageType";
-    private static final String EMAIL_KEY = "email";
-    private static final String APPURL_KEY = "appUrl";
-    private static final String REASON_KEY = "reason";
-    private static final String APPROVED_KEY = "approved";
+    public static final String APPSLUG_KEY = "appSlug";
+    public static final String PUBLISHER_KEY = "publisher";
+    public static final String USAGE_TYPE_KEY = "usageType";
+    public static final String EMAIL_KEY = "email";
+    public static final String APPURL_KEY = "appUrl";
+    public static final String REASON_KEY = "reason";
+    public static final String APPROVED_KEY = "approved";
     
     public String createKey(SourceRequest sourceRequest) {
         return String.format("%s|%s", sourceRequest.getAppSlug(), sourceRequest.getPublisher().key());
