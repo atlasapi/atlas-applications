@@ -223,7 +223,10 @@ public class ApplicationController {
         sourceRequestStore.store(sourceRequest);
 
         // send notification of request
-        emailSender.sendNotificationOfPublisherRequest(app, sourceRequest);
+        emailSender.sendNotificationOfPublisherRequestToAdmin(app, sourceRequest);
+        if (sourceRequest.getEmail() != null) {
+            emailSender.sendNotificationOfPublisherRequestToUser(app, sourceRequest);
+        }
 
         return APPLICATION_TEMPLATE;
     }
