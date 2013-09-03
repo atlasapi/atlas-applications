@@ -9,6 +9,8 @@ public interface UserStore {
     
     Optional<User> userForId(Long userId);
     
+    Iterable<User> allUsers();
+    
     void store(User user);
     
 }

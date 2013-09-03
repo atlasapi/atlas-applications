@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -39,6 +41,7 @@ public class UserController {
     private final NumberToShortStringCodec idCodec;
     private final ApplicationStore appStore;
     private final ApplicationModelBuilder appModelBuilder;
+    private final UserModelBuilder userModelBuilder;
     private final SourceModelBuilder sourceModelBuilder;
     private static final int DEFAULT_PAGE_SIZE = 15;
     private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
@@ -49,11 +52,16 @@ public class UserController {
         this.appStore = appStore;
         this.idCodec = new SubstitutionTableNumberCodec();
         this.appModelBuilder = new ApplicationModelBuilder();
+        this.userModelBuilder = new UserModelBuilder();
         this.sourceModelBuilder = new SourceModelBuilder(new SourceIdCodec(idCodec));
     }
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
-    public String forwardToUser(HttpServletResponse response) {
+    public String listAllUsers(HttpServletRequest request,
+                               HttpServletResponse response, 
+                               Map<String, Object> model,
+                               @RequestParam(defaultValue="") final String search) {
+        
         UserRef principal = authProvider.principal();
 
         Optional<User> existingUser = userStore.userForRef(principal);
@@ -64,10 +72,94 @@ public class UserController {
             return "";
         }
         
-        response.setStatus(HttpStatusCode.SERVICE_UNAVAILABLE.code());
-        response.setContentLength(0);
+        Iterable<User> users = userStore.allUsers();
         
-        return "";//"applications/users";
+        Selection selection = selectionBuilder.build(request);
+        // apply filter if specified
+        if (search.length() > 1) {
+            users = Iterables.filter(users, new Predicate<User>() {
+                @Override
+                public boolean apply(@Nullable User input) {
+                    return contains(input.getFullName(), search) 
+                            || contains(input.getCompany(), search) 
+                            || contains(input.getEmail(), search)
+                            || contains(input.getWebsite(), search);
+                }
+            });
+        }
+
+        model.put("users", SimpleModelList.fromBuilder(userModelBuilder, selection.applyTo(users)));
+        model.put("page", getPagination(request, selection, Iterables.size(users), search));
+        return "users/list";
+    }
+    
+    private boolean contains(String target, String search) {
+        return target != null && target.toLowerCase().contains(search.toLowerCase());
+    }
+    
+    @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.GET)
+    public String showUserProfileForm(HttpServletRequest request, 
+                                      HttpServletResponse response, 
+                                      Map<String, Object> model, 
+                                      @PathVariable("id") String id,
+                                      @RequestParam(defaultValue = "") String redirectUri) {
+
+        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+
+        if (!existingUser.isPresent()) {
+            response.setStatus(HttpStatusCode.NOT_FOUND.code());
+            response.setContentLength(0);
+            return null;
+        }
+
+        UserRef principal = authProvider.principal();
+        User user = existingUser.get();
+
+        //This is the not logged-in user's page or the logged-in user is not an administrator.
+        if (!(user.getUserRef().equals(principal) || userStore.userForRef(principal).get().is(Role.ADMIN))) {
+            response.setStatus(HttpStatusCode.FORBIDDEN.code());
+            response.setContentLength(0);
+            return null;
+        }
+        model.put("user", userModelBuilder.build(user));
+        if (redirectUri.isEmpty()) {
+            model.put("redirectUri", "/admin/users/" + id + "/account");
+        } else {
+            model.put("redirectUri", redirectUri);
+        }
+        return "users/account";
+    }
+    
+    @RequestMapping(value = "/admin/users/{id}/account", method = RequestMethod.POST)
+    public View updateUserProfile(Map<String, Object> model, 
+            HttpServletRequest request,
+            HttpServletResponse response, 
+            @PathVariable("id") String id,
+            @RequestParam("fullName") String fullName,
+            @RequestParam("website") String website,
+            @RequestParam("email") String email,
+            @RequestParam("company") String company,
+            @RequestParam("redirectUri") String redirectUri) {
+        Optional<User> existingUser = userStore.userForId(idCodec.decode(id).longValue());
+        if (!existingUser.isPresent()) {
+            response.setStatus(HttpStatusCode.NOT_FOUND.code());
+            response.setContentLength(0);
+            return null;
+        }
+        UserRef principal = authProvider.principal();
+        User user = existingUser.get();
+        //This is the not logged-in user's page or the logged-in user is not an administrator.
+        if (!(user.getUserRef().equals(principal) || userStore.userForRef(principal).get().is(Role.ADMIN))) {
+            response.setStatus(HttpStatusCode.FORBIDDEN.code());
+            response.setContentLength(0);
+            return null;
+        }
+        user.setFullName(fullName);
+        user.setWebsite(website);
+        user.setEmail(email);
+        user.setCompany(company);
+        userStore.store(user);
+        return new RedirectView(redirectUri);
     }
 
     @RequestMapping(value = "/admin/users/{id}/applications", method = RequestMethod.GET)

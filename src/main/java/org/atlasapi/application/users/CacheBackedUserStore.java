@@ -47,4 +47,9 @@ public class CacheBackedUserStore implements UserStore {
         idCache.invalidate(user.getId());
     }
 
+    @Override
+    public Iterable<User> allUsers() {
+        return delegate.allUsers();
+    }
+
 }
