@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlas.application.notification.EmailNotificationSender;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
+import org.atlasapi.application.sources.SourceRequest;
+import org.atlasapi.application.sources.SourceRequestStore;
 import org.atlasapi.application.sources.UsageType;
 import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
@@ -59,6 +61,7 @@ public class ApplicationController {
 
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
+    private final SourceRequestStore sourceRequestStore;
     private final ApplicationManager manager;
     private final EmailNotificationSender emailSender;
 
@@ -73,11 +76,14 @@ public class ApplicationController {
             .create();
 
     public ApplicationController(ApplicationManager appManager,
-            AuthenticationProvider authProvider, UserStore userStore,
+            AuthenticationProvider authProvider, 
+            UserStore userStore,
+            SourceRequestStore sourceRequestStore,
             EmailNotificationSender emailSender) {
         this.manager = appManager;
         this.authProvider = authProvider;
         this.userStore = userStore;
+        this.sourceRequestStore = sourceRequestStore;
         this.emailSender = emailSender;
     }
 
@@ -207,9 +213,18 @@ public class ApplicationController {
         Application app = manager.requestPublisher(slug, publisher);
 
         model.put("application", modelBuilder.build(app));
+        SourceRequest sourceRequest = SourceRequest.builder()
+                .withAppSlug(app.getSlug())
+                .withEmail(email)
+                .withPublisher(publisher)
+                .withReason(reason)
+                .withUsageType(usageType)
+                .build();
+        
+        sourceRequestStore.store(sourceRequest);
 
         // send notification of request
-        emailSender.sendNotificationOfPublisherRequest(app, publisher, usageType, email, reason, appUrl);
+        emailSender.sendNotificationOfPublisherRequest(app, sourceRequest);
 
         return APPLICATION_TEMPLATE;
     }

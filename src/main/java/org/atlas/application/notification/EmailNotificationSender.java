@@ -6,8 +6,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.atlasapi.application.Application;
-import org.atlasapi.application.sources.UsageType;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.application.sources.SourceRequest;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -73,17 +72,17 @@ public class EmailNotificationSender {
     	this.to = to;
     }
     
-    public void sendNotificationOfPublisherRequest(Application app, Publisher publisher, UsageType usageType, String email, String reason, String appUrl) throws MessagingException, UnsupportedEncodingException {
+    public void sendNotificationOfPublisherRequest(Application app, SourceRequest sourceRequest) throws MessagingException, UnsupportedEncodingException {
     	 MimeMessage message = sender.createMimeMessage();
     	 
          MimeMessageHelper helper = new MimeMessageHelper(message, false, Charsets.UTF_8.name());
          SimpleModel model = new SimpleModel();
-         model.put("publisher_key", publisher.key());
-         model.put("publisher_title", publisher.title());
-         model.put("usage_type", usageType.title());
-         model.put("email", email);
-         model.put("appUrl", appUrl);
-         model.put("reason", reason);
+         model.put("publisher_key", sourceRequest.getPublisher().key());
+         model.put("publisher_title", sourceRequest.getPublisher().title());
+         model.put("usage_type", sourceRequest.getUsageType().title());
+         model.put("email", sourceRequest.getEmail());
+         model.put("appUrl", sourceRequest.getAppUrl());
+         model.put("reason", sourceRequest.getReason());
          model.put("slug", app.getSlug());
          model.put("application_title", app.getTitle());
          helper.setTo(this.to);     
