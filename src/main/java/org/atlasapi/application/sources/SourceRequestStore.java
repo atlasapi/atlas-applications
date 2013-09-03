@@ -15,5 +15,7 @@ public interface SourceRequestStore {
     Optional<SourceRequest> getBy(Application application, Publisher publisher);
     
     Set<SourceRequest> sourceRequestsFor(Publisher publisher);
+    
+    Set<SourceRequest> all();
 
 }

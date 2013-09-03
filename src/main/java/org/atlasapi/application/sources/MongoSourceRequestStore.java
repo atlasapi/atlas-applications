@@ -44,5 +44,9 @@ public static final String SOURCE_REQUESTS_COLLECTION = "sourceRequests";
     @Override
     public Set<SourceRequest> sourceRequestsFor(Publisher publisher) {
         return ImmutableSet.copyOf(Iterables.transform(sourceRequests.find(where().fieldEquals(SourceRequestTranslator.PUBLISHER_KEY, publisher.key()).build()), translatorFunction));
-   }
+    }
+    @Override
+    public Set<SourceRequest> all() {
+        return ImmutableSet.copyOf(Iterables.transform(sourceRequests.find(), translatorFunction));
+    }
 }

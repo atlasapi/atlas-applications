@@ -157,11 +157,29 @@ public class SourceController {
       
         ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
 
-        ModelBuilder<SourceRequest> sourceRequestModelBuilder = new SourceRequestModelBuilder(appManager, applicationModelBuilder);
+        ModelBuilder<SourceRequest> sourceRequestModelBuilder = new SourceRequestModelBuilder(appManager, applicationModelBuilder, sourceIdCodec);
         model.put("source_requests", SimpleModelList.fromBuilder(sourceRequestModelBuilder , selection.applyTo(sourceRequestStore.sourceRequestsFor(publisher))));
         model.put("source", sourceModelBuilder.build(publisher));
         
         return "applications/sourceRequests";
+    }
+    
+    @RequestMapping(value="/admin/requests", method=RequestMethod.GET)
+    public String allSourceRequests(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response) {
+
+        Optional<User> possibleUser = user();
+        if (!(possibleUser.isPresent() && possibleUser.get().is(Role.ADMIN))) {
+            return sendError(response, HttpStatusCode.FORBIDDEN.code());
+        }
+        
+        Selection selection = Selection.builder().build(request);
+
+        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder();
+
+        ModelBuilder<SourceRequest> sourceRequestModelBuilder = new SourceRequestModelBuilder(appManager, applicationModelBuilder, sourceIdCodec);
+        model.put("source_requests", SimpleModelList.fromBuilder(sourceRequestModelBuilder , selection.applyTo(sourceRequestStore.all())));
+        // TODO page object
+        return "applications/allSourceRequests";
     }
     
 

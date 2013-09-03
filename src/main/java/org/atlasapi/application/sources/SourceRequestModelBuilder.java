@@ -4,6 +4,7 @@ import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.media.entity.Publisher;
 
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;
 
@@ -12,10 +13,14 @@ public class SourceRequestModelBuilder implements ModelBuilder<SourceRequest> {
 
     private final ApplicationManager appManager;
     private final ModelBuilder<Application> applicationModelBuilder;
+    private final SourceIdCodec sourceIdCodec;
     
-    public SourceRequestModelBuilder(ApplicationManager appManager, ModelBuilder<Application> applicationModelBuilder) {
+    public SourceRequestModelBuilder(ApplicationManager appManager, 
+            ModelBuilder<Application> applicationModelBuilder,
+            SourceIdCodec sourceIdCodec) {
         this.appManager = appManager;
         this.applicationModelBuilder = applicationModelBuilder;
+        this.sourceIdCodec = sourceIdCodec;
     }
     
     @Override
@@ -34,6 +39,7 @@ public class SourceRequestModelBuilder implements ModelBuilder<SourceRequest> {
     
     protected SimpleModel model(Publisher publisher) {
         return new SimpleModel()
+            .put("id", sourceIdCodec.encode(publisher))
             .put("key", publisher.key())
             .put("title", publisher.title());
     }
