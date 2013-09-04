@@ -27,7 +27,7 @@ public class NotifierModule {
         factory.setPassword(emailPassword);
         
 		return emailNotificationSender(factory.getObject(), soyRenderer)
-				.withToField(to)
+				.withAdminToField(to)
 				.withFromField(from)
 				.withFriendlyFromName(fromFriendlyName)
 				.build();

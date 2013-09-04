@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlas.application.notification.EmailNotificationSender;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationManager;
+import org.atlasapi.application.sources.SourceRequest;
+import org.atlasapi.application.sources.SourceRequestStore;
+import org.atlasapi.application.sources.UsageType;
 import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserModelBuilder;
@@ -58,6 +61,7 @@ public class ApplicationController {
 
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
+    private final SourceRequestStore sourceRequestStore;
     private final ApplicationManager manager;
     private final EmailNotificationSender emailSender;
 
@@ -72,11 +76,14 @@ public class ApplicationController {
             .create();
 
     public ApplicationController(ApplicationManager appManager,
-            AuthenticationProvider authProvider, UserStore userStore,
+            AuthenticationProvider authProvider, 
+            UserStore userStore,
+            SourceRequestStore sourceRequestStore,
             EmailNotificationSender emailSender) {
         this.manager = appManager;
         this.authProvider = authProvider;
         this.userStore = userStore;
+        this.sourceRequestStore = sourceRequestStore;
         this.emailSender = emailSender;
     }
 
@@ -191,20 +198,37 @@ public class ApplicationController {
     @RequestMapping(value = "/admin/applications/{appSlug}/publishers/requested", method = RequestMethod.POST)
     public String requestPublisher(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response, @PathVariable("appSlug") String slug,
-            @RequestParam(defaultValue = "") String email,
-            @RequestParam(defaultValue = "") String reason) throws UnsupportedEncodingException,
+            @RequestParam(defaultValue = "") String reason,
+            @RequestParam(defaultValue = "") String appUrl) throws UnsupportedEncodingException,
             MessagingException {
+        
+        UsageType usageType = UsageType.valueOf(request.getParameter("usageType").toUpperCase());
+        
         Publisher publisher = Publisher.fromKey(request.getParameter("pubkey")).valueOrNull();
         if (publisher == null) {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
 
         Application app = manager.requestPublisher(slug, publisher);
-
+        Optional<User> user = user();
         model.put("application", modelBuilder.build(app));
+        SourceRequest sourceRequest = SourceRequest.builder()
+                .withAppSlug(app.getSlug())
+                .withEmail(user.get().getEmail())
+                .withPublisher(publisher)
+                .withReason(reason)
+                .withUsageType(usageType)
+                .withAppUrl(appUrl)
+                .withApproved(false)
+                .build();
+        
+        sourceRequestStore.store(sourceRequest);
 
         // send notification of request
-        emailSender.sendNotificationOfPublisherRequest(app, publisher, email, reason);
+        emailSender.sendNotificationOfPublisherRequestToAdmin(app, sourceRequest);
+        if (sourceRequest.getEmail() != null) {
+            emailSender.sendNotificationOfPublisherRequestToUser(app, sourceRequest);
+        }
 
         return APPLICATION_TEMPLATE;
     }
