@@ -5,6 +5,7 @@ import static org.atlasapi.application.auth.TwitterAuthController.LOGIN_FAILED_U
 import static org.atlasapi.application.auth.TwitterAuthController.LOGIN_URL;
 import static org.atlasapi.application.auth.TwitterAuthController.LOGOUT;
 
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,6 @@ import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
-import org.atlasapi.application.users.CacheBackedUserStore;
 import org.atlasapi.application.users.MongoUserStore;
 import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
@@ -32,6 +32,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -49,6 +50,9 @@ import com.metabroadcast.common.social.user.AccessTokenProcessor;
 import com.metabroadcast.common.social.user.FixedAppIdUserRefBuilder;
 import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
 import com.metabroadcast.common.time.SystemClock;
+import com.mongodb.Mongo;
+import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
 
 @Configuration
 @Import({ApplicationWebModule.class, NotifierModule.class})
@@ -59,28 +63,44 @@ public class ApplicationModule {
     private static final String APP_NAME = "atlas";
     private static final String COOKIE_NAME = "atlastw";
 
-    @Autowired DatabasedMongo mongo;
     @Autowired ViewResolver viewResolver;
     @Autowired RequestScopedAuthenticationProvider authProvider;
 	
 	@Value("${twitter.auth.consumerKey}") String consumerKey;
 	@Value("${twitter.auth.consumerSecret}") String consumerSecret;
 	@Value("${local.host.name}") String host;
+	
+	@Value("${admin.db.host}") String adminDbHost;
+	@Value("${admin.db.port}") Integer adminDbPort;
+	@Value("${admin.db.name}") String adminDbName;
+	
+	public @Bean DatabasedMongo adminMongo() {
+	    ServerAddress adminAddress = null;
+	    try {
+            adminAddress = new ServerAddress(adminDbHost, adminDbPort);
+            Mongo adminMongo = new Mongo(adminAddress);
+            adminMongo.setReadPreference(ReadPreference.primary());
+            return new DatabasedMongo(adminMongo, adminDbName);
+        } catch (UnknownHostException e) {
+            Preconditions.checkNotNull(adminAddress);
+            return null;
+        }
+	}
     
 	public @Bean ApplicationConfigurationFetcher configFetcher(){
 		return new IpCheckingApiKeyConfigurationFetcher(applicationStore());
 	}
 	
 	public @Bean ApplicationStore applicationStore(){
-		return new MongoApplicationStore(mongo);
+		return new MongoApplicationStore(adminMongo());
 	}
 	
 	public @Bean UserStore userStore() {
-		return new MongoUserStore(mongo);
+		return new MongoUserStore(adminMongo());
 	}
 	
 	public @Bean CredentialsStore credentialsStore() {
-	    return new MongoDBCredentialsStore(mongo);
+	    return new MongoDBCredentialsStore(adminMongo());
 	}
 
 	public @Bean AccessTokenProcessor accessTokenProcessor() {
@@ -97,7 +117,7 @@ public class ApplicationModule {
     }
 	
 	public @Bean TwitterAuthController authController() {
-	    AuthCallbackHandler handler = new UserAuthCallbackHandler(userStore(), new NewUserSupplier(new MongoSequentialIdGenerator(mongo, "users")));
+	    AuthCallbackHandler handler = new UserAuthCallbackHandler(userStore(), new NewUserSupplier(new MongoSequentialIdGenerator(adminMongo(), "users")));
         return new TwitterAuthController(new TwitterApplication(consumerKey, consumerSecret), accessTokenProcessor(), cookieTranslator(),handler, host);
 	}
 
