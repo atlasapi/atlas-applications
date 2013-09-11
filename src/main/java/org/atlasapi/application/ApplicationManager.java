@@ -1,6 +1,6 @@
 package org.atlasapi.application;
 
-import static org.atlasapi.application.Application.application;
+import static org.atlasapi.application.OldApplication.application;
 
 import java.util.List;
 import java.util.Set;
@@ -21,12 +21,12 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class ApplicationManager implements ApplicationStore {
+public class ApplicationManager implements OldApplicationStore {
 
-    private final ApplicationStore delegate;
+    private final OldApplicationStore delegate;
     private final UserStore userStore;
 
-    public ApplicationManager(ApplicationStore delegate, UserStore userStore) {
+    public ApplicationManager(OldApplicationStore delegate, UserStore userStore) {
         this.delegate = delegate;
         this.userStore = userStore;
     }
@@ -37,7 +37,7 @@ public class ApplicationManager implements ApplicationStore {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(title), "Invalid application title");
         Preconditions.checkState(!applicationFor(slug).isPresent(), "Application already exists");
         
-        Application application = application(slug)
+        OldApplication application = application(slug)
                 .withTitle(title)
                 .withDescription(null)
                 .createdAt(new DateTime(DateTimeZones.UTC))
@@ -49,34 +49,34 @@ public class ApplicationManager implements ApplicationStore {
         userStore.store(user);
     }
     
-    public Application requestPublisher(String slug, Publisher publisher) {
+    public OldApplication requestPublisher(String slug, Publisher publisher) {
         Preconditions.checkNotNull(publisher);
         
-        Application app = applicationForSlug(slug);
+        OldApplication app = applicationForSlug(slug);
         
         return update(app.copy().withConfiguration(app.getConfiguration().request(publisher)).build());
     }
 
-    public Application enablePublisher(String slug, Publisher publisher) {
+    public OldApplication enablePublisher(String slug, Publisher publisher) {
         Preconditions.checkNotNull(publisher);
         
-        Application app = applicationForSlug(slug);
+        OldApplication app = applicationForSlug(slug);
         
         return update(app.copy().withConfiguration(app.getConfiguration().enable(publisher)).build());
         
     }
 
-    public Application disablePublisher(String slug, Publisher publisher) {
+    public OldApplication disablePublisher(String slug, Publisher publisher) {
         Preconditions.checkNotNull(publisher);
         
-        Application app = applicationForSlug(slug);
+        OldApplication app = applicationForSlug(slug);
         
         return update(app.copy().withConfiguration(app.getConfiguration().disable(publisher)).build());
         
     }
     
-    public Application setPublisherConfiguration(String slug, PublisherConfiguration configuration) {
-    	Application app = applicationForSlug(slug);
+    public OldApplication setPublisherConfiguration(String slug, PublisherConfiguration configuration) {
+    	OldApplication app = applicationForSlug(slug);
     	ApplicationConfiguration appConfiguration = app.getConfiguration();
     	for (Publisher source : configuration.getEnabled()) {
     		appConfiguration = appConfiguration.enable(source);
@@ -87,16 +87,16 @@ public class ApplicationManager implements ApplicationStore {
     	return update(app.copy().withConfiguration(appConfiguration).build());
     }
 
-    public Application approvePublisher(String slug, Publisher publisher) {
+    public OldApplication approvePublisher(String slug, Publisher publisher) {
         Preconditions.checkNotNull(publisher);
         
-        Application app = applicationForSlug(slug);
+        OldApplication app = applicationForSlug(slug);
         
         return update(app.copy().withConfiguration(app.getConfiguration().approve(publisher)).build());
     }
 
-    public Application setSourcePrecedence(String slug, List<Publisher> publishers) {
-        Application app = applicationForSlug(slug);
+    public OldApplication setSourcePrecedence(String slug, List<Publisher> publishers) {
+        OldApplication app = applicationForSlug(slug);
         if (publishers == null) {
         	app = app.copy().withConfiguration(app.getConfiguration().copyWithNullPrecedence()).build();
         }
@@ -107,8 +107,8 @@ public class ApplicationManager implements ApplicationStore {
         return app;
     }
 
-    public Application addIpRange(String slug, IpRange range) {
-        Application app = applicationForSlug(slug);
+    public OldApplication addIpRange(String slug, IpRange range) {
+        OldApplication app = applicationForSlug(slug);
 
         Preconditions.checkArgument(range != null, "Invalid IP range");
 
@@ -119,8 +119,8 @@ public class ApplicationManager implements ApplicationStore {
         return app;
     }
 
-    public Application removeIpRange(String slug, IpRange range) {
-        Application app = applicationForSlug(slug);
+    public OldApplication removeIpRange(String slug, IpRange range) {
+        OldApplication app = applicationForSlug(slug);
         
         Preconditions.checkNotNull(range);
 
@@ -136,44 +136,44 @@ public class ApplicationManager implements ApplicationStore {
         return app;
     }
 
-    private Application applicationForSlug(String slug) {
-        Optional<Application> possibleApp = applicationFor(slug);
+    private OldApplication applicationForSlug(String slug) {
+        Optional<OldApplication> possibleApp = applicationFor(slug);
         Preconditions.checkState(possibleApp.isPresent(), "Unknown application " + slug);
         
         return possibleApp.get();
     }
     
-    public Set<Application> applicationsFor(Optional<User> possibleUser) {
+    public Set<OldApplication> applicationsFor(Optional<User> possibleUser) {
         return delegate.applicationsFor(possibleUser);
     }
 
     @Override
-    public Optional<Application> applicationFor(String slug) {
+    public Optional<OldApplication> applicationFor(String slug) {
         return delegate.applicationFor(slug);
     }
 
     @Override
-    public Optional<Application> applicationForKey(String key) {
+    public Optional<OldApplication> applicationForKey(String key) {
         return delegate.applicationForKey(key);
     }
 
     @Override
-    public Application persist(Application application) {
+    public OldApplication persist(OldApplication application) {
         return delegate.persist(application);
     }
 
     @Override
-    public Application update(Application application) {
+    public OldApplication update(OldApplication application) {
         return delegate.update(application);
     }
 
     @Override
-    public Set<Application> applicationsFor(Publisher source) {
+    public Set<OldApplication> applicationsFor(Publisher source) {
         return delegate.applicationsFor(source);
     }
     
     @Override
-    public Iterable<Application> allApplications() {
+    public Iterable<OldApplication> allApplications() {
         return delegate.allApplications();
     }
 }

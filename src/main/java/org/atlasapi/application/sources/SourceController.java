@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.OldApplication;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
@@ -90,7 +90,7 @@ public class SourceController {
         
         Selection selection = Selection.builder().build(request);
         
-        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
+        ModelBuilder<OldApplication> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder , selection.applyTo(appManager.applicationsFor(publisher))));
         model.put("source", sourceModelBuilder.build(publisher));
         
@@ -113,9 +113,9 @@ public class SourceController {
         
         Publisher publisher = decodedPublisher.requireValue();
         
-        Application application = appManager.approvePublisher(request.getParameter("application"), publisher);
+        OldApplication application = appManager.approvePublisher(request.getParameter("application"), publisher);
 
-        ModelBuilder<Application> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
+        ModelBuilder<OldApplication> applicationModelBuilder = new ApplicationModelBuilder(new SourceSpecificApplicationConfigurationModelBuilder(publisher));
         model.put("applications", SimpleModelList.fromBuilder(applicationModelBuilder, ImmutableList.of(application)));
         model.put("source", sourceModelBuilder.build(publisher));
         

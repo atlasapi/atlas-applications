@@ -3,7 +3,7 @@ package org.atlasapi.application.www;
 import org.atlas.application.notification.EmailNotificationSender;
 import org.atlas.application.notification.JavaMailSenderFactory;
 import org.atlasapi.application.ApplicationManager;
-import org.atlasapi.application.ApplicationStore;
+import org.atlasapi.application.OldApplicationStore;
 import org.atlasapi.application.auth.LoginController;
 import org.atlasapi.application.sources.SourceController;
 import org.atlasapi.application.users.UserController;
@@ -19,7 +19,7 @@ import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
 @Configuration
 public class ApplicationWebModule {
 	
-    @Autowired ApplicationStore appStore;
+    @Autowired OldApplicationStore appStore;
     @Autowired UserStore userStore;
     @Autowired RequestScopedAuthenticationProvider authProvider;
     @Autowired DatabasedMongo mongo;

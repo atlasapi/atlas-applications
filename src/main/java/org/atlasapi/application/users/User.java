@@ -2,7 +2,7 @@ package org.atlasapi.application.users;
 
 import java.util.Set;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.OldApplication;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableSet;
@@ -46,11 +46,11 @@ public class User {
         this.applicationSlugs = ImmutableSet.copyOf(applicationSlugs);
     }
     
-    public void addApplication(Application application) {
+    public void addApplication(OldApplication application) {
         this.applicationSlugs = ImmutableSet.<String>builder().add(application.getSlug()).addAll(applicationSlugs).build();
     }
     
-    public boolean manages(Application application) {
+    public boolean manages(OldApplication application) {
         return manages(application.getSlug());
     }
     
