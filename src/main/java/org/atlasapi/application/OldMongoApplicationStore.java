@@ -6,7 +6,7 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
 import static org.atlasapi.application.ApplicationConfigurationTranslator.PUBLISHER_KEY;
 import static org.atlasapi.application.ApplicationConfigurationTranslator.SOURCES_KEY;
 import static org.atlasapi.application.ApplicationConfigurationTranslator.STATE_KEY;
-import static org.atlasapi.application.ApplicationTranslator.APPLICATION_CONFIG_KEY;
+import static org.atlasapi.application.OldApplicationTranslator.APPLICATION_CONFIG_KEY;
 
 import java.util.Set;
 
@@ -32,7 +32,7 @@ public class OldMongoApplicationStore implements OldApplicationStore {
 	
 	public static final String APPLICATION_COLLECTION = "applications";
 	
-	private final ApplicationTranslator translator = new ApplicationTranslator();
+	private final OldApplicationTranslator translator = new OldApplicationTranslator();
 	
 	private final DBCollection applications;
 
@@ -53,7 +53,7 @@ public class OldMongoApplicationStore implements OldApplicationStore {
 	
 	@Override
 	public Optional<OldApplication> applicationForKey(String key) {
-		String apiKeyField = String.format("%s.%s", ApplicationTranslator.APPLICATION_CREDENTIALS_KEY, ApplicationCredentialsTranslator.API_KEY_KEY);
+		String apiKeyField = String.format("%s.%s", OldApplicationTranslator.APPLICATION_CREDENTIALS_KEY, OldApplicationCredentialsTranslator.API_KEY_KEY);
 		return Optional.fromNullable(translator.fromDBObject(applications.findOne(where().fieldEquals(apiKeyField, key).build())));
 	}
 

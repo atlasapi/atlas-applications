@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 
 import org.atlasapi.application.OldApplication;
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.OldApplicationCredentials;
 import org.atlasapi.application.OldMongoApplicationStore;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.media.entity.Publisher;
@@ -22,7 +22,7 @@ import com.metabroadcast.common.persistence.MongoTestHelper;
 
 public class MongoApplicationStoreTest {
 
-    private final ApplicationCredentials creds = new ApplicationCredentials("apiKey");
+    private final OldApplicationCredentials creds = new OldApplicationCredentials("apiKey");
 	private final OldMongoApplicationStore appStore = new OldMongoApplicationStore(MongoTestHelper.anEmptyTestDatabase());
 	
 	@Test
@@ -81,7 +81,7 @@ public class MongoApplicationStoreTest {
 	public void testCredentialIPAddressPersistence() throws UnknownHostException {
 	    OldApplication app1 = OldApplication.application("testd").withTitle("Test 1").withCredentials(creds).build();
 		
-		ApplicationCredentials credentials = app1.getCredentials().copyWithIpAddresses(ImmutableList.of(new IpRange(InetAddress.getLocalHost())));
+		OldApplicationCredentials credentials = app1.getCredentials().copyWithIpAddresses(ImmutableList.of(new IpRange(InetAddress.getLocalHost())));
 		
 		app1 = app1.copy().withCredentials(credentials).build();
 		

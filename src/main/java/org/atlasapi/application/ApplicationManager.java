@@ -41,7 +41,7 @@ public class ApplicationManager implements OldApplicationStore {
                 .withTitle(title)
                 .withDescription(null)
                 .createdAt(new DateTime(DateTimeZones.UTC))
-                .withCredentials(new ApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", "")))
+                .withCredentials(new OldApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", "")))
                 .withConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION).build();
         
         persist(application);

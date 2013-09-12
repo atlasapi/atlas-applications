@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.OldApplication;
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.OldApplicationCredentials;
 import org.atlasapi.application.OldApplicationStore;
 
 import com.google.common.base.Optional;
@@ -51,7 +51,7 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
         return Maybe.nothing();
     }
 
-    private boolean validIp(ApplicationCredentials credentials, HttpServletRequest request) {
+    private boolean validIp(OldApplicationCredentials credentials, HttpServletRequest request) {
         if (credentials.getIpAddressRanges() == null || credentials.getIpAddressRanges().isEmpty()) {
             return true;
         }

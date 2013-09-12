@@ -7,7 +7,7 @@ import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-public class ApplicationTranslator {
+public class OldApplicationTranslator {
 	
 	public static final String APPLICATION_SLUG_KEY = MongoConstants.ID;
 	public static final String APPLICATION_TITLE_KEY = "title";
@@ -17,7 +17,7 @@ public class ApplicationTranslator {
 	public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
 	
 	private final ApplicationConfigurationTranslator configurationTranslator = new ApplicationConfigurationTranslator();
-	private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
+	private final OldApplicationCredentialsTranslator credentialsTranslator = new OldApplicationCredentialsTranslator();
 	
 	public DBObject toDBObject(OldApplication application) {
 		DBObject dbo = new BasicDBObject();
