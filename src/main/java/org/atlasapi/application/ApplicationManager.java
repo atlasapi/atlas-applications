@@ -42,7 +42,7 @@ public class ApplicationManager implements OldApplicationStore {
                 .withDescription(null)
                 .createdAt(new DateTime(DateTimeZones.UTC))
                 .withCredentials(new OldApplicationCredentials(UUID.randomUUID().toString().replaceAll("-", "")))
-                .withConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION).build();
+                .withConfiguration(OldApplicationConfiguration.DEFAULT_CONFIGURATION).build();
         
         persist(application);
         user.addApplication(application);
@@ -77,7 +77,7 @@ public class ApplicationManager implements OldApplicationStore {
     
     public OldApplication setPublisherConfiguration(String slug, PublisherConfiguration configuration) {
     	OldApplication app = applicationForSlug(slug);
-    	ApplicationConfiguration appConfiguration = app.getConfiguration();
+    	OldApplicationConfiguration appConfiguration = app.getConfiguration();
     	for (Publisher source : configuration.getEnabled()) {
     		appConfiguration = appConfiguration.enable(source);
     	}

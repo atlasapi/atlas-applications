@@ -2,7 +2,7 @@ package org.atlasapi.application.www;
 
 import java.util.Map;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.media.entity.Publisher;
 
@@ -12,10 +12,10 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;
 
-public class ApplicationConfigurationModelBuilder implements ModelBuilder<ApplicationConfiguration> {
+public class ApplicationConfigurationModelBuilder implements ModelBuilder<OldApplicationConfiguration> {
 	
 	@Override
-	public SimpleModel build(final ApplicationConfiguration target) {
+	public SimpleModel build(final OldApplicationConfiguration target) {
 		SimpleModel model = new SimpleModel();
 		
 		final Map<Publisher, SourceStatus> sourceStatuses = target.sourceStatuses();

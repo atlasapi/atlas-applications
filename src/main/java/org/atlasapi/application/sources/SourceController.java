@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.model.ModelBuilder;
@@ -47,6 +46,7 @@ public class SourceController {
         this.idCodec = new SubstitutionTableNumberCodec();
         this.sourceIdCodec = new SourceIdCodec(idCodec);
         this.sourceModelBuilder = new SourceModelBuilder(sourceIdCodec);
+        
     }
 
     private Optional<User> user() {
@@ -75,9 +75,9 @@ public class SourceController {
     @RequestMapping(value="/admin/sources/{id}/applications", method=RequestMethod.GET)
     public String applicationsForSource(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
     
-        Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
+        Optional<Publisher> decodedPublisher = sourceIdCodec.decode(id);
         
-        if (decodedPublisher.isNothing()) {
+        if (!decodedPublisher.isPresent()) {
             return sendError(response, HttpStatusCode.NOT_FOUND.code());
         }
         
@@ -86,7 +86,7 @@ public class SourceController {
             return sendError(response, HttpStatusCode.FORBIDDEN.code());
         }
         
-        Publisher publisher = decodedPublisher.requireValue();
+        Publisher publisher = decodedPublisher.get();
         
         Selection selection = Selection.builder().build(request);
         
@@ -100,9 +100,9 @@ public class SourceController {
     @RequestMapping(value="/admin/sources/{id}/applications/approved", method=RequestMethod.POST)
     public String approveApplication(Map<String,Object> model, HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
         
-        Maybe<Publisher> decodedPublisher = sourceIdCodec.decode(id);
+        Optional<Publisher> decodedPublisher = sourceIdCodec.decode(id);
         
-        if (decodedPublisher.isNothing()) {
+        if (!decodedPublisher.isPresent()) {
             return sendError(response, HttpStatusCode.NOT_FOUND.code());
         }
         
@@ -111,7 +111,7 @@ public class SourceController {
             return sendError(response, HttpStatusCode.FORBIDDEN.code());
         }
         
-        Publisher publisher = decodedPublisher.requireValue();
+        Publisher publisher = decodedPublisher.get();
         
         OldApplication application = appManager.approvePublisher(request.getParameter("application"), publisher);
 

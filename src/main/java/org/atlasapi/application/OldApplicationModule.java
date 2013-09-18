@@ -20,7 +20,7 @@ import org.atlasapi.application.users.CacheBackedUserStore;
 import org.atlasapi.application.users.MongoUserStore;
 import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
-import org.atlasapi.application.www.ApplicationWebModule;
+import org.atlasapi.application.www.OldApplicationWebModule;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,9 +51,9 @@ import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
 import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
-@Import({ApplicationWebModule.class, NotifierModule.class})
+@Import({OldApplicationWebModule.class, NotifierModule.class})
 @ImportResource("atlas-applications.xml")
-public class ApplicationModule {
+public class OldApplicationModule {
     
 	private static final String SALT = "saltthatisofareasonablelength";
     private static final String APP_NAME = "atlas";

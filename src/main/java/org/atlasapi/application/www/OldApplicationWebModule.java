@@ -17,7 +17,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
 
 @Configuration
-public class ApplicationWebModule {
+public class OldApplicationWebModule {
 	
     @Autowired OldApplicationStore appStore;
     @Autowired UserStore userStore;

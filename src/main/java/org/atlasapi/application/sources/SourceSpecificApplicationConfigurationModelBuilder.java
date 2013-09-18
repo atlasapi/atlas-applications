@@ -1,6 +1,6 @@
 package org.atlasapi.application.sources;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.www.ApplicationConfigurationModelBuilder;
 import org.atlasapi.media.entity.Publisher;
 
@@ -16,7 +16,7 @@ public class SourceSpecificApplicationConfigurationModelBuilder extends Applicat
     }
 
     @Override
-    public SimpleModel build(ApplicationConfiguration target) {
+    public SimpleModel build(OldApplicationConfiguration target) {
         SimpleModel model = super.build(target);
         model.put("publishers", SimpleModelList.containing(model(source, target.sourceStatuses().get(source))));
         return model;

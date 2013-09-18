@@ -7,7 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.OldApplication;
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.OldApplicationCredentials;
 import org.atlasapi.application.OldApplicationStore;
 
@@ -38,7 +38,7 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     }
 
     @Override
-    public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) {
+    public Maybe<OldApplicationConfiguration> configurationFor(HttpServletRequest request) {
         if (request != null) {
             String apiKey = request.getParameter(API_KEY_QUERY_PARAMETER);
             if (apiKey != null) {

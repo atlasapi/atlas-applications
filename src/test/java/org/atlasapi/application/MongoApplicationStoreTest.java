@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.atlasapi.application.OldApplication;
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.OldApplicationCredentials;
 import org.atlasapi.application.OldMongoApplicationStore;
 import org.atlasapi.application.SourceStatus;
@@ -55,7 +55,7 @@ public class MongoApplicationStoreTest {
 	public void testConfigurationPublisherPersistence() {
 	    OldApplication app1 = OldApplication.application("testb").withTitle("Test 1").withCredentials(creds).build();
 		
-		ApplicationConfiguration config = new ApplicationConfiguration(ImmutableMap.of(Publisher.FIVE, SourceStatus.AVAILABLE_ENABLED), null);
+		OldApplicationConfiguration config = new OldApplicationConfiguration(ImmutableMap.of(Publisher.FIVE, SourceStatus.AVAILABLE_ENABLED), null);
 		
 		app1 = app1.copy().withConfiguration(config).build();
 		
