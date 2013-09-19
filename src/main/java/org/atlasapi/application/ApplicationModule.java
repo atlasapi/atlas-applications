@@ -34,6 +34,7 @@ import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMa
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.anonymous.AnonymousUserProvider;
 import com.metabroadcast.common.social.anonymous.CookieBasedAnonymousUserProvider;
@@ -72,7 +73,8 @@ public class ApplicationModule {
 	}
 	
 	public @Bean ApplicationStore applicationStore(){
-		return new MongoApplicationStore(mongo);
+	    IdGenerator idGenerator = new MongoSequentialIdGenerator(mongo, "application");
+	    return new MongoApplicationStore(mongo, idGenerator);
 	}
 	
 	public @Bean UserStore userStore() {
