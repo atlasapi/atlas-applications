@@ -20,6 +20,7 @@ import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.text.MoreStrings;
@@ -37,6 +38,8 @@ public class MongoApplicationStore implements ApplicationStore {
 	private final DBCollection applications;
 
 	private DatabasedMongo mongo;
+	
+	private final IdGenerator idGenerator;
 
     private final Function<DBObject, Application> translatorFunction = new Function<DBObject, Application>(){
         @Override
@@ -45,10 +48,11 @@ public class MongoApplicationStore implements ApplicationStore {
         }
     };
 	
-	public MongoApplicationStore(DatabasedMongo mongo) {
+	public MongoApplicationStore(DatabasedMongo mongo, IdGenerator idGenerator) {
 		this.applications = mongo.collection(APPLICATION_COLLECTION);
 		this.applications.setReadPreference(ReadPreference.primary());
 		this.mongo = mongo;
+		this.idGenerator = idGenerator;
 	}
 	
 	@Override
@@ -64,6 +68,10 @@ public class MongoApplicationStore implements ApplicationStore {
 
 	@Override
 	public Application persist(Application application) {
+	    // Check that an id is being generated for compatibility with 4.0
+        if (application.getDeerId() == null) {
+            application = application.copy().withDeerId(idGenerator.generateRaw()).build();
+        }
 		applications.insert(translator.toDBObject(application));
 		CommandResult result = mongo.database().getLastError();
 		if (result.get("err") != null && result.getInt("code") == 11000) {
@@ -74,6 +82,10 @@ public class MongoApplicationStore implements ApplicationStore {
 	
 	@Override
 	public Application update(Application application) {
+	    // Check that an id is being generated for compatibility with 4.0
+	    if (application.getDeerId() == null) {
+	        application = application.copy().withDeerId(idGenerator.generateRaw()).build();
+	    }
 		applications.update(where().idEquals(application.getSlug()).build(), translator.toDBObject(application), NO_UPSERT, SINGLE);
 		return application;
 	}
