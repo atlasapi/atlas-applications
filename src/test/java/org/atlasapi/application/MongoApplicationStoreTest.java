@@ -12,6 +12,8 @@ import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.application.MongoApplicationStore;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
@@ -19,11 +21,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.persistence.MongoTestHelper;
+import static org.mockito.Mockito.*;
 
 public class MongoApplicationStoreTest {
 
     private final ApplicationCredentials creds = new ApplicationCredentials("apiKey");
-	private final MongoApplicationStore appStore = new MongoApplicationStore(MongoTestHelper.anEmptyTestDatabase());
+	private MongoApplicationStore appStore;
+	
+	@Before
+	public void setup() {
+	    MongoSequentialIdGenerator idGenerator = mock(MongoSequentialIdGenerator.class);
+	    when(idGenerator.generateRaw()).thenReturn(5000L);
+	    appStore = new MongoApplicationStore(MongoTestHelper.anEmptyTestDatabase(), idGenerator);
+	}
 	
 	@Test
 	public void testApplicationPersists() {
@@ -101,5 +111,14 @@ public class MongoApplicationStoreTest {
 		Optional<Application> retrieved = appStore.applicationForKey(app1.getCredentials().getApiKey());
 		
 		assertEquals(app1, retrieved.get());
+	}
+	
+	@Test
+	public void testDeerIdGeneration() {
+        Application app1 = Application.application("teste").withTitle("Test 1").withCredentials(creds).build();
+        appStore.persist(app1);
+        
+        Optional<Application> retrieved = appStore.applicationForKey(app1.getCredentials().getApiKey());
+        assertEquals(5000L, retrieved.get().getDeerId().longValue());
 	}
 }

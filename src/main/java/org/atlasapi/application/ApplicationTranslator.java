@@ -18,6 +18,7 @@ public class ApplicationTranslator {
 	public static final String APPLICATION_LAST_UPDATED_KEY = "lastUpdated";
 	public static final String APPLICATION_CONFIG_KEY = "configuration";
 	public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
+	public static final String DEER_ID_KEY = "deerId";
 	
 	private final ApplicationConfigurationTranslator configurationTranslator = new ApplicationConfigurationTranslator();
 	private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
@@ -33,6 +34,7 @@ public class ApplicationTranslator {
 		    TranslatorUtils.fromDateTime(dbo, APPLICATION_LAST_UPDATED_KEY, application.getLastUpdated());
 		    TranslatorUtils.from(dbo, APPLICATION_CONFIG_KEY, configurationTranslator.toDBObject(application.getConfiguration()));
 		    TranslatorUtils.from(dbo, APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
+		    TranslatorUtils.from(dbo, DEER_ID_KEY, application.getDeerId());
 		}
 		
 		return dbo;
@@ -59,7 +61,8 @@ public class ApplicationTranslator {
 		        .createdAt(TranslatorUtils.toDateTime(dbo, APPLICATION_CREATED_KEY))
 		        .withLastUpdated(lastUpdated)
 		        .withConfiguration(configurationTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CONFIG_KEY)))
-		        .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CREDENTIALS_KEY))).build();
+		        .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CREDENTIALS_KEY)))
+		        .withDeerId(TranslatorUtils.toLong(dbo, DEER_ID_KEY)).build();
 	}
 
 }
