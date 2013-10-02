@@ -18,7 +18,7 @@ public class ApplicationConfigurationTranslatorTest {
     @Test
     public void testEncodesAndDecodesApplicationConfiguration() {
         
-        ApplicationConfiguration config = ApplicationConfiguration.defaultConfiguration()
+        OldApplicationConfiguration config = OldApplicationConfiguration.defaultConfiguration()
                 .request(Publisher.PA)
                 .approve(Publisher.PA)
                 .enable(Publisher.PA)
@@ -27,7 +27,7 @@ public class ApplicationConfigurationTranslatorTest {
         
         DBObject dbo = codec.toDBObject(config);
         
-        ApplicationConfiguration decoded = codec.fromDBObject(dbo);
+        OldApplicationConfiguration decoded = codec.fromDBObject(dbo);
         
         assertTrue(decoded.isEnabled(Publisher.PA));
         assertTrue(decoded.isEnabled(Publisher.BBC));

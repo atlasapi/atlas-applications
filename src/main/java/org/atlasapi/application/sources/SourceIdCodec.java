@@ -2,9 +2,10 @@ package org.atlasapi.application.sources;
 
 import java.math.BigInteger;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.base.Optional;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
@@ -25,12 +26,20 @@ public class SourceIdCodec {
         return idCodec.encode(BigInteger.valueOf(ID_MAGNIFIER + source.ordinal()));
     }
     
-    public Maybe<Publisher> decode(String id) {
+    public Optional<Publisher> decode(String id) {
         try {
-            return Maybe.fromPossibleNullValue(Publisher.values()[idCodec.decode(id).intValue() - 1000]);
+            return Optional.fromNullable(Publisher.values()[idCodec.decode(id).intValue() - ID_MAGNIFIER]);
         } catch (Exception e) {
-            return Maybe.nothing();
+            return Optional.absent();
         }
     }
     
+    public Optional<Publisher> decode(Id id) {
+        try {
+            return Optional.fromNullable(Publisher.values()[id.toBigInteger().intValue()- ID_MAGNIFIER]);
+        } catch (Exception e) {
+            return Optional.absent();
+        }
+    }
+  
 }

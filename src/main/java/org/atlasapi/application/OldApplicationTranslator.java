@@ -1,13 +1,13 @@
 package org.atlasapi.application;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.OldApplication;
 
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-public class ApplicationTranslator {
+public class OldApplicationTranslator {
 	
 	public static final String APPLICATION_SLUG_KEY = MongoConstants.ID;
 	public static final String APPLICATION_TITLE_KEY = "title";
@@ -17,9 +17,9 @@ public class ApplicationTranslator {
 	public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
 	
 	private final ApplicationConfigurationTranslator configurationTranslator = new ApplicationConfigurationTranslator();
-	private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
+	private final OldApplicationCredentialsTranslator credentialsTranslator = new OldApplicationCredentialsTranslator();
 	
-	public DBObject toDBObject(Application application) {
+	public DBObject toDBObject(OldApplication application) {
 		DBObject dbo = new BasicDBObject();
 		
 		if (application != null) {
@@ -34,7 +34,7 @@ public class ApplicationTranslator {
 		return dbo;
 	}
 	
-	public Application fromDBObject(DBObject dbo) {
+	public OldApplication fromDBObject(DBObject dbo) {
 	    if (dbo == null) {
 	        return null;
 	    }
@@ -44,7 +44,7 @@ public class ApplicationTranslator {
 			return null;
 		}
 		
-		return Application.application(applicationSlug)
+		return OldApplication.application(applicationSlug)
 		        .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))
 		        .withDescription(TranslatorUtils.toString(dbo, APPLICATION_DESCRIPTION_KEY))
 		        .createdAt(TranslatorUtils.toDateTime(dbo, APPLICATION_CREATED_KEY))

@@ -23,7 +23,7 @@ public class ApplicationConfigurationTranslator {
 	public static final String PRECEDENCE_KEY = "precedence";
 	public static final String WRITABLE_KEY = "writable";
 
-	public DBObject toDBObject(ApplicationConfiguration configuration) {
+	public DBObject toDBObject(OldApplicationConfiguration configuration) {
 		BasicDBObject dbo = new BasicDBObject();
 		
 		TranslatorUtils.from(dbo, SOURCES_KEY, sourceStatusesToList(configuration.sourceStatuses()));
@@ -51,7 +51,7 @@ public class ApplicationConfigurationTranslator {
         return statuses;
     }
 	
-	public ApplicationConfiguration fromDBObject(DBObject dbo) {
+	public OldApplicationConfiguration fromDBObject(DBObject dbo) {
 	    List<DBObject> statusDbos = TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY);
         Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos);
 	
@@ -59,7 +59,7 @@ public class ApplicationConfigurationTranslator {
 
 		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
         Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
-        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources);
+        return new OldApplicationConfiguration(sourceStatuses, precedence, writableSources);
 	}
 
     private List<Publisher> sourcePrecedenceFrom(DBObject dbo) {

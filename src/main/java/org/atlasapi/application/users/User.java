@@ -2,11 +2,11 @@ package org.atlasapi.application.users;
 
 import java.util.Set;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.OldApplication;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.social.model.UserRef;
 
 public class User {
@@ -46,11 +46,11 @@ public class User {
         this.applicationSlugs = ImmutableSet.copyOf(applicationSlugs);
     }
     
-    public void addApplication(Application application) {
+    public void addApplication(OldApplication application) {
         this.applicationSlugs = ImmutableSet.<String>builder().add(application.getSlug()).addAll(applicationSlugs).build();
     }
     
-    public boolean manages(Application application) {
+    public boolean manages(OldApplication application) {
         return manages(application.getSlug());
     }
     
@@ -58,8 +58,8 @@ public class User {
         return applicationSlugs.contains(applicationSlug);
     }
     
-    public boolean manages(Maybe<Publisher> possibleSource) {
-        return possibleSource.hasValue() && publishers.contains(possibleSource.requireValue());
+    public boolean manages(Optional<Publisher> possibleSource) {
+        return possibleSource.isPresent() && publishers.contains(possibleSource.get());
     }
 
     public Set<Publisher> getSources() {

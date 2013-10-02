@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.Application;
-import org.atlasapi.application.ApplicationStore;
+import org.atlasapi.application.OldApplication;
+import org.atlasapi.application.OldApplicationStore;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.sources.SourceModelBuilder;
 import org.atlasapi.application.www.ApplicationModelBuilder;
@@ -37,13 +37,13 @@ public class UserController {
     private final AuthenticationProvider authProvider;
     private final UserStore userStore;
     private final NumberToShortStringCodec idCodec;
-    private final ApplicationStore appStore;
+    private final OldApplicationStore appStore;
     private final ApplicationModelBuilder appModelBuilder;
     private final SourceModelBuilder sourceModelBuilder;
     private static final int DEFAULT_PAGE_SIZE = 15;
     private SelectionBuilder selectionBuilder = Selection.builder().withDefaultLimit(DEFAULT_PAGE_SIZE).withMaxLimit(50);
 
-    public UserController(AuthenticationProvider authProvider, UserStore userStore, ApplicationStore appStore) {
+    public UserController(AuthenticationProvider authProvider, UserStore userStore, OldApplicationStore appStore) {
         this.authProvider = authProvider;
         this.userStore = userStore;
         this.appStore = appStore;
@@ -89,12 +89,12 @@ public class UserController {
             response.setContentLength(0);
             return null;
         }
-        Iterable<Application> apps = appStore.applicationsFor(existingUser);
+        Iterable<OldApplication> apps = appStore.applicationsFor(existingUser);
         // apply filter if specified
         if (search.length() > 1) {
-        	apps = Iterables.filter(apps, new Predicate<Application>() {
+        	apps = Iterables.filter(apps, new Predicate<OldApplication>() {
 				@Override
-				public boolean apply(@Nullable Application input) {
+				public boolean apply(@Nullable OldApplication input) {
 					return input.getSlug().contains(search.toLowerCase().toLowerCase()) || input.getTitle().toLowerCase().contains(search.toLowerCase()) || input.getCredentials().getApiKey().equals(search);
 				}
         	});

@@ -26,10 +26,10 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
 import com.metabroadcast.common.social.auth.UserNotLoggedInException;
@@ -83,7 +83,7 @@ public class AdminAuthenticationInterceptor extends HandlerInterceptorAdapter {
         return true;
     }
 
-    private Maybe<Publisher> sourceFrom(HttpServletRequest request) {
+    private Optional<Publisher> sourceFrom(HttpServletRequest request) {
         final Matcher matcher = applicationPagePattern.matcher(request.getRequestURI());
         if (matcher.matches()) {
             return sourceIdCodec.decode(matcher.group(1));

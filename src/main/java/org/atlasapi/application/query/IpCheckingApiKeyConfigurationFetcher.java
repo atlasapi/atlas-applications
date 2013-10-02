@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.Application;
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
-import org.atlasapi.application.ApplicationStore;
+import org.atlasapi.application.OldApplication;
+import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.OldApplicationCredentials;
+import org.atlasapi.application.OldApplicationStore;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -26,9 +26,9 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     private static final String X_FORWARDED_FOR = "X-Forwarded-For";
     public static final String API_KEY_QUERY_PARAMETER = "apiKey";
     
-    private final ApplicationStore reader;
+    private final OldApplicationStore reader;
 
-    public IpCheckingApiKeyConfigurationFetcher(ApplicationStore reader) {
+    public IpCheckingApiKeyConfigurationFetcher(OldApplicationStore reader) {
         this.reader = reader;
     }
     
@@ -38,11 +38,11 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     }
 
     @Override
-    public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) {
+    public Maybe<OldApplicationConfiguration> configurationFor(HttpServletRequest request) {
         if (request != null) {
             String apiKey = request.getParameter(API_KEY_QUERY_PARAMETER);
             if (apiKey != null) {
-                Optional<Application> app = reader.applicationForKey(apiKey);
+                Optional<OldApplication> app = reader.applicationForKey(apiKey);
                 if (app.isPresent() && validIp(app.get().getCredentials(), request)) {
                     return Maybe.fromPossibleNullValue(app.get().getConfiguration());
                 }
@@ -51,7 +51,7 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
         return Maybe.nothing();
     }
 
-    private boolean validIp(ApplicationCredentials credentials, HttpServletRequest request) {
+    private boolean validIp(OldApplicationCredentials credentials, HttpServletRequest request) {
         if (credentials.getIpAddressRanges() == null || credentials.getIpAddressRanges().isEmpty()) {
             return true;
         }
