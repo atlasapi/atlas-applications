@@ -18,7 +18,7 @@ public class ApplicationTranslator {
 	public static final String APPLICATION_LAST_UPDATED_KEY = "lastUpdated";
 	public static final String APPLICATION_CONFIG_KEY = "configuration";
 	public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
-	public static final String DEER_ID_KEY = "deerId";
+	public static final String DEER_ID_KEY = "aid";
 	
 	private final ApplicationConfigurationTranslator configurationTranslator = new ApplicationConfigurationTranslator();
 	private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
