@@ -1,6 +1,6 @@
 package org.atlasapi.application.www;
 
-import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.OldApplicationCredentials;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -9,10 +9,10 @@ import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.net.IpRange;
 
-public class ApplicationCredentialsModelBuilder implements ModelBuilder<ApplicationCredentials> {
+public class ApplicationCredentialsModelBuilder implements ModelBuilder<OldApplicationCredentials> {
 
 	@Override
-	public SimpleModel build(ApplicationCredentials target) {
+	public SimpleModel build(OldApplicationCredentials target) {
 		SimpleModel model = new SimpleModel();
 		
 		model.put("apiKey", target.getApiKey());

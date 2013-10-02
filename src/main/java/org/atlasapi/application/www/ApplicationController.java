@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlas.application.notification.EmailNotificationSender;
-import org.atlasapi.application.Application;
+import org.atlasapi.application.OldApplication;
 import org.atlasapi.application.ApplicationManager;
 import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
@@ -61,8 +61,8 @@ public class ApplicationController {
     private final ApplicationManager manager;
     private final EmailNotificationSender emailSender;
 
-    private final ModelListBuilder<Application> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
-    private final ModelBuilder<Application> modelBuilder = new ApplicationModelBuilder();
+    private final ModelListBuilder<OldApplication> modelListBuilder = DelegatingModelListBuilder.delegateTo(new ApplicationModelBuilder());
+    private final ModelBuilder<OldApplication> modelBuilder = new ApplicationModelBuilder();
     private final ModelBuilder<User> userModelBuilder = new UserModelBuilder();
     private final SelectionBuilder selectionBuilder = Selection.builder()
             .withDefaultLimit(DEFAULT_PAGE_SIZE)
@@ -101,7 +101,7 @@ public class ApplicationController {
 
         Selection selection = selectionBuilder.build(request);
         Optional<User> user = user();
-        Iterable<Application> apps = null;
+        Iterable<OldApplication> apps = null;
 
         if (user.isPresent() && user.get().is(Role.ADMIN)) {
             apps = manager.allApplications();
@@ -111,10 +111,10 @@ public class ApplicationController {
 
         // apply filter if specified
         if (search.length() > 1) {
-            apps = Iterables.filter(apps, new Predicate<Application>() {
+            apps = Iterables.filter(apps, new Predicate<OldApplication>() {
 
                 @Override
-                public boolean apply(@Nullable Application input) {
+                public boolean apply(@Nullable OldApplication input) {
                     return input.getSlug().toLowerCase().contains(search.toLowerCase())
                         || input.getTitle().toLowerCase().contains(search.toLowerCase())
                         || input.getCredentials().getApiKey().equals(search);
@@ -178,7 +178,7 @@ public class ApplicationController {
     @RequestMapping(value = "/admin/applications/{appSlug}", method = RequestMethod.GET)
     public String application(Map<String, Object> model, @PathVariable("appSlug") String slug,
             HttpServletResponse response) {
-        Optional<Application> application = manager.applicationFor(slug);
+        Optional<OldApplication> application = manager.applicationFor(slug);
 
         if (!application.isPresent()) {
             return sendError(response, HttpServletResponse.SC_NOT_FOUND);
@@ -199,7 +199,7 @@ public class ApplicationController {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        Application app = manager.requestPublisher(slug, publisher);
+        OldApplication app = manager.requestPublisher(slug, publisher);
 
         model.put("application", modelBuilder.build(app));
 
@@ -231,7 +231,7 @@ public class ApplicationController {
         Reader reader = new InputStreamReader(request.getInputStream());
         PublisherConfiguration configuration = publisherKeyDeserializer.fromJson(reader,
                 PublisherConfiguration.class);
-        Application app = manager.setPublisherConfiguration(slug, configuration);
+        OldApplication app = manager.setPublisherConfiguration(slug, configuration);
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
     }
@@ -245,7 +245,7 @@ public class ApplicationController {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        Application app = manager.enablePublisher(slug, publisher);
+        OldApplication app = manager.enablePublisher(slug, publisher);
 
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
@@ -261,7 +261,7 @@ public class ApplicationController {
             return sendError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        Application app = manager.disablePublisher(slug, publisher);
+        OldApplication app = manager.disablePublisher(slug, publisher);
 
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;
@@ -271,7 +271,7 @@ public class ApplicationController {
     public String setPrecedence(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response, @PathVariable("appSlug") String slug) {
 
-        Application app = manager.setSourcePrecedence(slug,
+        OldApplication app = manager.setSourcePrecedence(slug,
                 getPublishersFrom(request.getParameter("precedence")));
 
         model.put("application", modelBuilder.build(app));
@@ -282,7 +282,7 @@ public class ApplicationController {
     public String setPrecedenceOff(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response, @PathVariable("appSlug") String slug) {
 
-        Application app = manager.setSourcePrecedence(slug, null);
+        OldApplication app = manager.setSourcePrecedence(slug, null);
 
         model.put("application", modelBuilder.build(app));
         return APPLICATION_TEMPLATE;

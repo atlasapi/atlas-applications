@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.OldApplication;
 import org.atlasapi.media.entity.Publisher;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -72,7 +72,7 @@ public class EmailNotificationSender {
     	this.to = to;
     }
     
-    public void sendNotificationOfPublisherRequest(Application app, Publisher publisher, String email, String reason) throws MessagingException, UnsupportedEncodingException {
+    public void sendNotificationOfPublisherRequest(OldApplication app, Publisher publisher, String email, String reason) throws MessagingException, UnsupportedEncodingException {
     	 MimeMessage message = sender.createMimeMessage();
     	 
          MimeMessageHelper helper = new MimeMessageHelper(message, false, Charsets.UTF_8.name());
