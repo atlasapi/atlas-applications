@@ -13,7 +13,7 @@ import com.mongodb.DBObject;
 
 public class ApplicationConfigurationTranslatorTest {
 
-    private final ApplicationConfigurationTranslator codec = new ApplicationConfigurationTranslator();
+  //  private final ApplicationConfigurationTranslator codec = new ApplicationConfigurationTranslator();
     
     @Test
     public void testEncodesAndDecodesApplicationConfiguration() {
