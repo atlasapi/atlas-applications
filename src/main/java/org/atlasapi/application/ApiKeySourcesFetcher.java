@@ -1,4 +1,4 @@
-package org.atlasapi.application.query;
+package org.atlasapi.application;
 
 import javax.servlet.http.HttpServletRequest;
 import org.atlasapi.application.Application;
@@ -7,13 +7,13 @@ import org.atlasapi.persistence.application.ApplicationStore;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 
-public class ApiKeyConfigurationFetcher implements ApplicationSourcesFetcher {
+public class ApiKeySourcesFetcher implements ApplicationSourcesFetcher {
 
     public static final String API_KEY_QUERY_PARAMETER = "apiKey";
     
     private final ApplicationStore reader;
 
-    public ApiKeyConfigurationFetcher(ApplicationStore reader) {
+    public ApiKeySourcesFetcher(ApplicationStore reader) {
         this.reader = reader;
     }
     

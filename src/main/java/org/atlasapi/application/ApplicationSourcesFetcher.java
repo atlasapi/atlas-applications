@@ -1,4 +1,4 @@
-package org.atlasapi.application.query;
+package org.atlasapi.application;
 
 import javax.servlet.http.HttpServletRequest;
 
