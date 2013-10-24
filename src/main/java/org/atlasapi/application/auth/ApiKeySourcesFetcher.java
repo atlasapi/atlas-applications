@@ -6,13 +6,10 @@ import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.persistence.application.ApplicationStore;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.common.social.model.UserRef;
 
 public class ApiKeySourcesFetcher implements ApplicationSourcesFetcher {
 
     public static final String API_KEY_QUERY_PARAMETER = "apiKey";
-    public static final String OAUTH_PROVIDER_QUERY_PARAMETER = "oauth_provider";
-    public static final String OAUTH_TOKEN_QUERY_PARAMETER = "oauth_token";
     
     private final ApplicationStore reader;
 
@@ -22,9 +19,7 @@ public class ApiKeySourcesFetcher implements ApplicationSourcesFetcher {
     
     @Override
     public ImmutableSet<String> getParameterNames() {
-        return ImmutableSet.of(API_KEY_QUERY_PARAMETER,
-                OAUTH_PROVIDER_QUERY_PARAMETER,
-                OAUTH_TOKEN_QUERY_PARAMETER);
+        return ImmutableSet.of(API_KEY_QUERY_PARAMETER);
     }
 
     @Override
@@ -38,11 +33,4 @@ public class ApiKeySourcesFetcher implements ApplicationSourcesFetcher {
             }
         return Optional.absent();
     }
-
-    @Override
-    public Optional<UserRef> userFor(HttpServletRequest request) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
 }
