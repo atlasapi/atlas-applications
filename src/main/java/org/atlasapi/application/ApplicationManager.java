@@ -48,8 +48,7 @@ public class ApplicationManager implements ApplicationStore {
                 .withConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION).build();
         
         persist(application);
-        user.addApplication(application);
-        userStore.store(user);
+        userStore.store(user.copyWithAddedApplication(application));
     }
     
     public Application requestPublisher(String slug, Publisher publisher) {

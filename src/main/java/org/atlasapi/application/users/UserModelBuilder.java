@@ -28,7 +28,7 @@ public class UserModelBuilder implements ModelBuilder<User> {
         return new SimpleModel()
             .put("id", idCodec.encode(BigInteger.valueOf(target.getId())))
             .put("role", target.getRole().toString().toLowerCase())
-            .putStrings("apps", target.getApplications())
+            .putStrings("apps", target.getApplicationSlugs())
             .putStrings("sources", ImmutableSet.copyOf(Iterables.transform(target.getSources(), new Function<Publisher, String>() {
                 @Override
                 public String apply(Publisher input) {
