@@ -16,6 +16,7 @@ public class ApplicationTranslator {
 	public static final String APPLICATION_CONFIG_KEY = "configuration";
 	public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
 	public static final String DEER_ID_KEY = "aid";
+	public static final String REVOKED_KEY = "revoked";
 	
 	private final ApplicationConfigurationTranslator configurationTranslator = new ApplicationConfigurationTranslator();
 	private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
@@ -31,6 +32,7 @@ public class ApplicationTranslator {
 		    TranslatorUtils.from(dbo, APPLICATION_CONFIG_KEY, configurationTranslator.toDBObject(application.getConfiguration()));
 		    TranslatorUtils.from(dbo, APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
 		    TranslatorUtils.from(dbo, DEER_ID_KEY, application.getDeerId());
+		    TranslatorUtils.from(dbo, REVOKED_KEY, application.isRevoked());
 		}
 		
 		return dbo;
@@ -46,13 +48,20 @@ public class ApplicationTranslator {
 			return null;
 		}
 		
+		boolean revoked = false;
+        if (dbo.containsField(REVOKED_KEY)) {
+            revoked = TranslatorUtils.toBoolean(dbo, REVOKED_KEY);
+        }
+		
 		return Application.application(applicationSlug)
 		        .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))
 		        .withDescription(TranslatorUtils.toString(dbo, APPLICATION_DESCRIPTION_KEY))
 		        .createdAt(TranslatorUtils.toDateTime(dbo, APPLICATION_CREATED_KEY))
 		        .withConfiguration(configurationTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CONFIG_KEY)))
 		        .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CREDENTIALS_KEY)))
-		        .withDeerId(TranslatorUtils.toLong(dbo, DEER_ID_KEY)).build();
+		        .withDeerId(TranslatorUtils.toLong(dbo, DEER_ID_KEY))
+		        .withRevoked(revoked)
+		        .build();
 	}
 
 }
