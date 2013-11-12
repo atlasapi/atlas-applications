@@ -1,7 +1,8 @@
-package org.atlasapi.application.users;
+package org.atlasapi.application.users.v3;
 
 import java.util.Set;
 
+import org.atlasapi.application.users.Role;
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.media.entity.Publisher;
 

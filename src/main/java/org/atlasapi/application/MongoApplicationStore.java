@@ -11,7 +11,7 @@ import static org.atlasapi.application.v3.ApplicationTranslator.APPLICATION_CONF
 import java.util.Set;
 
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.v3.User;
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.application.v3.ApplicationCredentialsTranslator;
 import org.atlasapi.application.v3.ApplicationTranslator;
