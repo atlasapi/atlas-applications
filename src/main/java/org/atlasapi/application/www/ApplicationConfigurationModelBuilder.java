@@ -2,8 +2,8 @@ package org.atlasapi.application.www;
 
 import java.util.Map;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;

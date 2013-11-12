@@ -1,6 +1,6 @@
 package org.atlasapi.application;
 
-import static org.atlasapi.application.Application.application;
+import static org.atlasapi.application.v3.Application.application;
 
 import java.util.List;
 import java.util.Set;
@@ -8,6 +8,9 @@ import java.util.UUID;
 
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationCredentials;
 import org.atlasapi.application.www.PublisherConfiguration;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;

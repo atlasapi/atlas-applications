@@ -1,10 +1,12 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableMap;

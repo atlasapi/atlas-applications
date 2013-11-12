@@ -1,9 +1,11 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfigurationTranslator;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 

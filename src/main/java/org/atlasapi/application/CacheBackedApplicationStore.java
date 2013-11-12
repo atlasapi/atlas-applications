@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.application.users.User;
+import org.atlasapi.application.v3.Application;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;
