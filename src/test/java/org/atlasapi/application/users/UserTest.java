@@ -3,9 +3,10 @@ package org.atlasapi.application.users;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.atlasapi.application.Application;
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
