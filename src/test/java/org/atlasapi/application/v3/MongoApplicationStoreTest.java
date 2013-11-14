@@ -1,4 +1,4 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,11 +6,11 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.atlasapi.application.Application;
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.application.MongoApplicationStore;
 import org.atlasapi.application.SourceStatus;
+import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationCredentials;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.junit.Before;

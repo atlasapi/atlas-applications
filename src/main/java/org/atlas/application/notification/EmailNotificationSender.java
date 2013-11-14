@@ -4,9 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-
-import org.atlasapi.application.Application;
 import org.atlasapi.application.sources.SourceRequest;
+import org.atlasapi.application.v3.Application;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 

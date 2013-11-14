@@ -1,8 +1,8 @@
 package org.atlasapi.application.www;
 
-import org.atlasapi.application.Application;
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationCredentials;
 
 import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;

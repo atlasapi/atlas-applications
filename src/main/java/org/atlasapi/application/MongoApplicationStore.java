@@ -3,16 +3,19 @@ package org.atlasapi.application;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.NO_UPSERT;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
-import static org.atlasapi.application.ApplicationConfigurationTranslator.PUBLISHER_KEY;
-import static org.atlasapi.application.ApplicationConfigurationTranslator.SOURCES_KEY;
-import static org.atlasapi.application.ApplicationConfigurationTranslator.STATE_KEY;
-import static org.atlasapi.application.ApplicationTranslator.APPLICATION_CONFIG_KEY;
-import static org.atlasapi.application.ApplicationConfigurationTranslator.WRITABLE_KEY;
+import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.WRITABLE_KEY;
+import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.PUBLISHER_KEY;
+import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.SOURCES_KEY;
+import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.STATE_KEY;
+import static org.atlasapi.application.v3.ApplicationTranslator.APPLICATION_CONFIG_KEY;
+
 import java.util.Set;
 
-import org.atlasapi.application.Application;
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationCredentialsTranslator;
+import org.atlasapi.application.v3.ApplicationTranslator;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;

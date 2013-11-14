@@ -1,8 +1,7 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
-import org.atlasapi.application.Application;
 import org.joda.time.DateTime;
-
+import org.atlasapi.application.v3.Application;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.metabroadcast.common.time.DateTimeZones;

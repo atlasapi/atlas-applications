@@ -1,8 +1,9 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
 import static org.junit.Assert.*;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationCredentials;
 import org.junit.Test;
 
 

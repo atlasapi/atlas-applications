@@ -1,6 +1,6 @@
 package org.atlasapi.application.www;
 
-import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.v3.ApplicationCredentials;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;

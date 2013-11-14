@@ -2,7 +2,7 @@ package org.atlasapi.application.sources;
 
 import java.util.Set;
 
-import org.atlasapi.application.Application;
+import org.atlasapi.application.v3.Application;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;

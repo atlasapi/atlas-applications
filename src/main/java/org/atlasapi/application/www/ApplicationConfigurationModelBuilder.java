@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;

@@ -1,6 +1,6 @@
 package org.atlasapi.application.sources;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.www.ApplicationConfigurationModelBuilder;
 import org.atlasapi.media.entity.Publisher;
 

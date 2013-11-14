@@ -74,7 +74,7 @@ public class ApplicationModule {
 	
 	public @Bean ApplicationStore applicationStore(){
 	    IdGenerator idGenerator = new MongoSequentialIdGenerator(mongo, "application");
-		return new MongoApplicationStore(mongo, idGenerator);
+	    return new MongoApplicationStore(mongo, idGenerator);
 	}
 	
 	public @Bean UserStore userStore() {
