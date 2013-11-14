@@ -1,5 +1,7 @@
 package org.atlasapi.application.users;
 
+import org.atlasapi.application.users.v3.User;
+
 import com.google.common.base.Supplier;
 import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;

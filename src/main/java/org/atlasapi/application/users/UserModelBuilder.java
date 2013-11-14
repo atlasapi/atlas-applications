@@ -3,6 +3,7 @@ package org.atlasapi.application.users;
 import java.math.BigInteger;
 
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.v3.User;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
