@@ -1,6 +1,4 @@
-package org.atlasapi.application.users;
-
-import org.atlasapi.application.users.v3.User;
+package org.atlasapi.application.users.v3;
 
 import com.google.common.base.Supplier;
 import com.metabroadcast.common.ids.IdGenerator;

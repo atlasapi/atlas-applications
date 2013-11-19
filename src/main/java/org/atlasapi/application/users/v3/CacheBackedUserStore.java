@@ -1,8 +1,6 @@
-package org.atlasapi.application.users;
+package org.atlasapi.application.users.v3;
 
 import java.util.concurrent.TimeUnit;
-
-import org.atlasapi.application.users.v3.User;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;

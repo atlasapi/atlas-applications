@@ -1,6 +1,6 @@
 package org.atlasapi.application.auth;
 
-import static org.atlasapi.application.users.Role.ADMIN;
+import static org.atlasapi.application.users.v3.Role.ADMIN;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.application.sources.SourceIdCodec;
-import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.users.v3.UserStore;
 import org.atlasapi.media.entity.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;

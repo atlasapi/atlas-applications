@@ -5,7 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
+import org.atlasapi.application.users.v3.MongoUserStore;
+import org.atlasapi.application.users.v3.Role;
 import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.users.v3.UserStore;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Before;
 import org.junit.Test;
