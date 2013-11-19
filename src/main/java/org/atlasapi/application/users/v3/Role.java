@@ -1,4 +1,4 @@
-package org.atlasapi.application.users;
+package org.atlasapi.application.users.v3;
 
 public enum Role {
 

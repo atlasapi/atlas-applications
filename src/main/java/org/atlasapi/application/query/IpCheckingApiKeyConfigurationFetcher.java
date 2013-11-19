@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.ApplicationStore;
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.ApplicationCredentials;
+import org.atlasapi.application.v3.ApplicationStore;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;

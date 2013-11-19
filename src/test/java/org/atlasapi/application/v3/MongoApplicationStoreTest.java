@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.atlasapi.application.MongoApplicationStore;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.application.v3.ApplicationConfiguration;
@@ -21,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.net.IpRange;
 import com.metabroadcast.common.persistence.MongoTestHelper;
+
 import static org.mockito.Mockito.*;
 
 public class MongoApplicationStoreTest {

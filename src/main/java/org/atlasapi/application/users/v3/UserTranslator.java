@@ -1,6 +1,5 @@
-package org.atlasapi.application.users;
+package org.atlasapi.application.users.v3;
 
-import org.atlasapi.application.users.v3.User;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableSet;

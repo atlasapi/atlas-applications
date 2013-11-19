@@ -1,9 +1,8 @@
-package org.atlasapi.application.users;
+package org.atlasapi.application.users.v3;
 
 import java.math.BigInteger;
 
 import org.atlasapi.application.sources.SourceIdCodec;
-import org.atlasapi.application.users.v3.User;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;

@@ -1,16 +1,16 @@
-package org.atlasapi.application.users;
+package org.atlasapi.application.users.v3;
 
 import java.io.IOException;
 import java.util.Map;
+
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApplicationStore;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.sources.SourceModelBuilder;
-import org.atlasapi.application.users.v3.User;
 import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationStore;
 import org.atlasapi.application.www.ApplicationModelBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

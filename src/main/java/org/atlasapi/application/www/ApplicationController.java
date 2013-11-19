@@ -14,12 +14,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlas.application.notification.EmailNotificationSender;
-import org.atlasapi.application.ApplicationManager;
-import org.atlasapi.application.users.Role;
-import org.atlasapi.application.users.UserModelBuilder;
-import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.users.v3.Role;
 import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.users.v3.UserModelBuilder;
+import org.atlasapi.application.users.v3.UserStore;
 import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationManager;
 import org.atlasapi.media.entity.Publisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
