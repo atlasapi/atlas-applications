@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.ApplicationCredentials;
