@@ -8,12 +8,13 @@ import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.atlas.application.notification.EmailNotificationSender;
-import org.atlasapi.application.ApplicationManager;
-import org.atlasapi.application.users.Role;
-import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.users.v3.Role;
 import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.users.v3.UserStore;
 import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.ApplicationManager;
 import org.atlasapi.application.www.ApplicationModelBuilder;
 import org.atlasapi.media.entity.Publisher;
 import org.springframework.stereotype.Controller;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;

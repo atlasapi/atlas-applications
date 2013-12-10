@@ -1,4 +1,4 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
 import static org.atlasapi.application.v3.Application.application;
 
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.users.v3.UserStore;
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.ApplicationCredentials;

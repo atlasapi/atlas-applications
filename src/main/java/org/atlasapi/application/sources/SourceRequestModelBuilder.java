@@ -1,7 +1,7 @@
 package org.atlasapi.application.sources;
 
 import org.atlasapi.application.v3.Application;
-import org.atlasapi.application.ApplicationManager;
+import org.atlasapi.application.v3.ApplicationManager;
 import org.atlasapi.media.entity.Publisher;
 
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;

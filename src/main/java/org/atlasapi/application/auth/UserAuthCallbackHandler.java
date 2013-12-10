@@ -5,9 +5,9 @@ import java.math.BigInteger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.users.NewUserSupplier;
-import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.users.v3.NewUserSupplier;
 import org.atlasapi.application.users.v3.User;
+import org.atlasapi.application.users.v3.UserStore;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 

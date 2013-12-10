@@ -1,4 +1,4 @@
-package org.atlasapi.application;
+package org.atlasapi.application.v3;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.NO_UPSERT;
@@ -11,11 +11,9 @@ import static org.atlasapi.application.v3.ApplicationTranslator.APPLICATION_CONF
 
 import java.util.Set;
 
-import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.application.users.v3.User;
 import org.atlasapi.application.v3.Application;
-import org.atlasapi.application.v3.ApplicationCredentialsTranslator;
-import org.atlasapi.application.v3.ApplicationTranslator;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
