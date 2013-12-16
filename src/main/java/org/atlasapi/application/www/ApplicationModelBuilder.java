@@ -28,6 +28,7 @@ public class ApplicationModelBuilder implements ModelBuilder<Application>{
 		model.put("title", application.getTitle());
 		model.put("description", application.getDescription());
 		model.put("created", application.getCreated() != null ? application.getCreated().toString("yyyy-MM-dd HH:mm:ss") : null);
+		model.put("lastUpdated", application.getLastUpdated() != null ? application.getLastUpdated().toString("yyyy-MM-dd HH:mm:ss") : null);
 		model.put("credentials", credentialsModelBuilder.build(application.getCredentials()));
 		model.put("configuration", configurationModelBuilder.build(application.getConfiguration()));
 		
