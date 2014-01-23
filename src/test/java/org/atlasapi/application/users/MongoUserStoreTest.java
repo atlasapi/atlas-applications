@@ -10,13 +10,16 @@ import org.atlasapi.application.users.v3.Role;
 import org.atlasapi.application.users.v3.User;
 import org.atlasapi.application.users.v3.UserStore;
 import org.atlasapi.media.entity.Publisher;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.social.model.UserRef;
 import com.metabroadcast.common.social.model.UserRef.UserNamespace;
+import com.metabroadcast.common.time.DateTimeZones;
 
 
 public class MongoUserStoreTest {
@@ -43,6 +46,8 @@ public class MongoUserStoreTest {
         final Set<Publisher> sources = ImmutableSet.of(Publisher.YOUTUBE, Publisher.SVERIGES_RADIO);
         
         final boolean profileComplete = true;
+        final DateTime licenceAccepted = DateTime.now(DateTimeZones.UTC);
+        
         User user = User.builder()
                 .withId(id)
                 .withUserRef(userRef)
@@ -56,6 +61,7 @@ public class MongoUserStoreTest {
                 .withSources(sources)
                 .withRole(role)
                 .withProfileComplete(profileComplete)
+                .withLicenceAccepted(licenceAccepted)
                 .build();
         store.store(user);
         
@@ -73,6 +79,7 @@ public class MongoUserStoreTest {
         assertEquals(2, retrieved.getSources().size());
         assertTrue(retrieved.getSources().contains(Publisher.YOUTUBE));
         assertTrue(retrieved.isProfileComplete());
+        assertEquals(licenceAccepted, retrieved.getLicenceAccepted().get());
     }
     
 

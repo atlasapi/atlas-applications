@@ -4,7 +4,9 @@ import java.util.Set;
 
 import org.atlasapi.application.v3.Application;
 import org.atlasapi.media.entity.Publisher;
+import org.joda.time.DateTime;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.social.model.UserRef;
@@ -21,12 +23,14 @@ public class User {
     private final String profileImage;
     private final Role role;
     private boolean profileComplete;
+    private final Optional<DateTime> licenceAccepted;
     private final Set<String> applicationSlugs;
     private final Set<Publisher> publishers;
 
     private User(Long id, UserRef userRef, String screenName, String fullName, String company,
             String email, String website, String profileImage, Role role,
-            Set<String> applicationSlugs, Set<Publisher> publishers, boolean profileComplete) {
+            Set<String> applicationSlugs, Set<Publisher> publishers, 
+            boolean profileComplete, Optional<DateTime> licenceAccepted) {
         this.id = id;
         this.userRef = userRef;
         this.screenName = screenName;
@@ -39,6 +43,7 @@ public class User {
         this.applicationSlugs = ImmutableSet.copyOf(applicationSlugs);
         this.publishers = ImmutableSet.copyOf(publishers);
         this.profileComplete = profileComplete;
+        this.licenceAccepted = licenceAccepted;
     }
 
     public Long getId() {
@@ -88,6 +93,10 @@ public class User {
     public boolean isProfileComplete() {
         return profileComplete;
     }
+    
+    public Optional<DateTime> getLicenceAccepted() {
+        return licenceAccepted;
+    }
 
     public boolean is(Role role) {
         return this.role == role;
@@ -124,7 +133,8 @@ public class User {
                     .withApplicationSlugs(this.getApplicationSlugs())
                     .withSources(this.getSources())
                     .withRole(this.getRole())
-                    .withProfileComplete(this.isProfileComplete());
+                    .withProfileComplete(this.isProfileComplete())
+                    .withLicenceAccepted(this.getLicenceAccepted().orNull());
     }
     
     public static Builder builder() {
@@ -142,6 +152,7 @@ public class User {
         private String profileImage;
         private Role role = Role.REGULAR;
         private boolean profileComplete;
+        private Optional<DateTime> licenceAccepted = Optional.absent();
         private Set<String> applicationSlugs = ImmutableSet.of();
         private Set<Publisher> publishers = ImmutableSet.of();
         
@@ -213,9 +224,14 @@ public class User {
             return this;
         }
         
+        public Builder withLicenceAccepted(DateTime licenceAccepted) {
+            this.licenceAccepted = Optional.fromNullable(licenceAccepted);
+            return this;
+        }
+        
         public User build() {
             return new User(id, userRef, screenName, fullName, company, email, website, profileImage, 
-                    role, applicationSlugs, publishers, profileComplete);
+                    role, applicationSlugs, publishers, profileComplete, licenceAccepted);
         }
     }
     
