@@ -2,6 +2,7 @@ package org.atlasapi.application.users.v3;
 
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
@@ -12,6 +13,9 @@ import com.mongodb.DBObject;
 
 public class UserTranslator {
     
+    private static final String LICENCE_ACCEPTED_KEY = "licenceAccepted";
+    private static final String PROFILE_COMPLETE_KEY = "profileComplete";
+    private static final String PROFILE_IMAGE_KEY = "profileImage";
     private static final String WEBSITE_KEY = "website";
     private static final String EMAIL_KEY = "email";
     private static final String COMPANY_KEY = "company";
@@ -32,6 +36,7 @@ public class UserTranslator {
             return null;
         }
         
+        
         BasicDBObject dbo = new BasicDBObject();
         
         TranslatorUtils.from(dbo, MongoConstants.ID, user.getId());
@@ -41,9 +46,13 @@ public class UserTranslator {
         TranslatorUtils.from(dbo, COMPANY_KEY, user.getCompany());
         TranslatorUtils.from(dbo, EMAIL_KEY, user.getEmail());
         TranslatorUtils.from(dbo, WEBSITE_KEY, user.getWebsite());
-        TranslatorUtils.from(dbo, APPS_KEY, user.getApplications());
+        TranslatorUtils.from(dbo, APPS_KEY, user.getApplicationSlugs());
         TranslatorUtils.from(dbo, MANAGES_KEY, Iterables.transform(user.getSources(), Publisher.TO_KEY));
         TranslatorUtils.from(dbo, ROLE_KEY, user.getRole().toString().toLowerCase());
+        TranslatorUtils.from(dbo, PROFILE_COMPLETE_KEY, user.isProfileComplete());
+        if (user.getLicenceAccepted().isPresent()) {
+            TranslatorUtils.fromDateTime(dbo, LICENCE_ACCEPTED_KEY, user.getLicenceAccepted().get());
+        }
         
         return dbo;
     }
@@ -53,27 +62,26 @@ public class UserTranslator {
             return null;
         }
 
-        User user = new User(TranslatorUtils.toLong(dbo, MongoConstants.ID));
+        boolean profileComplete = false;
+        if (TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY) != null) {
+            profileComplete = TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY);
+        }
         
-        user.setUserRef(userTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, USER_REF_KEY)));
-        if (dbo.containsField(SCREEN_NAME_KEY)) {
-            user.setScreenName(TranslatorUtils.toString(dbo, SCREEN_NAME_KEY));
-        }
-        if (dbo.containsField(FULL_NAME_KEY)) {
-            user.setFullName(TranslatorUtils.toString(dbo, FULL_NAME_KEY));
-        } 
-        if (dbo.containsField(COMPANY_KEY)) {
-            user.setCompany(TranslatorUtils.toString(dbo, COMPANY_KEY));
-        }
-        if (dbo.containsField(EMAIL_KEY)) {
-            user.setEmail(TranslatorUtils.toString(dbo, EMAIL_KEY));
-        }
-        if (dbo.containsField(WEBSITE_KEY)) {
-            user.setWebsite(TranslatorUtils.toString(dbo, WEBSITE_KEY));
-        }
-        user.setApplications(TranslatorUtils.toSet(dbo, APPS_KEY));
-        user.setSources(ImmutableSet.copyOf(Iterables.transform(TranslatorUtils.toSet(dbo, MANAGES_KEY),Publisher.FROM_KEY)));
-        user.setRole(Role.valueOf(TranslatorUtils.toString(dbo, ROLE_KEY).toUpperCase()));
+        User user = User.builder()
+                .withId(TranslatorUtils.toLong(dbo, MongoConstants.ID))
+                .withUserRef(userTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, USER_REF_KEY)))
+                .withScreenName(TranslatorUtils.toString(dbo, SCREEN_NAME_KEY))
+                .withFullName(TranslatorUtils.toString(dbo, FULL_NAME_KEY))
+                .withCompany(TranslatorUtils.toString(dbo, COMPANY_KEY))
+                .withEmail(TranslatorUtils.toString(dbo, EMAIL_KEY))
+                .withWebsite(TranslatorUtils.toString(dbo, WEBSITE_KEY))
+                .withProfileImage(TranslatorUtils.toString(dbo, PROFILE_IMAGE_KEY))
+                .withApplicationSlugs(TranslatorUtils.toSet(dbo, APPS_KEY))
+                .withSources(ImmutableSet.copyOf(Iterables.transform(TranslatorUtils.toSet(dbo, MANAGES_KEY),Publisher.FROM_KEY)))
+                .withRole(Role.valueOf(TranslatorUtils.toString(dbo, ROLE_KEY).toUpperCase()))
+                .withProfileComplete(profileComplete)
+                .withLicenceAccepted(TranslatorUtils.toDateTime(dbo, LICENCE_ACCEPTED_KEY))
+                .build();
         
         return user;
     }
