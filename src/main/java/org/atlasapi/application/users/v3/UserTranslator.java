@@ -2,6 +2,7 @@ package org.atlasapi.application.users.v3;
 
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
@@ -12,6 +13,7 @@ import com.mongodb.DBObject;
 
 public class UserTranslator {
     
+    private static final String LICENCE_ACCEPTED_KEY = "licenceAccepted";
     private static final String PROFILE_COMPLETE_KEY = "profileComplete";
     private static final String PROFILE_IMAGE_KEY = "profileImage";
     private static final String WEBSITE_KEY = "website";
@@ -48,6 +50,9 @@ public class UserTranslator {
         TranslatorUtils.from(dbo, MANAGES_KEY, Iterables.transform(user.getSources(), Publisher.TO_KEY));
         TranslatorUtils.from(dbo, ROLE_KEY, user.getRole().toString().toLowerCase());
         TranslatorUtils.from(dbo, PROFILE_COMPLETE_KEY, user.isProfileComplete());
+        if (user.getLicenceAccepted().isPresent()) {
+            TranslatorUtils.fromDateTime(dbo, LICENCE_ACCEPTED_KEY, user.getLicenceAccepted().get());
+        }
         
         return dbo;
     }
@@ -75,6 +80,7 @@ public class UserTranslator {
                 .withSources(ImmutableSet.copyOf(Iterables.transform(TranslatorUtils.toSet(dbo, MANAGES_KEY),Publisher.FROM_KEY)))
                 .withRole(Role.valueOf(TranslatorUtils.toString(dbo, ROLE_KEY).toUpperCase()))
                 .withProfileComplete(profileComplete)
+                .withLicenceAccepted(TranslatorUtils.toDateTime(dbo, LICENCE_ACCEPTED_KEY))
                 .build();
         
         return user;
