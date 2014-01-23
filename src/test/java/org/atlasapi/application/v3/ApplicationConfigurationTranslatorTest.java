@@ -21,19 +21,20 @@ public class ApplicationConfigurationTranslatorTest {
     public void testEncodesAndDecodesApplicationConfiguration() {
         
         ApplicationConfiguration config = ApplicationConfiguration.defaultConfiguration()
-                .request(Publisher.PA)
-                .approve(Publisher.PA)
-                .enable(Publisher.PA)
-                .copyWithPrecedence(ImmutableList.of(Publisher.PA, Publisher.BBC))
+                .enable(Publisher.BBC)
+                .request(Publisher.ITV)
+                .approve(Publisher.ITV)
+                .enable(Publisher.ITV)
+                .copyWithPrecedence(ImmutableList.of(Publisher.ITV, Publisher.BBC))
                 .copyWithWritableSources(ImmutableSet.of(Publisher.ITV));
         
         DBObject dbo = codec.toDBObject(config);
         
         ApplicationConfiguration decoded = codec.fromDBObject(dbo);
         
-        assertTrue(decoded.isEnabled(Publisher.PA));
+        assertTrue(decoded.isEnabled(Publisher.ITV));
         assertTrue(decoded.isEnabled(Publisher.BBC));
-        assertThat(decoded.orderdPublishers().get(0), is(Publisher.PA));
+        assertThat(decoded.orderdPublishers().get(0), is(Publisher.ITV));
         assertThat(decoded.orderdPublishers().get(1), is(Publisher.BBC));
         assertTrue(decoded.canWrite(Publisher.ITV));
     
