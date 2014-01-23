@@ -96,7 +96,7 @@ public class MongoApplicationStore implements ApplicationStore {
         if (!user.isPresent()) {
             return ImmutableSet.of();
         }
-        return ImmutableSet.copyOf(Iterables.transform(applications.find(where().idIn(user.get().getApplications()).build()), translatorFunction));
+        return ImmutableSet.copyOf(Iterables.transform(applications.find(where().idIn(user.get().getApplicationSlugs()).build()), translatorFunction));
     }
 
     @Override
