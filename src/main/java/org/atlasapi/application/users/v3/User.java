@@ -23,14 +23,14 @@ public class User {
     private final String profileImage;
     private final Role role;
     private boolean profileComplete;
-    private final Optional<DateTime> licenceAccepted;
+    private final Optional<DateTime> licenseAccepted;
     private final Set<String> applicationSlugs;
     private final Set<Publisher> publishers;
 
     private User(Long id, UserRef userRef, String screenName, String fullName, String company,
             String email, String website, String profileImage, Role role,
             Set<String> applicationSlugs, Set<Publisher> publishers, 
-            boolean profileComplete, Optional<DateTime> licenceAccepted) {
+            boolean profileComplete, Optional<DateTime> licenseAccepted) {
         this.id = id;
         this.userRef = userRef;
         this.screenName = screenName;
@@ -43,7 +43,7 @@ public class User {
         this.applicationSlugs = ImmutableSet.copyOf(applicationSlugs);
         this.publishers = ImmutableSet.copyOf(publishers);
         this.profileComplete = profileComplete;
-        this.licenceAccepted = licenceAccepted;
+        this.licenseAccepted = licenseAccepted;
     }
 
     public Long getId() {
@@ -94,8 +94,8 @@ public class User {
         return profileComplete;
     }
     
-    public Optional<DateTime> getLicenceAccepted() {
-        return licenceAccepted;
+    public Optional<DateTime> getLicenseAccepted() {
+        return licenseAccepted;
     }
 
     public boolean is(Role role) {
@@ -134,7 +134,7 @@ public class User {
                     .withSources(this.getSources())
                     .withRole(this.getRole())
                     .withProfileComplete(this.isProfileComplete())
-                    .withLicenceAccepted(this.getLicenceAccepted().orNull());
+                    .withLicenseAccepted(this.getLicenseAccepted().orNull());
     }
     
     public static Builder builder() {
@@ -152,7 +152,7 @@ public class User {
         private String profileImage;
         private Role role = Role.REGULAR;
         private boolean profileComplete;
-        private Optional<DateTime> licenceAccepted = Optional.absent();
+        private Optional<DateTime> licenseAccepted = Optional.absent();
         private Set<String> applicationSlugs = ImmutableSet.of();
         private Set<Publisher> publishers = ImmutableSet.of();
         
@@ -224,14 +224,14 @@ public class User {
             return this;
         }
         
-        public Builder withLicenceAccepted(DateTime licenceAccepted) {
-            this.licenceAccepted = Optional.fromNullable(licenceAccepted);
+        public Builder withLicenseAccepted(DateTime licenseAccepted) {
+            this.licenseAccepted = Optional.fromNullable(licenseAccepted);
             return this;
         }
         
         public User build() {
             return new User(id, userRef, screenName, fullName, company, email, website, profileImage, 
-                    role, applicationSlugs, publishers, profileComplete, licenceAccepted);
+                    role, applicationSlugs, publishers, profileComplete, licenseAccepted);
         }
     }
     
