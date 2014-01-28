@@ -3,17 +3,16 @@ package org.atlasapi.application.v3;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.NO_UPSERT;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
-import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.WRITABLE_KEY;
 import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.PUBLISHER_KEY;
 import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.SOURCES_KEY;
 import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.STATE_KEY;
+import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.WRITABLE_KEY;
 import static org.atlasapi.application.v3.ApplicationTranslator.APPLICATION_CONFIG_KEY;
 
 import java.util.Set;
 
-import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.application.users.v3.User;
-import org.atlasapi.application.v3.Application;
+import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
@@ -23,7 +22,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.text.MoreStrings;
 import com.mongodb.CommandResult;
 import com.mongodb.DBCollection;

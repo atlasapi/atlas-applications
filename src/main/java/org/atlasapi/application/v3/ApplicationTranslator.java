@@ -1,6 +1,7 @@
 package org.atlasapi.application.v3;
 
 import org.joda.time.DateTime;
+
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -50,14 +51,15 @@ public class ApplicationTranslator {
 			return null;
 		}
 		
-		DateTime lastUpdated = null;
-		if (dbo.containsField(APPLICATION_LAST_UPDATED_KEY)) {
-		    lastUpdated = TranslatorUtils.toDateTime(dbo, APPLICATION_LAST_UPDATED_KEY);
-		}
 		boolean revoked = false;
         if (dbo.containsField(REVOKED_KEY)) {
             revoked = TranslatorUtils.toBoolean(dbo, REVOKED_KEY);
         }
+        
+		DateTime lastUpdated = null;
+		if (dbo.containsField(APPLICATION_LAST_UPDATED_KEY)) {
+		    lastUpdated = TranslatorUtils.toDateTime(dbo, APPLICATION_LAST_UPDATED_KEY);
+		}
 
 		return Application.application(applicationSlug)
 		        .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))

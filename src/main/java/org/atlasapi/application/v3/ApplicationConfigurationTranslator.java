@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.atlasapi.application.v3.SourceStatus;
-import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableMap;

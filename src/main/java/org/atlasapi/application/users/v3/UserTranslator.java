@@ -20,11 +20,11 @@ public class UserTranslator {
     private static final String EMAIL_KEY = "email";
     private static final String COMPANY_KEY = "company";
     private static final String FULL_NAME_KEY = "fullName";
+    private static final String SCREEN_NAME_KEY = "screenName";
+    private static final String ROLE_KEY = "role";
+    private static final String MANAGES_KEY = "manages";
     private static final String APPS_KEY = "apps";
     private static final String USER_REF_KEY = "userRef";
-    private static final String MANAGES_KEY = "manages";
-    private static final String ROLE_KEY = "role";
-    private static final String SCREEN_NAME_KEY = "screenName";
     private final UserRefTranslator userTranslator;
 
     public UserTranslator(UserRefTranslator userTranslator) {
