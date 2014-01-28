@@ -46,6 +46,7 @@ public class UserTranslator {
         TranslatorUtils.from(dbo, COMPANY_KEY, user.getCompany());
         TranslatorUtils.from(dbo, EMAIL_KEY, user.getEmail());
         TranslatorUtils.from(dbo, WEBSITE_KEY, user.getWebsite());
+        TranslatorUtils.from(dbo, PROFILE_IMAGE_KEY, user.getProfileImage());
         TranslatorUtils.from(dbo, APPS_KEY, user.getApplicationSlugs());
         TranslatorUtils.from(dbo, MANAGES_KEY, Iterables.transform(user.getSources(), Publisher.TO_KEY));
         TranslatorUtils.from(dbo, ROLE_KEY, user.getRole().toString().toLowerCase());
