@@ -1,6 +1,7 @@
 package org.atlasapi.application.v3;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -21,10 +22,12 @@ public class ApplicationConfigurationTranslatorTest {
     public void testEncodesAndDecodesApplicationConfiguration() {
         
         ApplicationConfiguration config = ApplicationConfiguration.defaultConfiguration()
+                .agreeLicense(Publisher.BBC)
                 .enable(Publisher.BBC)
                 .request(Publisher.ITV)
                 .approve(Publisher.ITV)
                 .enable(Publisher.ITV)
+                .request(Publisher.NETFLIX)
                 .copyWithPrecedence(ImmutableList.of(Publisher.ITV, Publisher.BBC))
                 .copyWithWritableSources(ImmutableSet.of(Publisher.ITV));
         
@@ -37,7 +40,8 @@ public class ApplicationConfigurationTranslatorTest {
         assertThat(decoded.orderdPublishers().get(0), is(Publisher.ITV));
         assertThat(decoded.orderdPublishers().get(1), is(Publisher.BBC));
         assertTrue(decoded.canWrite(Publisher.ITV));
-    
+        assertEquals(SourceStatus.REQUESTED, decoded.statusOf(Publisher.NETFLIX));
+        assertEquals(SourceStatus.ENABLEABLE, decoded.statusOf(Publisher.PA));
     }
 
 }
