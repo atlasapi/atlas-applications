@@ -93,6 +93,8 @@ public class ApplicationConfigurationTranslator {
                 return SourceStatus.REQUESTED;
             case REVOKED:
                 return SourceStatus.REVOKED;
+            case ENABLEABLE:
+                return SourceStatus.ENABLEABLE;
             default:
                 return SourceStatus.UNAVAILABLE;
         }
