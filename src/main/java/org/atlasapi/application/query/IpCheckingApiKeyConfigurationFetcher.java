@@ -32,14 +32,21 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     }
 
     @Override
-    public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) {
+    public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) throws ApiKeyNotFoundException, RevokedApiKeyException, InvalidIpForApiKeyException {
         if (request != null) {
             String apiKey = request.getParameter(API_KEY_QUERY_PARAMETER);
             if (apiKey != null) {
                 Optional<Application> app = reader.applicationForKey(apiKey);
-                if (app.isPresent() && validIp(app.get().getCredentials(), request)) {
-                    return Maybe.fromPossibleNullValue(app.get().getConfiguration());
+                if (!app.isPresent()) {
+                    throw new ApiKeyNotFoundException(apiKey);
                 }
+                if (!validIp(app.get().getCredentials(), request)) {
+                    throw new InvalidIpForApiKeyException(app.get().getCredentials().getApiKey());
+                }
+                if (app.get().isRevoked()) {
+                    throw new RevokedApiKeyException(app.get().getCredentials().getApiKey());
+                }
+                return Maybe.fromPossibleNullValue(app.get().getConfiguration());
             }
         }
         return Maybe.nothing();
