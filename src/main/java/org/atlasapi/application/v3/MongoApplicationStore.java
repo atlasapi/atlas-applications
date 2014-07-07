@@ -50,7 +50,6 @@ public class MongoApplicationStore implements ApplicationStore {
 	
 	public MongoApplicationStore(DatabasedMongo mongo, IdGenerator idGenerator) {
 		this.applications = mongo.collection(APPLICATION_COLLECTION);
-		this.applications.setReadPreference(ReadPreference.primary());
 		this.mongo = mongo;
 		this.idGenerator = idGenerator;
 	}
