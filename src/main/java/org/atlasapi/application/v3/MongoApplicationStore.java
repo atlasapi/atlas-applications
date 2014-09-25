@@ -32,13 +32,10 @@ import com.mongodb.ReadPreference;
 public class MongoApplicationStore implements ApplicationStore {
 	
 	public static final String APPLICATION_COLLECTION = "applications";
-	
-	private final ApplicationTranslator translator = new ApplicationTranslator();
-	
-	private final DBCollection applications;
 
-	private DatabasedMongo mongo;
-	
+	private final ApplicationTranslator translator = new ApplicationTranslator();
+	private final DBCollection applications;
+	private final DatabasedMongo mongo;
 	private final IdGenerator idGenerator;
 
     private final Function<DBObject, Application> translatorFunction = new Function<DBObject, Application>(){
@@ -53,6 +50,11 @@ public class MongoApplicationStore implements ApplicationStore {
 		this.mongo = mongo;
 		this.idGenerator = idGenerator;
 	}
+	
+	public MongoApplicationStore(DatabasedMongo mongo, IdGenerator idGenerator, ReadPreference readPreference) {
+	    this(mongo, idGenerator);
+        this.applications.setReadPreference(readPreference);
+    }
 	
 	@Override
 	public Optional<Application> applicationForKey(String key) {
