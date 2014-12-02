@@ -41,7 +41,7 @@ public class ApplicationConfigurationTranslatorTest {
         assertThat(decoded.orderdPublishers().get(1), is(Publisher.BBC));
         assertTrue(decoded.canWrite(Publisher.ITV));
         assertEquals(SourceStatus.REQUESTED, decoded.statusOf(Publisher.NETFLIX));
-        assertEquals(SourceStatus.ENABLEABLE, decoded.statusOf(Publisher.PA));
+        assertEquals(SourceStatus.AVAILABLE_DISABLED, decoded.statusOf(Publisher.PA));
     }
 
 }
