@@ -6,12 +6,12 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
 import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.PUBLISHER_KEY;
 import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.SOURCES_KEY;
 import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.STATE_KEY;
+import static org.atlasapi.application.v3.ApplicationConfigurationTranslator.WRITABLE_KEY;
 import static org.atlasapi.application.v3.ApplicationTranslator.APPLICATION_CONFIG_KEY;
 
 import java.util.Set;
 
 import org.atlasapi.application.users.v3.User;
-import org.atlasapi.application.v3.Application;
 import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.media.entity.Publisher;
 
@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.text.MoreStrings;
 import com.mongodb.CommandResult;
 import com.mongodb.DBCollection;
@@ -114,5 +113,10 @@ public class MongoApplicationStore implements ApplicationStore {
     public Iterable<Application> allApplications() {
         return Iterables.transform(applications.find(where().build()), translatorFunction);
     }
-	
+
+	@Override
+	public Set<Application> writersFor(Publisher source) {
+	    String sourceField = String.format("%s.%s", APPLICATION_CONFIG_KEY, WRITABLE_KEY);
+	    return ImmutableSet.copyOf(Iterables.transform(applications.find(where().fieldEquals(sourceField, source.key()).build()), translatorFunction));
+	}
 }

@@ -36,6 +36,7 @@ public class UserTranslator {
             return null;
         }
         
+        
         BasicDBObject dbo = new BasicDBObject();
         
         TranslatorUtils.from(dbo, MongoConstants.ID, user.getId());
@@ -61,7 +62,7 @@ public class UserTranslator {
         if (dbo == null) {
             return null;
         }
-        
+
         boolean profileComplete = false;
         if (TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY) != null) {
             profileComplete = TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY);
