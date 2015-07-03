@@ -23,11 +23,13 @@ public class ApplicationConfigurationTranslator {
     public static final String SOURCES_KEY = "sources";
 	public static final String PRECEDENCE_KEY = "precedence";
 	public static final String WRITABLE_KEY = "writable";
+	public static final String IMAGE_PRECEDENCE_ENABLED_KEY = "imagePrecedenceEnabled";
 
 	public DBObject toDBObject(ApplicationConfiguration configuration) {
 		BasicDBObject dbo = new BasicDBObject();
 		
 		TranslatorUtils.from(dbo, SOURCES_KEY, sourceStatusesToList(configuration.sourceStatuses()));
+		TranslatorUtils.from(dbo, IMAGE_PRECEDENCE_ENABLED_KEY, configuration.imagePrecedenceEnabledRawValue());
 		
 		if (configuration.precedenceEnabled()) { 
 			TranslatorUtils.fromList(dbo, Lists.transform(configuration.precedence(), Publisher.TO_KEY), PRECEDENCE_KEY);
@@ -56,11 +58,12 @@ public class ApplicationConfigurationTranslator {
 	    List<DBObject> statusDbos = TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY);
         Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos);
 	
+        Boolean imagePrecedenceEnabled = TranslatorUtils.toBoolean(dbo, IMAGE_PRECEDENCE_ENABLED_KEY);
 		List<Publisher> precedence = sourcePrecedenceFrom(dbo);
 
 		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
         Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
-        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources);
+        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources, imagePrecedenceEnabled);
 	}
 
     private List<Publisher> sourcePrecedenceFrom(DBObject dbo) {
