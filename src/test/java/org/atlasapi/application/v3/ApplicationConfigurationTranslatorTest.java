@@ -29,7 +29,8 @@ public class ApplicationConfigurationTranslatorTest {
                 .enable(Publisher.ITV)
                 .request(Publisher.NETFLIX)
                 .copyWithPrecedence(ImmutableList.of(Publisher.ITV, Publisher.BBC))
-                .copyWithWritableSources(ImmutableSet.of(Publisher.ITV));
+                .copyWithWritableSources(ImmutableSet.of(Publisher.ITV))
+                .copyWithContentHierarchyPrecedence(ImmutableList.of(Publisher.BBC, Publisher.ITV));
         
         DBObject dbo = codec.toDBObject(config);
         
@@ -42,6 +43,7 @@ public class ApplicationConfigurationTranslatorTest {
         assertTrue(decoded.canWrite(Publisher.ITV));
         assertEquals(SourceStatus.REQUESTED, decoded.statusOf(Publisher.NETFLIX));
         assertEquals(SourceStatus.AVAILABLE_DISABLED, decoded.statusOf(Publisher.PA));
+        assertEquals(config.contentHierarchyPrecedence().get(), decoded.contentHierarchyPrecedence().get());
     }
 
 }

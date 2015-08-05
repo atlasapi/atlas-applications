@@ -8,6 +8,7 @@ import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
@@ -23,6 +24,7 @@ public class ApplicationConfigurationTranslator {
     public static final String SOURCES_KEY = "sources";
 	public static final String PRECEDENCE_KEY = "precedence";
 	public static final String WRITABLE_KEY = "writable";
+	public static final String CONTENT_HIERARCHY_PRECEDENCE = "contentHierarchyPrecedence";
 	public static final String IMAGE_PRECEDENCE_ENABLED_KEY = "imagePrecedenceEnabled";
 
 	public DBObject toDBObject(ApplicationConfiguration configuration) {
@@ -35,6 +37,12 @@ public class ApplicationConfigurationTranslator {
 			TranslatorUtils.fromList(dbo, Lists.transform(configuration.precedence(), Publisher.TO_KEY), PRECEDENCE_KEY);
 		} else {
 			dbo.put(PRECEDENCE_KEY, null);
+		}
+		
+		if (configuration.contentHierarchyPrecedence().isPresent()) {
+		    dbo.put(CONTENT_HIERARCHY_PRECEDENCE, 
+		            Lists.transform(configuration.contentHierarchyPrecedence().get(), Publisher.TO_KEY)
+		           );
 		}
 		
 		dbo.put(WRITABLE_KEY, Lists.transform(configuration.writableSources().asList(), Publisher.TO_KEY));
@@ -63,7 +71,14 @@ public class ApplicationConfigurationTranslator {
 
 		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
         Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
-        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources, imagePrecedenceEnabled);
+        
+        Optional<List<Publisher>> contentHierarchyPrecedenceSources = Optional.absent();
+        if (dbo.containsField(CONTENT_HIERARCHY_PRECEDENCE)) {
+            List<String> contentHierarchyPrecedenceKeys = TranslatorUtils.toList(dbo,  CONTENT_HIERARCHY_PRECEDENCE);
+            contentHierarchyPrecedenceSources = Optional.of(Lists.transform(contentHierarchyPrecedenceKeys, Publisher.FROM_KEY));
+        }
+        
+        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources, imagePrecedenceEnabled, contentHierarchyPrecedenceSources);
 	}
 
     private List<Publisher> sourcePrecedenceFrom(DBObject dbo) {
