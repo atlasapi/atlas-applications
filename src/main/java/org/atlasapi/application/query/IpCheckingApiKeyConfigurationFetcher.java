@@ -35,6 +35,9 @@ public class IpCheckingApiKeyConfigurationFetcher implements ApplicationConfigur
     public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) throws ApiKeyNotFoundException, RevokedApiKeyException, InvalidIpForApiKeyException {
         if (request != null) {
             String apiKey = request.getParameter(API_KEY_QUERY_PARAMETER);
+            if (apiKey == null) {
+                apiKey = request.getHeader(API_KEY_QUERY_PARAMETER);
+            }
             if (apiKey != null) {
                 Optional<Application> app = reader.applicationForKey(apiKey);
                 if (!app.isPresent()) {
