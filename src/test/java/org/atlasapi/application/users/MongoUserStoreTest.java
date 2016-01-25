@@ -44,6 +44,7 @@ public class MongoUserStoreTest {
         final Set<Publisher> sources = ImmutableSet.of(Publisher.YOUTUBE, Publisher.SVERIGES_RADIO);
         
         final boolean profileComplete = true;
+        final boolean profileDeactivated = true;
         final DateTime licenseAccepted = DateTime.now(DateTimeZones.UTC);
         
         User user = User.builder()
@@ -60,6 +61,7 @@ public class MongoUserStoreTest {
                 .withRole(role)
                 .withProfileComplete(profileComplete)
                 .withLicenseAccepted(licenseAccepted)
+                .withProfileDeactivated(profileDeactivated)
                 .build();
         store.store(user);
         
@@ -78,6 +80,7 @@ public class MongoUserStoreTest {
         assertTrue(retrieved.getSources().contains(Publisher.YOUTUBE));
         assertTrue(retrieved.isProfileComplete());
         assertEquals(licenseAccepted, retrieved.getLicenseAccepted().get());
+        assertTrue(retrieved.isProfileDeactivated());
     }
     
 
