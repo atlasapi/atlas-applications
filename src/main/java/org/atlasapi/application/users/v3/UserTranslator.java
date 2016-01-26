@@ -25,6 +25,7 @@ public class UserTranslator {
     private static final String MANAGES_KEY = "manages";
     private static final String APPS_KEY = "apps";
     private static final String USER_REF_KEY = "userRef";
+    private static final String PROFILE_DEACTIVATED_KEY = "profileDeactivated";
     private final UserRefTranslator userTranslator;
 
     public UserTranslator(UserRefTranslator userTranslator) {
@@ -50,6 +51,7 @@ public class UserTranslator {
         TranslatorUtils.from(dbo, MANAGES_KEY, Iterables.transform(user.getSources(), Publisher.TO_KEY));
         TranslatorUtils.from(dbo, ROLE_KEY, user.getRole().toString().toLowerCase());
         TranslatorUtils.from(dbo, PROFILE_COMPLETE_KEY, user.isProfileComplete());
+        TranslatorUtils.from(dbo, PROFILE_DEACTIVATED_KEY, user.isProfileDeactivated());
         if (user.getLicenseAccepted().isPresent()) {
             TranslatorUtils.fromDateTime(dbo, LICENSE_ACCEPTED_KEY, user.getLicenseAccepted().get());
         }
@@ -66,6 +68,11 @@ public class UserTranslator {
         if (TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY) != null) {
             profileComplete = TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY);
         }
+
+        boolean profileDeactivated = false;
+        if (TranslatorUtils.toBoolean(dbo, PROFILE_DEACTIVATED_KEY) != null) {
+            profileDeactivated = TranslatorUtils.toBoolean(dbo, PROFILE_DEACTIVATED_KEY);
+        }
         
         User user = User.builder()
                 .withId(TranslatorUtils.toLong(dbo, MongoConstants.ID))
@@ -81,6 +88,7 @@ public class UserTranslator {
                 .withRole(Role.valueOf(TranslatorUtils.toString(dbo, ROLE_KEY).toUpperCase()))
                 .withProfileComplete(profileComplete)
                 .withLicenseAccepted(TranslatorUtils.toDateTime(dbo, LICENSE_ACCEPTED_KEY))
+                .withProfileDeactivated(profileDeactivated)
                 .build();
         
         return user;
