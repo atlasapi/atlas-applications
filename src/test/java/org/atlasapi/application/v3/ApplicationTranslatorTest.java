@@ -20,8 +20,8 @@ public class ApplicationTranslatorTest {
                 .withLastUpdated(fixed)
                 .withDeerId(123L)
                 .withRevoked(true)
-                .withNumberOfUsers(27L)
                 .withStripeCustomerId("Stripe1234")
+                .withStripeSubscriptionId("Sub1234")
                 .build();
         
         ApplicationTranslator translator = new ApplicationTranslator();
@@ -31,7 +31,7 @@ public class ApplicationTranslatorTest {
         assertEquals(app.getLastUpdated(), translated.getLastUpdated());
         assertEquals(app.getDeerId(), translated.getDeerId());
         assertEquals(app.isRevoked(), translated.isRevoked());
-        assertEquals(app.getNumberOfUsers(), translated.getNumberOfUsers());
         assertEquals(app.getStripeCustomerId().get(), translated.getStripeCustomerId().get());
+        assertEquals(app.getStripeSubscriptionId().get(), translated.getStripeSubscriptionId().get());
     }
 }

@@ -20,6 +20,7 @@ public class ApplicationTranslator {
 	public static final String REVOKED_KEY = "revoked";
 	public static final String NUMBER_OF_USERS_KEY = "numberOfUsers";
 	public static final String STRIPE_CUSTOMER_ID_KEY = "stripeCustomerId";
+	public static final String STRIPE_SUBSCRIPTION_ID_KEY = "stripeSubscriptionId";
 	
 	private final ApplicationConfigurationTranslator configurationTranslator = new ApplicationConfigurationTranslator();
 	private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
@@ -37,8 +38,8 @@ public class ApplicationTranslator {
 		    TranslatorUtils.from(dbo, APPLICATION_CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
 		    TranslatorUtils.from(dbo, DEER_ID_KEY, application.getDeerId());
 		    TranslatorUtils.from(dbo, REVOKED_KEY, application.isRevoked());
-		    TranslatorUtils.from(dbo, NUMBER_OF_USERS_KEY, application.getNumberOfUsers());
 		    TranslatorUtils.from(dbo, STRIPE_CUSTOMER_ID_KEY, application.getStripeCustomerId().orNull());
+            TranslatorUtils.from(dbo, STRIPE_SUBSCRIPTION_ID_KEY, application.getStripeSubscriptionId().orNull());
 		}
 		return dbo;
 	}
@@ -62,11 +63,6 @@ public class ApplicationTranslator {
 		if (dbo.containsField(APPLICATION_LAST_UPDATED_KEY)) {
 		    lastUpdated = TranslatorUtils.toDateTime(dbo, APPLICATION_LAST_UPDATED_KEY);
 		}
-		
-		Long numberOfUsers = Long.valueOf(1L);
-		if (dbo.containsField(NUMBER_OF_USERS_KEY)) {
-		    numberOfUsers = TranslatorUtils.toLong(dbo, NUMBER_OF_USERS_KEY);
-		}
 
 		return Application.application(applicationSlug)
 		        .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))
@@ -77,8 +73,8 @@ public class ApplicationTranslator {
 		        .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CREDENTIALS_KEY)))
 		        .withDeerId(TranslatorUtils.toLong(dbo, DEER_ID_KEY))
 		        .withRevoked(revoked)
-		        .withNumberOfUsers(numberOfUsers)
 		        .withStripeCustomerId(TranslatorUtils.toString(dbo, STRIPE_CUSTOMER_ID_KEY))
+		        .withStripeSubscriptionId(TranslatorUtils.toString(dbo, STRIPE_SUBSCRIPTION_ID_KEY))
 		        .build();
 	}
 
