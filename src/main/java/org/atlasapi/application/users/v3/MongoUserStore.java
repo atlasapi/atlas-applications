@@ -14,6 +14,7 @@ import com.mongodb.DBObject;
 
 public class MongoUserStore implements UserStore {
 
+    public static final String EMAIL = "email";
     private DBCollection users;
     private UserTranslator translator;
     private UserRefTranslator userRefTranslator;
@@ -32,6 +33,13 @@ public class MongoUserStore implements UserStore {
     @Override
     public Optional<User> userForId(Long userId) {
         return Optional.fromNullable(translator.fromDBObject(users.findOne(userId)));
+    }
+
+    @Override
+    public Optional<User> userForEmail(String email) {
+        BasicDBObject emailField = new BasicDBObject();
+        emailField.append(EMAIL, email);
+        return Optional.fromNullable(translator.fromDBObject(users.findOne(emailField)));
     }
 
     @Override

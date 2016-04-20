@@ -1,6 +1,7 @@
 package org.atlasapi.application.users;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
@@ -23,30 +24,26 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class MongoUserStoreTest {
     
     private UserStore store;
-    
+
+    private final Long id = Long.valueOf(5000);
+    private final UserRef userRef = new UserRef(5000, UserNamespace.TWITTER, "test");
+    private final String screenName = "test123";
+    private final String fullName = "Test One Two Three";
+    private final String company = "the company";
+    private final String email = "me@example.com";
+    private final String website = "http://example.com";
+    private final String profileImage = "http://example.com/image.png";
+    private final Role role = Role.REGULAR;
+    private final Set<String> applicationSlugs = ImmutableSet.of("app1", "app2");
+    private final Set<Publisher> sources = ImmutableSet.of(Publisher.YOUTUBE, Publisher.SVERIGES_RADIO);
+
+    private final boolean profileComplete = true;
+    private final boolean profileDeactivated = true;
+    private final DateTime licenseAccepted = DateTime.now(DateTimeZones.UTC);
     @Before
     public void setup() {
         store = new MongoUserStore(MongoTestHelper.anEmptyTestDatabase());
-    }
-    
-    @Test 
-    public void testUserPersists() {
-        final Long id = Long.valueOf(5000);
-        final UserRef userRef = new UserRef(5000, UserNamespace.TWITTER, "test");
-        final String screenName = "test123";
-        final String fullName = "Test One Two Three";
-        final String company = "the company";
-        final String email = "me@example.com";
-        final String website = "http://example.com";
-        final String profileImage = "http://example.com/image.png";
-        final Role role = Role.REGULAR;
-        final Set<String> applicationSlugs = ImmutableSet.of("app1", "app2");
-        final Set<Publisher> sources = ImmutableSet.of(Publisher.YOUTUBE, Publisher.SVERIGES_RADIO);
-        
-        final boolean profileComplete = true;
-        final boolean profileDeactivated = true;
-        final DateTime licenseAccepted = DateTime.now(DateTimeZones.UTC);
-        
+
         User user = User.builder()
                 .withId(id)
                 .withUserRef(userRef)
@@ -64,7 +61,10 @@ public class MongoUserStoreTest {
                 .withProfileDeactivated(profileDeactivated)
                 .build();
         store.store(user);
-        
+    }
+    
+    @Test 
+    public void testUserPersists() {
         User retrieved = store.userForRef(userRef).get();
         assertEquals(id, retrieved.getId());
         assertEquals(userRef, retrieved.getUserRef());
@@ -82,6 +82,11 @@ public class MongoUserStoreTest {
         assertEquals(licenseAccepted, retrieved.getLicenseAccepted().get());
         assertTrue(retrieved.isProfileDeactivated());
     }
-    
+
+    @Test
+    public void retrievesUserByEmail() {
+        User retrievedByEmail = store.userForEmail(email).get();
+        assertEquals(email, retrievedByEmail.getEmail());
+    }
 
 }
