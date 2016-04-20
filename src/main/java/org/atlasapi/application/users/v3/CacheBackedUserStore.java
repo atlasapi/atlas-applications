@@ -13,6 +13,7 @@ public class CacheBackedUserStore implements UserStore {
     private final UserStore delegate;
     private LoadingCache<UserRef, Optional<User>> userRefCache;
     private LoadingCache<Long, Optional<User>> idCache;
+    private LoadingCache<String, Optional<User>> emailCache;
 
     public CacheBackedUserStore(final UserStore delegate) {
         this.delegate = delegate;
@@ -28,11 +29,22 @@ public class CacheBackedUserStore implements UserStore {
                 return delegate.userForId(key);
             }
         });
+        this.emailCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<User>>() {
+            @Override
+            public Optional<User> load(String email) throws Exception {
+                return delegate.userForEmail(email);
+            }
+        });
     }
     
     @Override
     public Optional<User> userForRef(UserRef ref) {
         return userRefCache.getUnchecked(ref);
+    }
+
+    @Override
+    public Optional<User> userForEmail(String email) {
+        return emailCache.getUnchecked(email);
     }
 
     @Override
@@ -45,6 +57,7 @@ public class CacheBackedUserStore implements UserStore {
         delegate.store(user);
         userRefCache.invalidate(user.getUserRef());
         idCache.invalidate(user.getId());
+        emailCache.invalidate(user.getEmail());
     }
 
 }
