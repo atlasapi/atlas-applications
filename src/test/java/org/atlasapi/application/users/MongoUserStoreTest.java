@@ -26,6 +26,7 @@ public class MongoUserStoreTest {
     private UserStore store;
 
     private final Long id = Long.valueOf(5000);
+    private final Long id2 = Long.valueOf(5000);
     private final UserRef userRef = new UserRef(5000, UserNamespace.TWITTER, "test");
     private final String screenName = "test123";
     private final String fullName = "Test One Two Three";
@@ -60,7 +61,24 @@ public class MongoUserStoreTest {
                 .withLicenseAccepted(licenseAccepted)
                 .withProfileDeactivated(profileDeactivated)
                 .build();
+        User user2 = User.builder()
+                .withId(id2)
+                .withUserRef(userRef)
+                .withScreenName(screenName)
+                .withFullName(fullName)
+                .withCompany(company)
+                .withEmail(email)
+                .withWebsite(website)
+                .withProfileImage(profileImage)
+                .withApplicationSlugs(applicationSlugs)
+                .withSources(sources)
+                .withRole(role)
+                .withProfileComplete(profileComplete)
+                .withLicenseAccepted(licenseAccepted)
+                .withProfileDeactivated(profileDeactivated)
+                .build();
         store.store(user);
+        store.store(user2);
     }
     
     @Test 
@@ -84,9 +102,9 @@ public class MongoUserStoreTest {
     }
 
     @Test
-    public void retrievesUserByEmail() {
-        User retrievedByEmail = store.userForEmail(email).get();
-        assertEquals(email, retrievedByEmail.getEmail());
+    public void retrievesUserAccountsByEmail() {
+        Set<User> retrievedByEmail = store.userAccountsForEmail(email);
+        assertTrue(retrievedByEmail.size() == 2);
     }
 
 }

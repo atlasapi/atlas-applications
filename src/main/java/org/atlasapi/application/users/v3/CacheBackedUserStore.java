@@ -1,5 +1,6 @@
 package org.atlasapi.application.users.v3;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Optional;
@@ -13,7 +14,7 @@ public class CacheBackedUserStore implements UserStore {
     private final UserStore delegate;
     private LoadingCache<UserRef, Optional<User>> userRefCache;
     private LoadingCache<Long, Optional<User>> idCache;
-    private LoadingCache<String, Optional<User>> emailCache;
+    private LoadingCache<String, Set<User>> emailCache;
 
     public CacheBackedUserStore(final UserStore delegate) {
         this.delegate = delegate;
@@ -35,10 +36,10 @@ public class CacheBackedUserStore implements UserStore {
         this.emailCache = CacheBuilder
                 .newBuilder()
                 .expireAfterAccess(10, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, Optional<User>>() {
+                .build(new CacheLoader<String, Set<User>>() {
                     @Override
-                    public Optional<User> load(String email) throws Exception {
-                        return delegate.userForEmail(email);
+                    public Set<User> load(String email) throws Exception {
+                        return delegate.userAccountsForEmail(email);
                     }
                 });
     }
@@ -49,7 +50,7 @@ public class CacheBackedUserStore implements UserStore {
     }
 
     @Override
-    public Optional<User> userForEmail(String email) {
+    public Set<User> userAccountsForEmail(String email) {
         return emailCache.getUnchecked(email);
     }
 
