@@ -1,5 +1,7 @@
 package org.atlasapi.application.users.v3;
 
+import java.util.Set;
+
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.UPSERT;
@@ -8,8 +10,11 @@ import com.google.common.base.Optional;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.model.UserRef;
 import com.metabroadcast.common.social.model.translator.UserRefTranslator;
+
+import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 public class MongoUserStore implements UserStore {
@@ -36,10 +41,15 @@ public class MongoUserStore implements UserStore {
     }
 
     @Override
-    public Optional<User> userForEmail(String email) {
+    public Set<User> userAccountsForEmail(String email) {
         BasicDBObject emailField = new BasicDBObject();
         emailField.append(EMAIL, email);
-        return Optional.fromNullable(translator.fromDBObject(users.findOne(emailField)));
+        DBCursor dbObjects = users.find(emailField);
+        Set<User> userAccounts = Sets.newHashSet();
+        for (DBObject dbObject : dbObjects) {
+            userAccounts.add(translator.fromDBObject(dbObject));
+        }
+        return userAccounts;
     }
 
     @Override
