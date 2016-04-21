@@ -26,7 +26,7 @@ public class MongoUserStoreTest {
     private UserStore store;
 
     private final Long id = Long.valueOf(5000);
-    private final Long id2 = Long.valueOf(5000);
+    private final Long id2 = Long.valueOf(4000);
     private final UserRef userRef = new UserRef(5000, UserNamespace.TWITTER, "test");
     private final String screenName = "test123";
     private final String fullName = "Test One Two Three";
