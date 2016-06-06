@@ -40,7 +40,9 @@ public class UserTranslator {
         BasicDBObject dbo = new BasicDBObject();
         
         TranslatorUtils.from(dbo, MongoConstants.ID, user.getId());
-        TranslatorUtils.from(dbo, USER_REF_KEY, userTranslator.toDBObject(user.getUserRef()));
+        if (user.getUserRef() != null) {
+            TranslatorUtils.from(dbo, USER_REF_KEY, userTranslator.toDBObject(user.getUserRef()));
+        }
         TranslatorUtils.from(dbo, SCREEN_NAME_KEY, user.getScreenName());
         TranslatorUtils.from(dbo, FULL_NAME_KEY, user.getFullName());
         TranslatorUtils.from(dbo, COMPANY_KEY, user.getCompany());
@@ -73,10 +75,9 @@ public class UserTranslator {
         if (TranslatorUtils.toBoolean(dbo, PROFILE_DEACTIVATED_KEY) != null) {
             profileDeactivated = TranslatorUtils.toBoolean(dbo, PROFILE_DEACTIVATED_KEY);
         }
-        
-        User user = User.builder()
+
+        User.Builder user = User.builder()
                 .withId(TranslatorUtils.toLong(dbo, MongoConstants.ID))
-                .withUserRef(userTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, USER_REF_KEY)))
                 .withScreenName(TranslatorUtils.toString(dbo, SCREEN_NAME_KEY))
                 .withFullName(TranslatorUtils.toString(dbo, FULL_NAME_KEY))
                 .withCompany(TranslatorUtils.toString(dbo, COMPANY_KEY))
@@ -88,10 +89,14 @@ public class UserTranslator {
                 .withRole(Role.valueOf(TranslatorUtils.toString(dbo, ROLE_KEY).toUpperCase()))
                 .withProfileComplete(profileComplete)
                 .withLicenseAccepted(TranslatorUtils.toDateTime(dbo, LICENSE_ACCEPTED_KEY))
-                .withProfileDeactivated(profileDeactivated)
-                .build();
+                .withProfileDeactivated(profileDeactivated);
+
+        DBObject userRef = TranslatorUtils.toDBObject(dbo, USER_REF_KEY);
+                if (userRef != null) {
+                    user.withUserRef(userTranslator.fromDBObject(userRef));
+                }
         
-        return user;
+        return user.build();
     }
     
 }
