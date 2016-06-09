@@ -16,7 +16,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
 
 @Configuration
-@ImportResource("atlas-applications.xml")
+@ImportResource("classpath:atlas-applications.xml")
 public class ApplicationModule {
 
     @Autowired DatabasedMongo mongo;
