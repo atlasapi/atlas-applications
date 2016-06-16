@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.SourceStatus.SourceState;
 import org.atlasapi.media.entity.Publisher;
+
+import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
-import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -30,56 +30,93 @@ public class ApplicationConfigurationTranslator {
 	public DBObject toDBObject(ApplicationConfiguration configuration) {
 		BasicDBObject dbo = new BasicDBObject();
 		
-		TranslatorUtils.from(dbo, SOURCES_KEY, sourceStatusesToList(configuration.sourceStatuses()));
-		TranslatorUtils.from(dbo, IMAGE_PRECEDENCE_ENABLED_KEY, configuration.imagePrecedenceEnabledRawValue());
+		TranslatorUtils.from(
+                dbo,
+                SOURCES_KEY,
+                sourceStatusesToList(configuration.sourceStatuses())
+        );
+		TranslatorUtils.from(
+                dbo,
+                IMAGE_PRECEDENCE_ENABLED_KEY,
+                configuration.imagePrecedenceEnabledRawValue()
+        );
 		
 		if (configuration.precedenceEnabled()) { 
-			TranslatorUtils.fromList(dbo, Lists.transform(configuration.precedence(), Publisher.TO_KEY), PRECEDENCE_KEY);
+			TranslatorUtils.fromList(
+                    dbo,
+                    Lists.transform(configuration.precedence(), Publisher.TO_KEY),
+                    PRECEDENCE_KEY
+            );
 		} else {
 			dbo.put(PRECEDENCE_KEY, null);
 		}
 		
 		if (configuration.contentHierarchyPrecedence().isPresent()) {
-		    dbo.put(CONTENT_HIERARCHY_PRECEDENCE, 
-		            Lists.transform(configuration.contentHierarchyPrecedence().get(), Publisher.TO_KEY)
-		           );
+		    dbo.put(
+                    CONTENT_HIERARCHY_PRECEDENCE,
+                    Lists.transform(
+                            configuration.contentHierarchyPrecedence().get(),
+                            Publisher.TO_KEY
+                    )
+            );
 		}
 		
-		dbo.put(WRITABLE_KEY, Lists.transform(configuration.writableSources().asList(), Publisher.TO_KEY));
+		dbo.put(
+                WRITABLE_KEY,
+                Lists.transform(
+                        configuration.writableSources().asList(),
+                        Publisher.TO_KEY
+                )
+        );
 		
 		return dbo;
 	}
 	
-	private BasicDBList sourceStatusesToList(Map<Publisher, SourceStatus> sourceStatuses) {
-	    BasicDBList statuses = new BasicDBList();
-	    for (Entry<Publisher, SourceStatus> sourceStatus : sourceStatuses.entrySet()) {
+	public ApplicationConfiguration fromDBObject(DBObject dbo) {
+	    List<DBObject> statusDbos = TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY);
+        Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos);
+
+        Boolean imagePrecedenceEnabled = TranslatorUtils.toBoolean(
+                dbo,
+                IMAGE_PRECEDENCE_ENABLED_KEY
+        );
+		List<Publisher> precedence = sourcePrecedenceFrom(dbo);
+
+		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
+        Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
+
+        Optional<List<Publisher>> contentHierarchyPrecedenceSources = Optional.absent();
+        if (dbo.containsField(CONTENT_HIERARCHY_PRECEDENCE)) {
+            List<String> contentHierarchyPrecedenceKeys = TranslatorUtils.toList(
+                    dbo,
+                    CONTENT_HIERARCHY_PRECEDENCE
+            );
+            contentHierarchyPrecedenceSources = Optional.of(Lists.transform(
+                    contentHierarchyPrecedenceKeys,
+                    Publisher.FROM_KEY
+            ));
+        }
+
+        return new ApplicationConfiguration(
+                sourceStatuses,
+                precedence,
+                writableSources,
+                imagePrecedenceEnabled,
+                contentHierarchyPrecedenceSources
+        );
+	}
+
+    private BasicDBList sourceStatusesToList(Map<Publisher, SourceStatus> sourceStatuses) {
+        BasicDBList statuses = new BasicDBList();
+        for (Entry<Publisher, SourceStatus> sourceStatus : sourceStatuses.entrySet()) {
             statuses.add(new BasicDBObject(ImmutableMap.of(
-                    PUBLISHER_KEY, sourceStatus.getKey().key(), 
+                    PUBLISHER_KEY, sourceStatus.getKey().key(),
                     STATE_KEY, sourceStatus.getValue().getState().toString().toLowerCase(),
                     "enabled", sourceStatus.getValue().isEnabled()
             )));
         }
         return statuses;
     }
-	
-	public ApplicationConfiguration fromDBObject(DBObject dbo) {
-	    List<DBObject> statusDbos = TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY);
-        Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos);
-	
-        Boolean imagePrecedenceEnabled = TranslatorUtils.toBoolean(dbo, IMAGE_PRECEDENCE_ENABLED_KEY);
-		List<Publisher> precedence = sourcePrecedenceFrom(dbo);
-
-		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
-        Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
-        
-        Optional<List<Publisher>> contentHierarchyPrecedenceSources = Optional.absent();
-        if (dbo.containsField(CONTENT_HIERARCHY_PRECEDENCE)) {
-            List<String> contentHierarchyPrecedenceKeys = TranslatorUtils.toList(dbo,  CONTENT_HIERARCHY_PRECEDENCE);
-            contentHierarchyPrecedenceSources = Optional.of(Lists.transform(contentHierarchyPrecedenceKeys, Publisher.FROM_KEY));
-        }
-        
-        return new ApplicationConfiguration(sourceStatuses, precedence, writableSources, imagePrecedenceEnabled, contentHierarchyPrecedenceSources);
-	}
 
     private List<Publisher> sourcePrecedenceFrom(DBObject dbo) {
         if (dbo.get(PRECEDENCE_KEY) == null) {
@@ -117,5 +154,4 @@ public class ApplicationConfigurationTranslator {
                 return SourceStatus.UNAVAILABLE;
         }
     }
-
 }
