@@ -12,10 +12,13 @@ import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -163,4 +166,49 @@ public class MongoApplicationStoreTest {
         );
         assertEquals(5000L, retrieved.get().getDeerId().longValue());
 	}
+
+    @Test
+    public void writeAndRetrieveAccessRoles() throws Exception {
+        ApplicationAccessRole expectedRole = ApplicationAccessRole.OWL_ACCESS;
+
+        Application application = Application
+                .application("test-access-roles")
+                .withTitle("title")
+                .withCredentials(creds)
+                .withConfiguration(
+                        getConfigurationBuilder()
+                                .withAccessRoles(ImmutableSet.of(expectedRole))
+                                .build()
+                )
+                .build();
+
+        appStore.persist(application);
+
+        Optional<Application> retrieved = appStore.applicationForKey(
+                application.getCredentials().getApiKey()
+        );
+
+        ApplicationConfiguration actual = retrieved.get().getConfiguration();
+
+        assertThat(
+                actual.getAccessRoles().contains(expectedRole),
+                is(true)
+        );
+        assertThat(
+                actual.getAccessRoles().containsAll(ApplicationAccessRole.getDefaultRoles()),
+                is(true)
+        );
+    }
+
+    private ApplicationConfiguration.Builder getConfigurationBuilder() {
+        return ApplicationConfiguration.builder()
+                .withSourceStatuses(ImmutableMap.of(
+                        Publisher.METABROADCAST,
+                        SourceStatus.AVAILABLE_ENABLED
+                ))
+                .withPrecedence(ImmutableList.of(Publisher.METABROADCAST))
+                .withWritableSources(ImmutableSet.of())
+                .withImagePrecedenceEnabled(false)
+                .withContentHierarchyPrecedence(Optional.absent());
+    }
 }
