@@ -1,23 +1,29 @@
 package org.atlasapi.application.v3;
 
+import org.atlasapi.media.entity.Publisher;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.mongodb.DBObject;
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
-import org.atlasapi.application.v3.ApplicationConfigurationTranslator;
-import org.atlasapi.media.entity.Publisher;
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.mongodb.DBObject;
-
 public class ApplicationConfigurationTranslatorTest {
 
-    private final ApplicationConfigurationTranslator codec = new ApplicationConfigurationTranslator();
-    
+    private ApplicationConfigurationTranslator translator;
+
+    @Before
+    public void setUp() throws Exception {
+        translator = new ApplicationConfigurationTranslator();
+    }
+
     @Test
     public void testEncodesAndDecodesApplicationConfiguration() {
         
@@ -32,9 +38,9 @@ public class ApplicationConfigurationTranslatorTest {
                 .copyWithWritableSources(ImmutableSet.of(Publisher.ITV))
                 .copyWithContentHierarchyPrecedence(ImmutableList.of(Publisher.BBC, Publisher.ITV));
         
-        DBObject dbo = codec.toDBObject(config);
+        DBObject dbo = translator.toDBObject(config);
         
-        ApplicationConfiguration decoded = codec.fromDBObject(dbo);
+        ApplicationConfiguration decoded = translator.fromDBObject(dbo);
         
         assertTrue(decoded.isEnabled(Publisher.ITV));
         assertTrue(decoded.isEnabled(Publisher.BBC));
@@ -46,4 +52,48 @@ public class ApplicationConfigurationTranslatorTest {
         assertEquals(config.contentHierarchyPrecedence().get(), decoded.contentHierarchyPrecedence().get());
     }
 
+    @Test
+    public void serialisesAndDeserialisesAccessRoles() throws Exception {
+        ApplicationAccessRole expectedRole = ApplicationAccessRole.OWL_ACCESS;
+
+        ApplicationConfiguration configuration = getBuilder()
+                .withAccessRoles(ImmutableSet.of(expectedRole))
+                .build();
+
+        ApplicationConfiguration actual = translator.fromDBObject(
+                translator.toDBObject(configuration)
+        );
+
+        assertThat(
+                actual.getAccessRoles().contains(expectedRole),
+                is(true)
+        );
+    }
+
+    @Test
+    public void serialisesDefaultRolesEvenWhenNotExplicitlyProvided() throws Exception {
+        ApplicationConfiguration configuration = getBuilder()
+                .build();
+
+        ApplicationConfiguration actual = translator.fromDBObject(
+                translator.toDBObject(configuration)
+        );
+
+        assertThat(
+                actual.getAccessRoles().containsAll(ApplicationAccessRole.getDefaultRoles()),
+                is(true)
+        );
+    }
+
+    private ApplicationConfiguration.Builder getBuilder() {
+        return ApplicationConfiguration.builder()
+                .withSourceStatuses(ImmutableMap.of(
+                        Publisher.METABROADCAST,
+                        SourceStatus.AVAILABLE_ENABLED
+                ))
+                .withPrecedence(ImmutableList.of(Publisher.METABROADCAST))
+                .withWritableSources(ImmutableSet.of())
+                .withImagePrecedenceEnabled(false)
+                .withContentHierarchyPrecedence(Optional.absent());
+    }
 }

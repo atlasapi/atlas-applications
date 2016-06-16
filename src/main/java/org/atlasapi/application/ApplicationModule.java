@@ -5,15 +5,16 @@ import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationStore;
 import org.atlasapi.application.v3.MongoApplicationStore;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+
+import com.metabroadcast.common.ids.IdGenerator;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.ViewResolver;
-
-import com.metabroadcast.common.ids.IdGenerator;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.social.auth.RequestScopedAuthenticationProvider;
 
 @Configuration
 @ImportResource("classpath:atlas-applications.xml")
