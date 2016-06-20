@@ -77,7 +77,7 @@ public class ApplicationConfigurationTranslator {
                 configuration.getAccessRoles()
                         .stream()
                         .map(ApplicationAccessRole::getRole)
-                        .collect(MoreCollectors.toList()),
+                        .collect(MoreCollectors.toImmutableList()),
                 ACCESS_ROLES
         );
 
@@ -117,7 +117,7 @@ public class ApplicationConfigurationTranslator {
             )
                     .stream()
                     .map(ApplicationAccessRole::from)
-                    .collect(MoreCollectors.toSet());
+                    .collect(MoreCollectors.toImmutableSet());
         }
 
         return ApplicationConfiguration.builder()
