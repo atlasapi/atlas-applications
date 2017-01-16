@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.base.MoreObjects;
 import com.metabroadcast.applications.client.ApplicationsClient;
-import com.metabroadcast.applications.client.exceptions.ErrorCode;
 import com.metabroadcast.applications.client.model.internal.Application;
 import com.metabroadcast.applications.client.model.internal.Environment;
 import com.metabroadcast.applications.client.query.Query;
