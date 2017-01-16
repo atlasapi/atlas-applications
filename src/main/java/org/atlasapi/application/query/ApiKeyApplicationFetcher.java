@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.base.MoreObjects;
 import com.metabroadcast.applications.client.ApplicationsClient;
+import com.metabroadcast.applications.client.exceptions.ErrorCode;
 import com.metabroadcast.applications.client.model.internal.Application;
 import com.metabroadcast.applications.client.model.internal.Environment;
 import com.metabroadcast.applications.client.query.Query;
@@ -21,9 +22,16 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
     
     private final ApplicationsClient applicationsClient;
 
-    public ApiKeyApplicationFetcher(ApplicationsClient applicationsClient) {
-        this.applicationsClient = applicationsClient;
-        this.environment = checkNotNull(Environment.parse(Configurer.getPlatform()));
+    private ApiKeyApplicationFetcher(ApplicationsClient applicationsClient, Environment environment) {
+        this.applicationsClient = checkNotNull(applicationsClient);
+        this.environment = checkNotNull(environment);
+    }
+
+    public static ApiKeyApplicationFetcher create(ApplicationsClient applicationsClient) {
+        return new ApiKeyApplicationFetcher(
+                applicationsClient,
+                Environment.parse(Configurer.getPlatform())
+        );
     }
 
     @Override
@@ -33,14 +41,12 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
                 request.getParameter(API_KEY_QUERY_PARAMETER),
                 request.getHeader(API_KEY_QUERY_PARAMETER)
         );
-        if (apiKey != null) {
-            Result result = applicationsClient.resolve(Query.create(apiKey, environment));
-            if (result.getErrorCode().isPresent()) {
-                throw new InvalidApiKeyException(apiKey, result.getErrorCode().get());
-            }
 
-            return result.getSingleResult();
+        Result result = applicationsClient.resolve(Query.create(apiKey, environment));
+
+        if (result.getErrorCode().isPresent()) {
+            throw InvalidApiKeyException.create(apiKey, result.getErrorCode().get());
         }
-        return Optional.empty();
+        return result.getSingleResult();
     }
 }

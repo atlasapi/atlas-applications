@@ -14,11 +14,11 @@ import org.springframework.context.annotation.ImportResource;
 @ImportResource("classpath:atlas-applications.xml")
 public class ApplicationModule {
 
-    private final String host = Configurer.get("thing").get(); //TODO: fix
+    private final String host = Configurer.get("applications.client.host").get();
 
 	@Bean
-	public ApplicationFetcher configFetcher(){
-        return new ApiKeyApplicationFetcher(applicationsClient());
+	public ApplicationFetcher applicationFetcher(){
+        return ApiKeyApplicationFetcher.create(applicationsClient());
     }
 
     @Bean

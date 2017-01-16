@@ -7,7 +7,7 @@ public abstract class ApplicationFetchException extends Exception {
     private final String apiKey;
     private final ErrorCode errorCode;
 
-    public ApplicationFetchException(String apiKey, ErrorCode errorCode) {
+    protected ApplicationFetchException(String apiKey, ErrorCode errorCode) {
         super();
         this.apiKey = apiKey;
         this.errorCode = errorCode;
