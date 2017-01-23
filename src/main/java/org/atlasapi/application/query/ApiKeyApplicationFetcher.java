@@ -5,7 +5,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.metabroadcast.applications.client.ApplicationsClient;
 import com.metabroadcast.applications.client.model.internal.Application;
 import com.metabroadcast.applications.client.model.internal.Environment;
@@ -38,10 +38,11 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
     @Override
     public Optional<Application> applicationFor(HttpServletRequest request)
             throws InvalidApiKeyException {
-        String apiKey = MoreObjects.firstNonNull(
+        String apiKey = Objects.firstNonNull(
                 request.getParameter(API_KEY_QUERY_PARAMETER),
                 request.getHeader(API_KEY_QUERY_PARAMETER)
         );
+
 
         Result result = applicationsClient.resolve(Query.create(apiKey, environment));
 
