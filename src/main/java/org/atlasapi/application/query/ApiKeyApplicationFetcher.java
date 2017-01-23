@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.metabroadcast.applications.client.ApplicationsClient;
 import com.metabroadcast.applications.client.model.internal.Application;
@@ -21,7 +22,8 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
     
     private final ApplicationsClient applicationsClient;
 
-    private ApiKeyApplicationFetcher(ApplicationsClient applicationsClient, Environment environment) {
+    @VisibleForTesting
+    ApiKeyApplicationFetcher(ApplicationsClient applicationsClient, Environment environment) {
         this.applicationsClient = checkNotNull(applicationsClient);
         this.environment = checkNotNull(environment);
     }
