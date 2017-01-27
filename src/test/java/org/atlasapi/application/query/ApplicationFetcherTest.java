@@ -47,19 +47,6 @@ public class ApplicationFetcherTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void exceptionIsThrownWhenNoApiKey() throws Exception {
-        thrown.expect(NullPointerException.class);
-
-        when(request.getParameter(ApiKeyApplicationFetcher.API_KEY_QUERY_PARAMETER))
-                .thenReturn(null);
-        when(request.getHeader(ApiKeyApplicationFetcher.API_KEY_QUERY_PARAMETER))
-                .thenReturn(null);
-
-        applicationFetcher.applicationFor(request);
-
-    }
-
-    @Test
     public void invalidApiKeyExceptionOnInvalidKey() throws Exception {
         thrown.expect(InvalidApiKeyException.class);
 
