@@ -12,12 +12,17 @@ import com.metabroadcast.applications.client.model.internal.Environment;
 import com.metabroadcast.applications.client.query.Query;
 import com.metabroadcast.applications.client.query.Result;
 import com.metabroadcast.common.properties.Configurer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ApiKeyApplicationFetcher implements ApplicationFetcher {
 
     public static final String API_KEY_QUERY_PARAMETER = "apiKey";
+
+    private static final Logger log = LoggerFactory.getLogger(ApiKeyApplicationFetcher.class);
+
     private final Environment environment;
     
     private final ApplicationsClient applicationsClient;
@@ -38,11 +43,16 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
     @Override
     public Optional<Application> applicationFor(HttpServletRequest request)
             throws InvalidApiKeyException {
-        String apiKey = Objects.firstNonNull(
-                request.getParameter(API_KEY_QUERY_PARAMETER),
-                request.getHeader(API_KEY_QUERY_PARAMETER)
-        );
-
+        String apiKey;
+        try {
+            apiKey = Objects.firstNonNull(
+                    request.getParameter(API_KEY_QUERY_PARAMETER),
+                    request.getHeader(API_KEY_QUERY_PARAMETER)
+            );
+        } catch (NullPointerException e) {
+            log.info("No api key from request: {}", request.getRequestURI(), e);
+            return Optional.empty();
+        }
 
         Result result = applicationsClient.resolve(Query.create(apiKey, environment));
 

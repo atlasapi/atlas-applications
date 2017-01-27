@@ -10,11 +10,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 @Configuration
 @ImportResource("classpath:atlas-applications.xml")
 public class ApplicationModule {
 
-    private final String host = Configurer.get("applications.client.host").get();
+    private final String host = checkNotNull(Configurer.get("applications.client.host").get());
 
 	@Bean
 	public ApplicationFetcher applicationFetcher(){

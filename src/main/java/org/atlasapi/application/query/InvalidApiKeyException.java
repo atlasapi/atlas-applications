@@ -15,7 +15,7 @@ public class InvalidApiKeyException extends ApplicationFetchException {
     @Override
     public String getMessage() {
         return String.format(
-                "Error fetching application for api key: %s - %s",
+                "Invalid api key: %s - %s",
                 this.getApiKey(),
                 this.getErrorCode()
         );
