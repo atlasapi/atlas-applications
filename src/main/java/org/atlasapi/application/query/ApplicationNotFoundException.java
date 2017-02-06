@@ -17,7 +17,10 @@ public class ApplicationNotFoundException extends ApplicationFetchException {
 
     @Override
     public String getMessage() {
-        return String.format("Unable to resolve an application for request: %s", request);
+        return String.format(
+                "Unable to resolve an application for request: %s",
+                request
+        );
     }
 
 }

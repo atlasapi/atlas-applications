@@ -56,6 +56,7 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
         Result result = applicationsClient.resolve(Query.create(apiKey, environment));
 
         if (result.getErrorCode().isPresent()) {
+            log.error("Error resolving application: {}", result.getErrorCode().get());
             throw InvalidApiKeyException.create(apiKey, result.getErrorCode().get());
         }
         return result.getSingleResult();
