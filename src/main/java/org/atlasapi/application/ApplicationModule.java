@@ -21,12 +21,12 @@ public class ApplicationModule {
     private final String environment = checkNotNull(Configurer.get("applications.client.env").get());
 
 	@Bean
-	public ApplicationFetcher applicationFetcher(){
+	public ApplicationFetcher applicationFetcher() {
         return ApiKeyApplicationFetcher.create(applicationsClient(), applicationsEnvironment());
     }
 
     @Bean
-    public ApplicationsClient applicationsClient(){
+    public ApplicationsClient applicationsClient() {
         return ApplicationsClientImpl.create(host , new MetricRegistry());
     }
 
