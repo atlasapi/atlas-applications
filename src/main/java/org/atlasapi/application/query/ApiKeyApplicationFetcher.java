@@ -21,12 +21,10 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
 
     public static final String API_KEY_QUERY_PARAMETER = "apiKey";
 
-    private static final String APP_CLIENT_ENV = checkNotNull(Configurer.get("applications.client.env").get());
     private static final Logger log = LoggerFactory.getLogger(ApiKeyApplicationFetcher.class);
 
-    private final Environment environment;
-    
     private final ApplicationsClient applicationsClient;
+    private final Environment environment;
 
     @VisibleForTesting
     ApiKeyApplicationFetcher(ApplicationsClient applicationsClient, Environment environment) {
@@ -34,11 +32,11 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
         this.environment = checkNotNull(environment);
     }
 
-    public static ApiKeyApplicationFetcher create(ApplicationsClient applicationsClient) {
-        return new ApiKeyApplicationFetcher(
-                applicationsClient,
-                Environment.parse(APP_CLIENT_ENV)
-        );
+    public static ApiKeyApplicationFetcher create(
+            ApplicationsClient applicationsClient,
+            Environment environment
+    ) {
+        return new ApiKeyApplicationFetcher(applicationsClient, environment);
     }
 
     @Override
