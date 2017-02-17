@@ -23,9 +23,8 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(ApiKeyApplicationFetcher.class);
 
-    private final Environment environment;
-    
     private final ApplicationsClient applicationsClient;
+    private final Environment environment;
 
     @VisibleForTesting
     ApiKeyApplicationFetcher(ApplicationsClient applicationsClient, Environment environment) {
@@ -33,11 +32,11 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
         this.environment = checkNotNull(environment);
     }
 
-    public static ApiKeyApplicationFetcher create(ApplicationsClient applicationsClient) {
-        return new ApiKeyApplicationFetcher(
-                applicationsClient,
-                Environment.parse(Configurer.getPlatform())
-        );
+    public static ApiKeyApplicationFetcher create(
+            ApplicationsClient applicationsClient,
+            Environment environment
+    ) {
+        return new ApiKeyApplicationFetcher(applicationsClient, environment);
     }
 
     @Override
