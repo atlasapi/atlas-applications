@@ -1,9 +1,5 @@
 package org.atlasapi.application.query;
 
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.metabroadcast.applications.client.ApplicationsClient;
@@ -11,9 +7,11 @@ import com.metabroadcast.applications.client.model.internal.Application;
 import com.metabroadcast.applications.client.model.internal.Environment;
 import com.metabroadcast.applications.client.query.Query;
 import com.metabroadcast.applications.client.query.Result;
-import com.metabroadcast.common.properties.Configurer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,7 +47,6 @@ public class ApiKeyApplicationFetcher implements ApplicationFetcher {
                     request.getHeader(API_KEY_QUERY_PARAMETER)
             );
         } catch (NullPointerException e) {
-            log.info("No api key from request: {}", request.getRequestURI(), e);
             return Optional.empty();
         }
 
